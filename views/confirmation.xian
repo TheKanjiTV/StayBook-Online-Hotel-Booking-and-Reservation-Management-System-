@@ -1,0 +1,242 @@
+{{> head }}
+
+<body class="bg-[#F8F7F2] text-gray-800">
+
+  <nav class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+
+      <a href="/" class="text-2xl font-bold text-emerald-900">
+        StayBook Online
+      </a>
+
+      <a href="/" class="text-gray-600">
+        Home
+      </a>
+
+    </div>
+  </nav>
+
+  <main class="max-w-3xl mx-auto px-6 py-16">
+
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+
+      <div class="bg-emerald-900 text-white text-center px-8 py-12">
+
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-3xl">✓</span>
+        </div>
+
+        <h1 class="text-3xl font-bold">
+          Reservation Review
+        </h1>
+
+        <p class="text-emerald-100 mt-3">
+          Your booking details have been prepared.
+        </p>
+
+        <p class="text-amber-200 mt-3 text-sm font-semibold">
+          Not yet reserved — payment and PMS confirmation are pending.
+        </p>
+
+      </div>
+
+      <div class="p-8 md:p-10">
+
+        <div id="loading" class="text-center text-gray-500 py-8">
+          Loading reservation details...
+        </div>
+
+        <div id="bookingContent" class="hidden">
+
+          <h2 class="text-xl font-bold text-emerald-950 mb-6">
+            Guest Information
+          </h2>
+
+          <div class="space-y-4">
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Guest Name</span>
+              <span id="guestName" class="font-semibold text-right"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Email</span>
+              <span id="guestEmail" class="font-semibold text-right break-all"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Phone</span>
+              <span id="guestPhone" class="font-semibold text-right"></span>
+            </div>
+
+          </div>
+
+          <hr class="my-8 border-gray-200">
+
+          <h2 class="text-xl font-bold text-emerald-950 mb-6">
+            Reservation Details
+          </h2>
+
+          <div class="space-y-4">
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Room</span>
+              <span id="roomName" class="font-semibold text-right"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Check-in</span>
+              <span id="checkIn" class="font-semibold"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Check-out</span>
+              <span id="checkOut" class="font-semibold"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Guests</span>
+              <span id="guests" class="font-semibold"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Nights</span>
+              <span id="nights" class="font-semibold"></span>
+            </div>
+
+            <div class="flex justify-between gap-4">
+              <span class="text-gray-500">Price per Night</span>
+              <span id="pricePerNight" class="font-semibold"></span>
+            </div>
+
+          </div>
+
+          <hr class="my-8 border-gray-200">
+
+          <div class="flex justify-between items-center">
+
+            <span class="text-xl font-bold">
+              Total Amount
+            </span>
+
+            <span
+              id="totalAmount"
+              class="text-3xl font-bold text-emerald-900"
+            ></span>
+
+          </div>
+
+          <div class="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-5">
+
+            <h3 class="font-semibold text-amber-900">
+              Pending Integration
+            </h3>
+
+            <p class="text-sm text-amber-800 mt-2">
+              This amount is an estimate based on sample room pricing.
+              Your room is not reserved yet. The actual booking process
+              will require PMS availability verification, reservation
+              creation, and payment confirmation.
+            </p>
+
+          </div>
+
+          <a
+            href="/"
+            class="block text-center mt-8 bg-emerald-900 text-white py-4 rounded-xl font-semibold hover:bg-emerald-800 transition"
+          >
+            Back to Home
+          </a>
+
+        </div>
+
+        <p id="errorMessage" class="text-red-600 text-center"></p>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+
+    const loading = document.getElementById("loading");
+    const bookingContent = document.getElementById("bookingContent");
+    const errorMessage = document.getElementById("errorMessage");
+
+    function formatMoney(amount) {
+      return "₱" + Number(amount).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    async function loadBooking() {
+
+      try {
+
+        const response = await fetch("/api/booking-preview");
+
+        const data = await response.json();
+
+        loading.classList.add("hidden");
+
+        if (!response.ok || !data.success) {
+          errorMessage.textContent =
+            data.message || "Reservation details not found.";
+
+          return;
+        }
+
+        const booking = data.booking;
+
+        document.getElementById("guestName").textContent =
+          `${booking.firstName} ${booking.lastName}`;
+
+        document.getElementById("guestEmail").textContent =
+          booking.email;
+
+        document.getElementById("guestPhone").textContent =
+          booking.phone;
+
+        document.getElementById("roomName").textContent =
+          booking.roomName;
+
+        document.getElementById("checkIn").textContent =
+          booking.checkIn;
+
+        document.getElementById("checkOut").textContent =
+          booking.checkOut;
+
+        document.getElementById("guests").textContent =
+          booking.guests;
+
+        document.getElementById("nights").textContent =
+          booking.nights;
+
+        document.getElementById("pricePerNight").textContent =
+          formatMoney(booking.pricePerNight);
+
+        document.getElementById("totalAmount").textContent =
+          formatMoney(booking.totalAmount);
+
+        bookingContent.classList.remove("hidden");
+
+      } catch (error) {
+
+        console.error(error);
+
+        loading.classList.add("hidden");
+
+        errorMessage.textContent =
+          "Unable to load reservation details.";
+
+      }
+
+    }
+
+    loadBooking();
+
+  </script>
+
+</body>
