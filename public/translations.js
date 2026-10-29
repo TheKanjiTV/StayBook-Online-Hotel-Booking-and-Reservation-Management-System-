@@ -119,6 +119,7 @@ const rows = {
   'Book now': 'Mag-book ngayon|立即预订|今すぐ予約|지금 예약|Reservar ahora|Réserver|Jetzt buchen|احجز الآن',
   'Find your stay': 'Hanapin ang matutuluyan|寻找住宿|宿泊先を探す|숙소 찾기|Encuentra tu estancia|Trouvez votre séjour|Unterkunft finden|ابحث عن إقامتك',
   'My StayBook': 'Aking StayBook|我的 StayBook|マイ StayBook|내 StayBook|Mi StayBook|Mon StayBook|Mein StayBook|حسابي في StayBook',
+  'Sign in to view your account bookings': 'Mag-sign in para makita ang bookings sa account mo|登录以查看您的账户预订|ログインしてアカウントの予約を確認|로그인하여 계정 예약 보기|Inicia sesión para ver las reservas de tu cuenta|Connectez-vous pour voir les réservations de votre compte|Anmelden und Kontobuchungen ansehen|سجّل الدخول لعرض حجوزات حسابك',
   'Menu': 'Menu|菜单|メニュー|메뉴|Menú|Menu|Menü|القائمة',
   'Language': 'Wika|语言|言語|언어|Idioma|Langue|Sprache|اللغة',
   'Currency': 'Pera|货币|通貨|통화|Moneda|Devise|Währung|العملة',

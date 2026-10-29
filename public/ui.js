@@ -21,7 +21,7 @@ window.StayBook = {
 document.addEventListener('DOMContentLoaded', () => {
   StayBook.configureSummaries();
   const current = ['/rooms', '/guest-details', '/confirmation'].includes(location.pathname) ? '/rooms' : location.pathname;
-  document.querySelectorAll('.site-header nav a').forEach(link => { if (link.getAttribute('href') === current) link.setAttribute('aria-current', 'page'); });
+  document.querySelectorAll('.site-header nav a').forEach(link => { if (link.getAttribute('href') === current || (link.hasAttribute('data-booking-hub') && ['/account', '/manage-booking'].includes(location.pathname))) link.setAttribute('aria-current', 'page'); });
   const siteMenu = document.querySelector('.site-menu'), compact = matchMedia('(max-width: 760px)');
   const configureMenu = () => { if (siteMenu) siteMenu.open = !compact.matches; };
   configureMenu(); compact.addEventListener('change', configureMenu);

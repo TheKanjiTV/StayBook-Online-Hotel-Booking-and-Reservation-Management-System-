@@ -18,7 +18,8 @@ await test('Online booking scope and guest review', async t => {
     await migrate(); server = await startServer(0);
     const guest = new Client(`http://127.0.0.1:${server.address().port}`);
     await t.test('Only guest booking pages and APIs are available', async () => {
-      const home = await guest.call('/'); assert.ok(!home.includes('Staff portal')); assert.ok(home.includes('href="/account"')); assert.ok(!home.includes('data-sign-out')); assert.ok(!home.includes('class="nav-link account-action"'));
+      const home = await guest.call('/'); assert.ok(!home.includes('Staff portal')); assert.ok(home.includes('data-booking-hub href="/manage-booking"')); assert.ok(!home.includes('href="/account"')); assert.ok(!home.includes('data-sign-out')); assert.ok(!home.includes('class="nav-link account-action"'));
+      assert.ok((await guest.call('/manage-booking')).includes('Sign in to view your account bookings'));
       for (const path of ['/staff', '/login', '/api/pms/overview', '/api/housekeeping', '/api/pos', '/api/hr', '/api/events']) await guest.call(path, 'GET', undefined, 404);
       const data = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.equal(data.rooms.length, 6);
     });
