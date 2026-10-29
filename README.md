@@ -77,6 +77,8 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 ## Development and commits
 
+`/receipt` renders only the session-owned saved booking. It combines demo payment details, internal transaction/reference/date, the room photo and stay/price breakdown in a compact receipt. Recorded amounts stay in PHP; other selected currencies appear only as an estimate. The print stylesheet requests 105 × 240 mm paper with zero margins. Use the receipt's Print button and the browser's paper settings; actual printer margins depend on the device. Cancellation prints the current simulated refund status rather than a paid booking.
+
 Review offers selectable demo methods: GCash, Maya, Apple Pay, Google Pay, Visa, Mastercard and bank transfer. The selected method and an internal demo transaction reference are saved with the payment. No wallet SDK, card processing, provider login or real bank details are used. A future production integration needs a chosen provider, server-issued payment intents and verified webhooks before a payment can be treated as real. Changing the selected method on an already-confirmed request is rejected instead of creating another payment.
 
 Signed-in guests have a header notification bell. Saving or cancelling their account bookings creates a persisted notification in the same database transaction. Confirmation retries and repeated cancellation do not duplicate notices. Guests without accounts have no bell and cannot access notification APIs. Read status is scoped to the signed-in account; the panel refreshes on opening and every minute while the page is visible. It is an in-app inbox, not push/email/SMS messaging.

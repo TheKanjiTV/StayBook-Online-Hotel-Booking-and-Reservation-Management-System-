@@ -12,6 +12,22 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Demo booking receipt': 'Demo na resibo ng booking|演示预订收据|デモ予約明細|데모 예약 영수증|Recibo de reserva de prueba|Reçu de réservation de démonstration|Demo-Buchungsbeleg|إيصال حجز تجريبي',
+  'Booking receipt': 'Resibo ng booking|预订收据|予約明細|예약 영수증|Recibo de reserva|Reçu de réservation|Buchungsbeleg|إيصال الحجز',
+  'Back to booking': 'Bumalik sa booking|返回预订|予約に戻る|예약으로 돌아가기|Volver a la reserva|Retour à la réservation|Zurück zur Buchung|العودة إلى الحجز',
+  'Print receipt': 'I-print ang resibo|打印收据|明細を印刷|영수증 인쇄|Imprimir recibo|Imprimer le reçu|Beleg drucken|طباعة الإيصال',
+  'Cancelled · Simulated refund': 'Nakansela · Simulated refund|已取消 · 模拟退款|キャンセル済み · 模擬返金|취소됨 · 모의 환불|Cancelado · Reembolso simulado|Annulé · Remboursement simulé|Storniert · Simulierte Erstattung|ملغى · استرداد تجريبي',
+  'Booking saved · Simulated payment': 'Naka-save ang booking · Simulated payment|预订已保存 · 模拟付款|予約保存済み · 模擬決済|예약 저장됨 · 모의 결제|Reserva guardada · Pago simulado|Réservation enregistrée · Paiement simulé|Buchung gespeichert · Simulierte Zahlung|تم حفظ الحجز · دفع تجريبي',
+  'Payment method': 'Paraan ng bayad|付款方式|支払方法|결제 방법|Método de pago|Mode de paiement|Zahlungsart|طريقة الدفع',
+  'Date': 'Petsa|日期|日時|날짜|Fecha|Date|Datum|التاريخ',
+  'Amount': 'Halaga|金额|金額|금액|Importe|Montant|Betrag|المبلغ',
+  'Total': 'Kabuuan|总计|合計|합계|Total|Total|Gesamt|الإجمالي',
+  'Refund total': 'Kabuuang refund|退款总额|返金合計|환불 총액|Total reembolsado|Total remboursé|Erstattungsbetrag|إجمالي الاسترداد',
+  'Demo transaction reference': 'Reference ng demo transaction|演示交易编号|デモ取引番号|데모 거래 번호|Referencia de transacción de prueba|Référence de transaction de démonstration|Demo-Transaktionsreferenz|مرجع العملية التجريبية',
+  'Display estimate': 'Tinatayang conversion|换算估值|換算目安|표시용 예상 금액|Conversión estimada|Estimation de conversion|Unverbindliche Umrechnung|تحويل تقديري',
+  'Illustrative room photograph': 'Halimbawang larawan ng kuwarto|客房示意照片|客室イメージ写真|객실 예시 사진|Fotografía ilustrativa de habitación|Photographie illustrative de chambre|Beispielfoto eines Zimmers|صورة توضيحية للغرفة',
+  'Demo receipt only. No real money was charged.': 'Demo na resibo lang. Walang totoong singil.|仅为演示收据，未收取真实费用。|デモ明細です。実際の請求はありません。|데모 영수증입니다. 실제 요금이 청구되지 않았습니다.|Recibo de prueba. No se cobró dinero real.|Reçu de démonstration. Aucun débit réel.|Nur Demobeleg. Kein echtes Geld abgebucht.|إيصال تجريبي فقط. لم تُخصم أموال حقيقية.',
+  'Hotel confirmation is pending PMS integration.': 'Susunod pa ang hotel confirmation kapag nakakonekta na ang PMS.|酒店确认需等待 PMS 连接。|ホテル確認はPMS連携後となります。|PMS 연동 후 호텔 확정이 가능합니다.|La confirmación del hotel requiere integrar el PMS.|La confirmation de l’hôtel nécessite l’intégration du PMS.|Hotelbestätigung erst nach PMS-Anbindung.|تأكيد الفندق بانتظار ربط نظام إدارة الفندق.',
   'Choose a demo payment method': 'Pumili ng demo na paraan ng bayad|选择模拟付款方式|デモ決済方法を選択|모의 결제 방법 선택|Elige un método de pago de prueba|Choisir un mode de paiement de démonstration|Demo-Zahlungsart wählen|اختر طريقة الدفع التجريبية',
   'No card, wallet login or bank details are collected. All methods simulate payment.': 'Walang kukuning card, wallet login o bank details. Lahat ay simulated.|不收集银行卡、钱包登录或银行信息。所有方式均为模拟付款。|カード・ウォレット・銀行情報は収集しません。すべて模擬決済です。|카드, 지갑 로그인, 은행 정보를 수집하지 않습니다. 모두 모의 결제입니다.|No se recopilan datos bancarios ni de tarjetas. Todos los pagos son simulados.|Aucune donnée bancaire ni de connexion n’est collectée. Tous les paiements sont simulés.|Keine Karten-, Wallet- oder Bankdaten werden erfasst. Alle Zahlungen sind simuliert.|لا تُجمع بيانات البطاقة أو المحفظة أو البنك. جميع طرق الدفع محاكاة.',
   'E-wallet': 'E-wallet|电子钱包|電子ウォレット|전자지갑|Monedero electrónico|Portefeuille électronique|E-Wallet|محفظة إلكترونية',

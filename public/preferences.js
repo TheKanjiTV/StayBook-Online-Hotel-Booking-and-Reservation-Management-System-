@@ -34,9 +34,9 @@ function localize(node) {
   for (const attribute of ['placeholder', 'aria-label']) if (node.hasAttribute?.(attribute)) { const old = node.getAttribute(attribute), value = sentence(old); if (old !== value) node.setAttribute(attribute, value); }
   for (const child of [...node.childNodes]) localize(child);
 }
-document.getElementById('languageSelect').innerHTML = languages.map(l => `<option value="${l.code}" ${l.code === lang ? 'selected' : ''}>${l.name}</option>`).join('');
-document.getElementById('currencySelect').innerHTML = currencies.map(code => `<option value="${code}" ${code === currency ? 'selected' : ''}>${code} — ${new Intl.DisplayNames([locale], { type: 'currency' }).of(code)}</option>`).join('');
-for (const [id, field] of [['languageSelect', 'language'], ['currencySelect', 'currency']]) document.getElementById(id).addEventListener('change', async event => {
+if (document.getElementById('languageSelect')) document.getElementById('languageSelect').innerHTML = languages.map(l => `<option value="${l.code}" ${l.code === lang ? 'selected' : ''}>${l.name}</option>`).join('');
+if (document.getElementById('currencySelect')) document.getElementById('currencySelect').innerHTML = currencies.map(code => `<option value="${code}" ${code === currency ? 'selected' : ''}>${code} — ${new Intl.DisplayNames([locale], { type: 'currency' }).of(code)}</option>`).join('');
+for (const [id, field] of [['languageSelect', 'language'], ['currencySelect', 'currency']]) document.getElementById(id)?.addEventListener('change', async event => {
   const control = event.target, error = document.getElementById('preferenceError'); control.disabled = true; error.textContent = '';
   try {
     // A preference change must not discard unsaved guest/account form fields.

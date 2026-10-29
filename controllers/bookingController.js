@@ -2,6 +2,7 @@ import { getAvailableRooms, getRoomById } from '../services/pmsApi.js';
 import { searchInput, guestInput, positiveId, fail } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
 import { hotels } from '../services/hotelCatalog.js';
+import { paymentLabel } from '../public/payment-methods.js';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
@@ -55,6 +56,20 @@ export const bookingController = {
   currentBooking: async (req, res) => {
     const reservation = req.session.bookingId ? await getBooking(req.session.bookingId, req.session.bookingToken) : null;
     res.json({ success: true, reservation });
+  },
+  receipt: async (req, res) => {
+    if (!req.session.bookingId) return res.redirect('/manage-booking');
+    const booking = await getBooking(req.session.bookingId, req.session.bookingToken);
+    const payment = booking.payments[0], preferences = res.locals.preferences;
+    const php = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', currencyDisplay: 'code' }).format(Number(value));
+    const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(preferences.locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    const estimate = preferences.currency !== 'PHP' ? new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(Number(booking.total_amount) * preferences.rate) : '';
+    res.render('receipt', { title: 'Booking receipt | StayBook', booking, receipt: {
+      cancelled: booking.status === 'CANCELLED', method: paymentLabel(payment?.payment_method), reference: payment?.reference,
+      paidAt: payment?.paid_at ? new Date(payment.paid_at).toLocaleString(preferences.locale, { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }) : '',
+      total: php(booking.total_amount), nightlyRate: php(booking.nightly_rate), checkIn: date(booking.check_in), checkOut: date(booking.check_out), estimate,
+      nightsLabel: booking.nights === 1 ? 'night' : 'nights', guestsLabel: booking.guests === 1 ? 'guest' : 'guests',
+    } });
   },
   lookupBooking: async (req, res) => {
     const previous = lookupAttempts.get(req.ip), now = Date.now();

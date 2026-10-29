@@ -23,6 +23,7 @@ router.get('/rooms/search', a(b.searchRooms));
 router.get('/guest-details', a(b.guestDetailsPage));
 router.post('/booking/preview', a(b.createBookingPreview));
 router.get('/confirmation', b.confirmationPage);
+router.get('/receipt', a(b.receipt));
 router.get('/api/booking-preview', b.getBookingPreview);
 router.post('/api/bookings/confirm', a(b.confirmBooking));
 router.get('/api/bookings/current', a(b.currentBooking));
