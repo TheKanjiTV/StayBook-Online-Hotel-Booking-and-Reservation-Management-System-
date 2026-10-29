@@ -1,10 +1,18 @@
 import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment, activeBookingStatuses } from '../models/bookingModel.js';
-import { AccountBooking, Notification } from '../models/accountModel.js';
+import { Account, AccountBooking, Notification } from '../models/accountModel.js';
 import { guestInput, positiveId, searchInput, cents, amount, fail } from './validation.js';
-import { cancelBooking } from './bookingService.js';
+import { cancelBooking, saveBooking } from './bookingService.js';
 import { recordAudit } from './auditService.js';
+export async function createAdminBooking(body, actor) {
+  let owner;
+  if (body.accountId) {
+    owner = await Account.findOne({ where: { account_id: positiveId(body.accountId, 'account'), role: 'GUEST' } });
+    if (!owner || owner.email !== String(body.email).trim().toLowerCase()) fail(400, 'The selected account must match the guest email.');
+  }
+  return saveBooking({ ...body, accountId: owner?.account_id, simulateFailure: false }, { source: 'ADMIN', onCreate: (booking, transaction) => recordAudit(actor, 'BOOKING_CREATED', 'BOOKING', booking.reservation_id, booking.reference, { source: 'ADMIN', status: booking.status, room_id: booking.room_id, total_amount: booking.total_amount, account_id: owner?.account_id || null }, transaction) });
+}
 
 export function checkVersion(row, body) {
   if (!/^\d+$/.test(String(body.version)) || Number(body.version) !== row.version) fail(409, 'This record changed. Reload the page before saving.');

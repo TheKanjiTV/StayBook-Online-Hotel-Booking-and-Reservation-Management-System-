@@ -94,6 +94,23 @@ await test('Admin booking and account management', async t => {
       await Account.update({ role: 'ADMIN' }, { where: { account_id: primary.account_id } }); await admin.call('/admin');
       await admin.call(`/api/admin/users/${backup.account_id}/delete`, 'POST', {});
     });
+    await t.test('Manual bookings use issued request keys, automatic references and explicit guest ownership', async () => {
+      const form = await admin.call('/admin/bookings/new'), key = form.match(/name="requestKey"[^>]*value="([^"]+)"/)[1];
+      const account = await Account.findOne({ where: { email: 'management-owner@example.test' } });
+      const input = { requestKey: key, checkIn: day(100), checkOut: day(101), roomId: 1, guests: 2, firstName: 'Manual', lastName: 'Owner', email: account.email, phone: '09123456789', paymentMethod: 'VISA', accountId: account.account_id, reference: 'CUSTOM', totalAmount: 1 };
+      await owner.call('/api/admin/bookings', 'POST', input, 403);
+      const created = await admin.call('/api/admin/bookings', 'POST', input), again = await admin.call('/api/admin/bookings', 'POST', input);
+      assert.match(created.reference, /^SB-[A-F0-9]{12}$/); assert.equal(again.reference, created.reference);
+      const row = await Reservation.findOne({ where: { reference: created.reference } }); assert.equal(Number(row.total_amount), 2500);
+      const { AccountBooking } = await import('../models/accountModel.js'); assert.equal((await AccountBooking.findByPk(row.reservation_id)).account_id, account.account_id);
+      assert.equal(await AuditLog.count({ where: { action: 'BOOKING_CREATED', target_id: row.reservation_id } }), 1);
+      await admin.call('/api/admin/bookings', 'POST', { ...input, phone: '09999999999' }, 409);
+      await admin.call('/api/admin/bookings', 'POST', { ...input, requestKey: 'not-issued' }, 409);
+      const next = await admin.call('/admin/bookings/new'), nextKey = next.match(/name="requestKey"[^>]*value="([^"]+)"/)[1];
+      await admin.call('/api/admin/bookings', 'POST', { ...input, requestKey: nextKey, email: 'different@example.test' }, 400);
+      const unlinked = await admin.call('/api/admin/bookings', 'POST', { ...input, requestKey: nextKey, accountId: '', checkIn: day(101), checkOut: day(102) });
+      const unlinkedRow = await Reservation.findOne({ where: { reference: unlinked.reference } }); assert.equal(await AccountBooking.findByPk(unlinkedRow.reservation_id), null);
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

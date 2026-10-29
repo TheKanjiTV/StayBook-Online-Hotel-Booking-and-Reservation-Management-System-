@@ -6,12 +6,12 @@ import { AccountBooking, Notification } from '../models/accountModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
 import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
-export async function saveBooking(body) {
+export async function saveBooking(body, options = {}) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
   const requestKey = string(body.requestKey, 'Request key');
   const paymentMethod = body.paymentMethod ?? 'SIMULATED';
   if (!['SIMULATED', ...paymentMethods.map(method => method.id)].includes(paymentMethod)) fail(400, 'Choose a supported payment method.');
-  const requestHash = hash({ dates, guest, roomId, paymentMethod });
+  const requestHash = hash({ dates, guest, roomId, paymentMethod, ...(options.source === 'ADMIN' ? { source: 'ADMIN', accountId: body.accountId || null } : {}) });
   return sequelize.transaction(async transaction => {
     const room = await BookingRoom.findByPk(roomId, { transaction, lock: transaction.LOCK.UPDATE });
     if (!room) fail(404, 'Room not found.');
@@ -34,6 +34,7 @@ export async function saveBooking(body) {
       await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });
       await Notification.create({ account_id: body.accountId, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_SAVED' }, { transaction });
     }
+    if (options.onCreate) await options.onCreate(booking, transaction);
     // TODO: send the agreed reservation payload to the PMS API in a later phase.
     // A locally saved booking must not be presented as acknowledged by the PMS.
     return booking;

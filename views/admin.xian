@@ -1,5 +1,5 @@
 {{> admin-start}}
-<div class="admin-heading"><h1>Bookings</h1><p>Search and manage StayBook reservations.</p></div>
+<div class="review-heading admin-heading"><div><h1>Bookings</h1><p>Search and manage StayBook reservations.</p></div><a class="btn" href="/admin/bookings/new">Add booking {{> arrow}}</a></div>
 <form action="/admin/bookings" method="get" class="admin-filters" role="search">
 <div><label for="bookingSearch">Search bookings</label><input id="bookingSearch" name="q" value="{{q}}" maxlength="100" placeholder="Reference, guest name or email"></div>
 <div><label for="bookingStatus">Booking status</label><select id="bookingStatus" name="status"><option value="">All bookings</option><option value="LOCAL_CONFIRMED" {{#if activeSelected}}selected{{/if}}>Awaiting confirmation</option><option value="ADMIN_CONFIRMED" {{#if confirmedSelected}}selected{{/if}}>Confirmed in StayBook</option><option value="CANCELLED" {{#if cancelledSelected}}selected{{/if}}>Cancelled</option></select></div>

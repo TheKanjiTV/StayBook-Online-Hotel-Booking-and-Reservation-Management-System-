@@ -384,6 +384,9 @@
 .admin-search > div { display: flex; gap: 12px; }
 .admin-search input { min-width: 0; }
 .admin-edit-form { max-width: 900px; }
+.admin-quote { display: flex; flex-wrap: wrap; gap: 20px 48px; border-block: 1px solid var(--line); padding-block: 20px; margin-block: 28px 16px; }
+.admin-quote dt { color: var(--subtle); }
+.admin-quote dd { font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 6px; }
 .password-field { position: relative; }
 .password-field input { padding-inline-end: 52px; }
 .password-toggle { position: absolute; inset-inline-end: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 6px; color: var(--subtle); }

@@ -20,6 +20,8 @@ router.post('/api/account/notifications/read', requireAccount, a(account.readNot
 router.post('/api/account/bookings/open', requireAccount, a(account.openBooking));
 router.get('/admin', requireAdmin, a(admin.dashboard));
 router.get('/admin/bookings', requireAdmin, a(admin.list));
+router.get('/admin/bookings/new', requireAdmin, a(admin.newBooking));
+router.post('/api/admin/bookings', requireAdmin, a(admin.create));
 router.get('/admin/audit-logs', requireAdmin, a(admin.audit));
 router.get('/admin/users', requireAdmin, a(adminUsers.list));
 router.get('/admin/users/new', requireAdmin, a(adminUsers.form));

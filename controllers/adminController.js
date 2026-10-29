@@ -3,11 +3,14 @@ import { Reservation, Payment, BookingRoom } from '../models/bookingModel.js';
 import { cancelBooking } from '../services/bookingService.js';
 import { hotelForRoom } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
-import { positiveId, string, fail } from '../services/validation.js';
+import { positiveId, string, fail, today, validDate } from '../services/validation.js';
+import { randomUUID } from 'node:crypto';
+import { hotels } from '../services/hotelCatalog.js';
+import { paymentMethods } from '../public/payment-methods.js';
 import { Account } from '../models/accountModel.js';
 import { AuditLog } from '../models/auditModel.js';
 import { recordAudit, auditDisplay } from '../services/auditService.js';
-import { confirmAdminBooking, updateAdminBooking, deleteAdminBooking } from '../services/adminBookingService.js';
+import { confirmAdminBooking, updateAdminBooking, deleteAdminBooking, createAdminBooking } from '../services/adminBookingService.js';
 
 const fields = ['reservation_id', 'reference', 'room_id', 'room_type', 'room_number', 'first_name', 'last_name', 'email', 'check_in', 'check_out', 'total_amount', 'status'];
 const php = amount => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', currencyDisplay: 'code' }).format(Number(amount));
@@ -17,6 +20,21 @@ function display(row, locale) {
   return { ...booking, hotelName: hotelForRoom(booking.room_id)?.name, checkIn: date(booking.check_in), checkOut: date(booking.check_out), total: php(booking.total_amount), cancelled: booking.status === 'CANCELLED', confirmed: booking.status === 'ADMIN_CONFIRMED', statusLabel: booking.status === 'CANCELLED' ? 'Cancelled' : booking.status === 'ADMIN_CONFIRMED' ? 'Confirmed in StayBook' : 'Awaiting confirmation' };
 }
 export const adminController = {
+  newBooking: async (req, res) => {
+    const requestKey = randomUUID(), now = Date.now();
+    req.session.adminBookingRequests = Object.fromEntries(Object.entries(req.session.adminBookingRequests || {}).filter(([, time]) => now - time < 7200000).slice(-19));
+    req.session.adminBookingRequests[requestKey] = now;
+    const checkIn = validDate(req.query.checkIn) ? req.query.checkIn : today(), checkOut = validDate(req.query.checkOut) ? req.query.checkOut : new Date(Date.parse(checkIn) + 86400000).toISOString().slice(0, 10);
+    const roomId = req.query.roomId ? positiveId(req.query.roomId, 'room') : null;
+    const [rooms, accounts] = await Promise.all([BookingRoom.findAll({ order: [['room_id', 'ASC']] }), Account.findAll({ where: { role: 'GUEST' }, attributes: ['account_id', 'first_name', 'last_name', 'email'], order: [['first_name', 'ASC']] })]);
+    res.render('admin-booking-new', { title: 'Add booking | StayBook', adminTitle: 'Add booking', requestKey, checkIn, checkOut, today: today(), hotels, methods: paymentMethods, rooms: rooms.map(room => ({ ...room.toJSON(), hotelName: hotelForRoom(room.room_id)?.name, selected: room.room_id === roomId })), accounts: accounts.map(row => row.toJSON()) });
+  },
+  create: async (req, res) => {
+    const key = req.body.requestKey, requests = req.session.adminBookingRequests || {};
+    if (typeof key !== 'string' || !Object.hasOwn(requests, key) || Date.now() - requests[key] >= 7200000) fail(409, 'This booking form expired. Open a new booking form.');
+    const booking = await createAdminBooking(req.body, req.account);
+    res.json({ success: true, redirect: `/admin/bookings/${booking.reservation_id}`, reference: booking.reference });
+  },
   dashboard: async (req, res) => {
     const [pending, cancelled, users, bookings, audits, confirmed] = await Promise.all([
       Reservation.count({ where: { status: 'LOCAL_CONFIRMED' } }), Reservation.count({ where: { status: 'CANCELLED' } }), Account.count(),
