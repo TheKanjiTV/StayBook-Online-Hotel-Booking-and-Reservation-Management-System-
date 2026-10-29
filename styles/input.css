@@ -353,15 +353,16 @@
 .payment-availability { margin-block: 14px 22px; font-size: 16px; color: var(--subtle); }
 .site-header { background: #fff; }
 .header-shell { width: min(1240px, calc(100% - 48px)); margin-inline: auto; }
-.header-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 16px; padding-block: 14px; }
-.site-header .brand { font-size: 36px; flex-shrink: 0; }
+.header-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px 22px; padding-block: 22px; }
+.site-header .brand { font-size: 36px; flex-shrink: 0; margin-inline-end: auto; }
 .site-menu { display: block; max-width: 100%; }
 .site-menu > summary { display: none; }
-.hotel-navigation { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 18px; font-size: 16px; font-weight: 550; }
+.hotel-navigation { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 24px; font-size: 16px; font-weight: 500; }
 .nav-link { min-height: 44px; }
 .header-actions { display: flex; align-items: center; gap: 14px; }
 .header-actions > * { flex-shrink: 0; }
-.header-book { white-space: nowrap; min-height: 44px; padding: 10px 18px; font-size: 16px; }
+.header-book { white-space: nowrap; min-height: 48px; padding: 12px 24px; font-size: 16px; }
+.header-logout { font-size: 16px; white-space: nowrap; }
 .header-tools { gap: 10px; }
 .header-tools .preference-menu summary { min-height: 44px; }
 @media (max-width: 1000px) and (min-width: 761px) { .site-menu { order: 2; flex-basis: 100%; } }
@@ -376,9 +377,11 @@
   .site-menu > summary { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 650; list-style: none; }
   .site-menu > summary::-webkit-details-marker { display: none; }
   .site-menu:not([open]) .hotel-navigation { display: none; }
-  .site-menu[open] .hotel-navigation { display: grid; justify-content: stretch; position: absolute; inset-inline-start: 0; top: 100%; width: calc(100vw - 32px); padding: 16px 22px; background: #fff; border: 1px solid var(--line); border-radius: 12px; z-index: 60; gap: 4px; }
+  .site-menu[open] { grid-column: 1 / -1; justify-self: stretch; }
+  .site-menu[open] .hotel-navigation { display: grid; justify-content: stretch; margin-top: 8px; padding: 16px 22px; background: #fff; border: 1px solid var(--line); border-radius: 12px; gap: 4px; }
   .hotel-navigation .nav-link { white-space: normal; }
-  .header-tools { grid-column: 2; grid-row: 2; justify-content: flex-end; min-width: 0; gap: 8px; }
+  .header-tools { grid-column: 2; grid-row: 2; align-self: start; justify-content: flex-end; min-width: 0; gap: 8px; }
+  .header-logout { grid-column: 2; grid-row: 3; justify-self: end; }
 }
 .payment-sheet { max-width: 520px; padding: 24px; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 16px; }
 .payment-sheet h3 { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 650; line-height: 1.5; letter-spacing: 0; margin-bottom: 18px; }
