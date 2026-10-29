@@ -274,12 +274,6 @@
   .panel { padding: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
-.header-shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
-.header-layout { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 10px 22px; padding-block: 16px; }
-.site-header .brand { font-size: 40px; }
-.site-menu { display: block; grid-column: 1 / -1; grid-row: 2; justify-self: center; width: min(900px, 100%); }
-.site-menu > summary { display: none; }
-.hotel-navigation { display: flex; justify-content: center; align-items: center; gap: 30px; font-size: 16px; font-weight: 550; border-top: 1px solid var(--line); padding-top: 8px; }
 .nav-link { display: flex; align-items: center; min-height: 48px; color: var(--ink); white-space: nowrap; line-height: 1.4; }
 .account-action { font-weight: 750; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px; }
 .header-tools, .auth-tools { display: flex; align-items: center; gap: 12px; position: relative; }
@@ -288,7 +282,6 @@
 .preference-menu .icon { width: 20px; height: 20px; }
 .menu-chevron { width: 14px; height: 14px; flex-shrink: 0; }
 .preference-panel, .notification-panel { top: calc(100% + 10px); z-index: 50; font-size: 16px; }
-.header-book { white-space: nowrap; font-size: 16px; }
 .session-action { font-size: 16px; font-weight: 600; }
 .notification-menu > summary { position: relative; justify-content: center; width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: var(--wash); }
 .notification-menu > summary:hover { background: #e1e8dc; }
@@ -334,26 +327,11 @@
 .room-preview .room-meta { flex-wrap: wrap; }
 .review-row dd { min-width: 0; }
 @media (max-width: 1600px) {
-  .header-layout { grid-template-columns: 1fr auto auto; gap: 12px 22px; padding-block: 16px; }
-  .site-menu { display: block; grid-column: 1 / -1; grid-row: 2; }
-  .hotel-navigation { justify-content: center; gap: 30px; }
 }
 @media (max-width: 1000px) {
-  .hotel-navigation { flex-wrap: wrap; justify-content: center; gap: 4px 24px; }
   .hero-content, .home-hero { min-height: 550px; }
 }
 @media (max-width: 760px) {
-  .header-shell { width: calc(100% - 32px); }
-  .header-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-  .site-header .brand { font-size: 36px; }
-  .header-book { justify-self: end; grid-column: 2; grid-row: 1; min-width: 0; max-width: 100%; white-space: normal; padding: 10px 12px; gap: 8px; line-height: 1.4; }
-  .site-menu { display: block; grid-row: 2; grid-column: 1; position: relative; }
-  .site-menu > summary { display: inline-flex; align-items: center; min-height: 48px; font-size: 16px; font-weight: 650; list-style: none; }
-  .site-menu > summary::-webkit-details-marker { display: none; }
-  .site-menu:not([open]) .hotel-navigation { display: none; }
-  .site-menu[open] .hotel-navigation { display: grid; position: absolute; inset-inline-start: 0; top: 100%; width: calc(100vw - 32px); background: white; padding: 16px 22px; border: 1px solid var(--line); border-radius: 12px; z-index: 60; gap: 4px; }
-  .hotel-navigation .nav-link { white-space: normal; }
-  .header-tools { grid-column: 2; grid-row: 2; justify-content: flex-end; gap: 8px; min-width: 0; }
   .header-tools .notification-menu > summary { min-width: 30px; }
   .preference-menu summary { gap: 5px; }
   .preference-menu .icon { width: 18px; height: 18px; }
@@ -373,6 +351,35 @@
 }
 @media (max-width: 540px) { .booking-steps { display: flex; flex-wrap: wrap; gap: 12px 20px; } }
 .payment-availability { margin-block: 14px 22px; font-size: 16px; color: var(--subtle); }
+.site-header { background: #fff; }
+.header-shell { width: min(1240px, calc(100% - 48px)); margin-inline: auto; }
+.header-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 16px; padding-block: 14px; }
+.site-header .brand { font-size: 36px; flex-shrink: 0; }
+.site-menu { display: block; max-width: 100%; }
+.site-menu > summary { display: none; }
+.hotel-navigation { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 18px; font-size: 16px; font-weight: 550; }
+.nav-link { min-height: 44px; }
+.header-actions { display: flex; align-items: center; gap: 14px; }
+.header-actions > * { flex-shrink: 0; }
+.header-book { white-space: nowrap; min-height: 44px; padding: 10px 18px; font-size: 16px; }
+.header-tools { gap: 10px; }
+.header-tools .preference-menu summary { min-height: 44px; }
+@media (max-width: 1000px) and (min-width: 761px) { .site-menu { order: 2; flex-basis: 100%; } }
+@media (max-width: 760px) {
+  .header-shell { width: calc(100% - 32px); }
+  .header-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 10px; padding-block: 12px; }
+  .site-header .brand { font-size: 34px; }
+  .header-actions { grid-column: 2; grid-row: 1; justify-content: flex-end; align-items: flex-end; flex-wrap: wrap; gap: 4px 12px; }
+  .header-actions .nav-link { min-height: 36px; }
+  .header-book { min-width: 0; max-width: 100%; white-space: normal; padding: 9px 12px; gap: 8px; line-height: 1.4; }
+  .site-menu { grid-row: 2; grid-column: 1; position: relative; justify-self: start; }
+  .site-menu > summary { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 650; list-style: none; }
+  .site-menu > summary::-webkit-details-marker { display: none; }
+  .site-menu:not([open]) .hotel-navigation { display: none; }
+  .site-menu[open] .hotel-navigation { display: grid; justify-content: stretch; position: absolute; inset-inline-start: 0; top: 100%; width: calc(100vw - 32px); padding: 16px 22px; background: #fff; border: 1px solid var(--line); border-radius: 12px; z-index: 60; gap: 4px; }
+  .hotel-navigation .nav-link { white-space: normal; }
+  .header-tools { grid-column: 2; grid-row: 2; justify-content: flex-end; min-width: 0; gap: 8px; }
+}
 .payment-sheet { max-width: 600px; padding: 30px; background: #070707; color: #fff; border-radius: 16px; }
 .payment-sheet h3 { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 650; line-height: 1.5; letter-spacing: 0; margin-bottom: 18px; }
 .wallet-buttons { display: grid; gap: 12px; }

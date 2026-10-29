@@ -18,7 +18,7 @@ await test('Online booking scope and guest review', async t => {
     await migrate(); server = await startServer(0);
     const guest = new Client(`http://127.0.0.1:${server.address().port}`);
     await t.test('Only guest booking pages and APIs are available', async () => {
-      const home = await guest.call('/'); assert.ok(!home.includes('Staff portal'));
+      const home = await guest.call('/'); assert.ok(!home.includes('Staff portal')); assert.ok(!home.includes('href="/account"'));
       for (const path of ['/staff', '/login', '/api/pms/overview', '/api/housekeeping', '/api/pos', '/api/hr', '/api/events']) await guest.call(path, 'GET', undefined, 404);
       const data = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.equal(data.rooms.length, 6);
     });
@@ -127,7 +127,7 @@ await test('Online booking scope and guest review', async t => {
       await member.call('/api/auth/register', 'POST', { ...credentials, password: 'short' }, 400);
       await member.call('/api/auth/register', 'POST', credentials);
       assert.notEqual(member.cookies.get('staybook.sid'), oldCookie);
-      await member.call('/account');
+      assert.ok((await member.call('/account')).includes('href="/account"'));
       assert.equal((await member.call('/api/account/bookings')).bookings.length, 0);
       await member.call('/booking/preview', 'POST', { ...dates, roomId: 3, ...credentials, phone: '09123456789' });
       const { reservation } = await member.call('/api/bookings/confirm', 'POST', { accountId: 999 });
