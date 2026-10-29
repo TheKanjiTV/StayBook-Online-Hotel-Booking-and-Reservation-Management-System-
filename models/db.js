@@ -25,15 +25,16 @@
     */
     
 import { Sequelize } from "sequelize";
+import { config } from '../config.js';
 
 export const sequelize = new Sequelize(
-  "online_booking",
-  "root",
-  "",
+  config.dbName,
+  config.dbUser,
+  config.dbPassword,
   {
-    host: "127.0.0.1",
+    host: config.dbHost,
     dialect: "mysql",
-    port: 3306,
+    port: config.dbPort,
     logging: false
   }
 );

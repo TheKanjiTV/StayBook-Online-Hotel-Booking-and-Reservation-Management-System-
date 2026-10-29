@@ -1,6 +1,6 @@
 {{> head}}
 <body>{{> nav}}
-<main class="max-w-2xl mx-auto px-5 py-10"><section class="panel">
-<h1>Review your reservation</h1><p class="muted mt-3 mb-6">Sample room catalog. This review does not reserve a room yet.</p>
-<dl class="space-y-3 text-sm"><div><dt class="muted">Guest</dt><dd>{{booking.firstName}} {{booking.lastName}}</dd></div><div><dt class="muted">Email</dt><dd>{{booking.email}}</dd></div><div><dt class="muted">Room</dt><dd>{{booking.roomName}}</dd></div><div><dt class="muted">Dates</dt><dd>{{booking.checkIn}} to {{booking.checkOut}}</dd></div><div><dt class="muted">Guests / nights</dt><dd>{{booking.guests}} / {{booking.nights}}</dd></div><div><dt class="muted">Estimated total</dt><dd>PHP {{booking.totalAmount}}</dd></div></dl>
-<a class="btn mt-6" href="/">Change dates or room</a></section></main></body></html>
+<main class="max-w-3xl mx-auto px-5 py-10">
+<div id="content" class="panel"><p>Loading booking…</p></div>
+<p id="message" role="status" aria-live="polite" class="text-sm text-red-700 mt-4"></p>
+</main><script src="/confirmation.js"></script></body></html>

@@ -18,6 +18,7 @@
     "create:upload-middleware": "node create.js upload-middleware",
     "route:list": "node list-routes.js",
     "route:cache": "node route-cache.js",
+    "setup": "node scripts/setup.js",
     "build": "tailwindcss -i ./styles/input.css -o ./public/tailwind.css --minify",
     "test": "node --test --test-concurrency=1 tests/integration.test.js"
   },

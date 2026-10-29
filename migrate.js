@@ -1,52 +1,22 @@
-import { Sequelize } from "sequelize";
-import { sequelize } from "./models/db.js";
-import { User } from "./models/userModel.js";
-import inquirer from "inquirer";
-
-const dbName = "online_booking";
-
-const rootSequelize = new Sequelize(
-  "mysql",
-  "root",
-  "",
-  {
-    host: "127.0.0.1",
-    dialect: "mysql",
-    port: 3306,
-    logging: false
-  }
-);
-
-try {
-  const { createDb } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "createDb",
-      message: `Database '${dbName}' may not exist. Create it?`,
-      default: true
+import { Sequelize } from 'sequelize';
+import { pathToFileURL } from 'node:url';
+import { config } from './config.js';
+import { sequelize } from './models/db.js';
+import { BookingRoom } from './models/bookingModel.js';
+import { sampleRooms } from './services/pmsApi.js';
+export async function migrate() {
+  const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });
+  try {
+    await root.query(`CREATE DATABASE IF NOT EXISTS \`${config.dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    await sequelize.sync(); // Add missing booking tables only. Never drop existing tables.
+    for (const room of sampleRooms) {
+      await BookingRoom.findOrCreate({ where: { room_id: room.id }, defaults: {
+        name: room.name, room_number: room.roomNumber, type: room.type, description: room.description, capacity: room.capacity, price: room.price, image: room.image,
+      } });
     }
-  ]);
-
-  if (createDb) {
-    await rootSequelize.query(
-      `CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`
-    );
-
-    console.log("Database created (if it did not exist).");
-  }
-
-  await sequelize.authenticate();
-
-  console.log("Connected to MySQL database!");
-
-  await sequelize.sync();
-
-  console.log("Database tables synchronized successfully!");
-
-} catch (error) {
-  console.error("Migration failed:", error.message);
-
-} finally {
-  await rootSequelize.close();
-  await sequelize.close();
+    console.log(`Online booking database ready: ${config.dbName}. No other system databases are accessed.`);
+  } finally { await root.close(); }
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try { await migrate(); } catch (error) { console.error('Migration failed:', error.message); process.exitCode = 1; } finally { await sequelize.close(); }
 }

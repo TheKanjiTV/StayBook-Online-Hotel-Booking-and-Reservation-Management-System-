@@ -14,6 +14,7 @@ import { createServer } from 'node:http';
 import hbs from 'hbs';
 import 'dotenv/config';
 import { sessionMiddleware, csrf } from './middleware/session.js';
+import { sequelize } from './models/db.js';
 import router from './routes/index.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -44,6 +45,7 @@ app.use((error, req, res, next) => {
 });
 export default app;
 export async function startServer(port = Number(process.env.PORT || 3000)) {
+  await sequelize.authenticate();
   const server = createServer(app);
   const host = process.env.HOST || '127.0.0.1';
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, host, resolve); });
@@ -51,4 +53,9 @@ export async function startServer(port = Number(process.env.PORT || 3000)) {
   return server;
 }
 const direct = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-if (direct) startServer().catch(error => { console.error(error.message); process.exitCode = 1; });
+if (direct) {
+  startServer().then(server => {
+    const shutdown = () => server.close(async () => { await sequelize.close(); process.exit(0); });
+    process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
+  }).catch(async error => { console.error(error.message); await sequelize.close(); process.exitCode = 1; });
+}

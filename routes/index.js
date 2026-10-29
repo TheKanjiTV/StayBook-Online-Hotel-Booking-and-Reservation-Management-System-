@@ -9,4 +9,6 @@ router.get('/guest-details', b.guestDetailsPage);
 router.post('/booking/preview', a(b.createBookingPreview));
 router.get('/confirmation', b.confirmationPage);
 router.get('/api/booking-preview', b.getBookingPreview);
+router.post('/api/bookings/confirm', a(b.confirmBooking));
+router.get('/api/bookings/current', a(b.currentBooking));
 export default router;
