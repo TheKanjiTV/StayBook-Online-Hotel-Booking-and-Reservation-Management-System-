@@ -2,7 +2,7 @@
 
 Refine the existing green-and-ivory identity into a welcoming hotel-booking experience. Keep the emphasis on dates, room photography, honest prices and a clear guest journey. The landing page introduces the stay; the remaining pages help the guest complete a booking with minimal distraction.
 
-- Paper `#faf9f6`, deep green ink `#233e35`, secondary text `#626b63`, dividers `#dedfd7`, soft green surfaces `#eef1e9`.
+- Paper `#faf9f6`, deep green ink `#233e35`, secondary text `#45584e`, dividers `#dedfd7`, soft green surfaces `#eef1e9`. Body copy is 18px, with 16px minimum for normal labels and controls. Compact printed receipts retain separate document sizing.
 - Self-hosted Cormorant Garamond for display headings and Manrope for controls/body copy. Their OFL licenses ship in `public/fonts/`.
 - A 1240px page container, generous section spacing, 12–16px image/panel corners, and a consistent 48px control height. Use borders or a subtle shadow as appropriate; avoid nested decorative cards.
 - Use the room catalog's actual local prices and descriptions. Photography is illustrative. Do not invent reviews, ratings, a hotel address, discounts, or verified hotel availability.
@@ -10,7 +10,8 @@ Refine the existing green-and-ivory identity into a welcoming hotel-booking expe
 - Room selection groups matching catalog entries, filters room types and shows nightly/whole-stay prices. Guest details and review use a two-column layout with a sticky stay summary; on phones the summary becomes a compact native disclosure above the form.
 - My Booking pairs a short introduction with a restrained lookup form. Success/cancellation pages prioritize the reference, local status and next actions. Technical integration details stay in README; the payment/confirmation views retain the information a guest needs to understand that this is a demo.
 - Preserve `.xian`, Tailwind, and all guest booking behavior. Payments remain simulated and PMS integration remains deferred.
-- Keep the two-tier hotel header consistent: utility links, native language/currency controls and an account-only notification bell above the property navigation. Restaurants & Bars remains disabled until its destination exists. My StayBook is booking history and notifications, not an invented loyalty scheme.
+- Use one navigation group beside Book now on wide screens; wrap it below the brand on intermediate screens and use a native Menu disclosure on phones. Language and currency have independent controls. Keep a single My StayBook link, underline/bold Sign in, and place Sign out in the header. Restaurants & Bars remains disabled until its destination exists.
+- The hero photograph fills the page width down to the search section, with a dark contrast layer for white copy. Sign-in and registration have a standalone brand/language bar and a Continue as a guest back link, without the hotel header, currency selector or footer. Hotel directory and account titles use compact top spacing.
 - Account and directory pages inherit the same typography, controls and restrained image-led layouts. Nine interface languages include Arabic RTL; session preferences connect language to display currency without changing PHP accounting.
 - The standalone receipt combines payment details above a room photograph and compact stay summary. It uses a 105 mm-wide paper layout with 240 mm print height, small document typography and explicit demo/refund status. It never imitates a real provider-issued payment proof.
 

@@ -22,7 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
   StayBook.configureSummaries();
   const current = ['/rooms', '/guest-details', '/confirmation'].includes(location.pathname) ? '/rooms' : location.pathname;
   document.querySelectorAll('.site-header nav a').forEach(link => { if (link.getAttribute('href') === current) link.setAttribute('aria-current', 'page'); });
-  const menus = [...document.querySelectorAll('.utility-bar details')];
+  const siteMenu = document.querySelector('.site-menu'), compact = matchMedia('(max-width: 760px)');
+  const configureMenu = () => { if (siteMenu) siteMenu.open = !compact.matches; };
+  configureMenu(); compact.addEventListener('change', configureMenu);
+  document.querySelectorAll('[data-sign-out]').forEach(button => button.addEventListener('click', async () => {
+    const error = document.getElementById('headerError'); button.disabled = true;
+    try { const data = await StayBook.request('/api/auth/sign-out', { method: 'POST', body: {} }); location.href = data.redirect; }
+    catch (problem) { error.textContent = problem.message; error.focus(); button.disabled = false; }
+  }));
+  const menus = [...document.querySelectorAll('.header-tools details, .auth-tools details')];
   menus.forEach(menu => menu.addEventListener('toggle', () => { if (menu.open) menus.filter(other => other !== menu).forEach(other => { other.open = false; }); }));
   document.addEventListener('keydown', event => { if (event.key === 'Escape') menus.filter(menu => menu.open).forEach(menu => { menu.open = false; menu.querySelector('summary').focus(); }); });
   document.addEventListener('click', event => menus.filter(menu => menu.open && !menu.contains(event.target)).forEach(menu => { menu.open = false; }));

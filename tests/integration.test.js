@@ -30,6 +30,13 @@ await test('Online booking scope and guest review', async t => {
       assert.equal(second.rooms.length, 3); assert.ok(second.rooms.every(room => room.hotel.id === 2));
       assert.equal((await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 999 })}`)).rooms.length, 0);
     });
+    await t.test('Account entry pages use the standalone brand and language layout', async () => {
+      for (const path of ['/sign-in', '/join']) {
+        const html = await guest.call(path);
+        assert.ok(html.includes('class="brand"')); assert.ok(html.includes('id="languageSelect"')); assert.ok(html.includes('Continue as a guest'));
+        assert.ok(!html.includes('class="site-header')); assert.ok(!html.includes('class="site-footer')); assert.ok(!html.includes('id="currencySelect"'));
+      }
+    });
     await t.test('Invalid dates and forged prices cannot affect the reservation review', async () => {
       await guest.call('/rooms/search?checkIn=2026-02-30&checkOut=2026-03-02&guests=2', 'GET', undefined, 400);
       const body = { ...dates, roomId: 1, firstName: 'Test', lastName: 'Guest', email: 'guest@example.test', phone: '09123456789', totalAmount: 1 };

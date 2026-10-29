@@ -82,7 +82,7 @@ const rows = {
   'Hotels & Resorts': 'Mga Hotel at Resort|酒店及度假酒店|ホテル＆リゾート|호텔 및 리조트|Hoteles y resorts|Hôtels et complexes|Hotels & Resorts|الفنادق والمنتجعات',
   'Offers & Rooms': 'Mga alok at kuwarto|优惠及客房|オファー＆客室|혜택 및 객실|Ofertas y habitaciones|Offres et chambres|Angebote & Zimmer|العروض والغرف',
   'Restaurants & Bars': 'Mga restawran at bar|餐厅及酒吧|レストラン＆バー|레스토랑 및 바|Restaurantes y bares|Restaurants et bars|Restaurants & Bars|المطاعم والبارات',
-  'Not connected yet': 'Hindi pa nakakonekta|尚未连接|未接続|아직 연결되지 않음|Aún sin conectar|Pas encore connecté|Noch nicht verbunden|غير متصل بعد',
+  'Not Available yet': 'Hindi pa nakakonekta|尚未连接|未接続|아직 연결되지 않음|Aún sin conectar|Pas encore connecté|Noch nicht verbunden|غير متصل بعد',
   'Find reservations': 'Hanapin ang reserbasyon|查找预订|予約を検索|예약 찾기|Buscar reservas|Retrouver une réservation|Buchung finden|البحث عن الحجوزات',
   'Sign in': 'Mag-sign in|登录|サインイン|로그인|Iniciar sesión|Se connecter|Anmelden|تسجيل الدخول',
   'Book now': 'Mag-book ngayon|立即预订|今すぐ予約|지금 예약|Reservar ahora|Réserver|Jetzt buchen|احجز الآن',

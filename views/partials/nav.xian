@@ -1,10 +1,11 @@
 <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-4">Skip to content</a>
-<header class="site-header no-print">
-  <div class="shell utility-bar">
-    <a href="{{#if account}}/account{{else}}/sign-in{{/if}}">{{#if account}}My StayBook{{else}}Sign in{{/if}}</a>
-    <a href="/manage-booking" class="reservation-link">Find reservations</a>
-    {{#if account}}<details class="notification-menu"><summary aria-label="Notifications"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="notificationBadge" class="notification-badge" hidden></span></summary><section class="notification-panel" aria-label="Notifications"><div class="review-heading"><h2 class="form-heading">Notifications</h2><button id="readNotifications" class="back-link" type="button">Mark all read</button></div><div id="notificationList" aria-live="polite"><p class="muted">Loading notifications…</p></div><p id="notificationError" class="form-error" role="alert"></p><button id="retryNotifications" class="back-link mt-3" type="button" hidden>Refresh</button></section></details><script defer src="/notifications.js"></script>{{/if}}
-    <details class="preference-menu"><summary><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span data-no-translate>{{preferences.languageName}}</span><span dir="ltr">/ {{preferences.currency}}</span></summary><div class="preference-panel"><label for="languageSelect">Language</label><select id="languageSelect" aria-label="Language"><option>English</option></select><label class="mt-4" for="currencySelect">Currency</label><select id="currencySelect" aria-label="Currency"><option>PHP</option></select><p class="field-help">Display currency only. Bookings are recorded in PHP.</p>{{#if preferences.updated}}<p class="field-help"><span>Exchange rates</span>: {{preferences.updated}}</p>{{/if}}<p class="field-help"><a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">Rates By Exchange Rate API</a></p><p id="preferenceError" class="form-error" role="alert"></p></div></details>
-  </div>
-  <div class="shell hotel-header"><a href="/" class="brand" aria-label="StayBook home">StayBook</a><nav class="hotel-navigation" aria-label="Main navigation"><a class="nav-link" href="/hotels">Hotels &amp; Resorts</a><a class="nav-link" href="/rooms">Offers &amp; Rooms</a><span class="nav-link pending-nav" role="link" aria-disabled="true" tabindex="0" title="Not connected yet">Restaurants &amp; Bars <small>Not connected yet</small></span><a class="nav-link" href="/account">My StayBook</a></nav><a class="btn" href="/#booking">Book now {{> arrow}}</a></div>
-</header>
+<header class="site-header no-print"><div class="header-shell header-layout">
+<a href="/" class="brand" aria-label="StayBook home">StayBook</a>
+<details class="site-menu" open><summary>Menu</summary><nav class="hotel-navigation" aria-label="Main navigation">
+<a class="nav-link" href="/hotels">Hotels &amp; Resorts</a><a class="nav-link" href="/rooms">Offers &amp; Rooms</a><span class="nav-link pending-nav" role="link" aria-disabled="true" tabindex="0" title="Not Available yet">Restaurants &amp; Bars</span><a class="nav-link" href="/account">My StayBook</a><a class="nav-link" href="/manage-booking">Find reservations</a>
+{{#if account}}<button class="nav-link account-action" type="button" data-sign-out>Sign out</button>{{else}}<a class="nav-link account-action" href="/sign-in">Sign in</a>{{/if}}
+</nav></details>
+<a class="btn header-book" href="/#booking">Book now {{> arrow}}</a>
+<div class="header-tools">{{> notifications}}{{> language}}{{> currency}}</div>
+<p id="headerError" class="form-error" role="alert" tabindex="-1"></p>
+</div></header>
