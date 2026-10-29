@@ -21,6 +21,7 @@ export function requireAdmin(req, res, next) {
   if (req.account.role !== 'ADMIN') return next(Object.assign(new Error('Administrator access is required.'), { status: 403 }));
   Object.assign(res.locals, { navDashboard: req.path === '/admin', navBookings: req.path.startsWith('/admin/bookings'), navAudit: req.path.startsWith('/admin/audit-logs'), navUsers: req.path.startsWith('/admin/users'), navRooms: req.path.startsWith('/admin/rooms') });
   res.locals.navAvailability = req.path.startsWith('/admin/availability');
+  res.locals.navGuests = req.path.startsWith('/admin/guests');
   next();
 }
 const accountHome = account => account.role === 'ADMIN' ? '/admin' : '/account';

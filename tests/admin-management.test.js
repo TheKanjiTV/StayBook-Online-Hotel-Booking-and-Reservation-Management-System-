@@ -144,6 +144,18 @@ await test('Admin booking and account management', async t => {
       await owner.call('/api/bookings/confirm', 'POST', { paymentMethod: 'VISA' });
       await admin.call('/api/admin/closures', 'POST', values, 409);
     });
+    await t.test('Guest directory aggregates booking history without assigning account ownership', async () => {
+      await owner.call('/admin/guests', 'GET', undefined, 403);
+      const address = 'management-owner@example.test', list = await admin.call(`/admin/guests?q=${address}`);
+      assert.ok(list.includes('View guest history')); assert.ok(list.includes('8,500.00'));
+      const history = await admin.call(`/admin/guests/history?${new URLSearchParams({ email: address })}`);
+      assert.ok(history.includes('Reservations</span>: 3')); assert.ok(!history.includes('access_token'));
+      const prefill = await admin.call(`/admin/bookings/new?${new URLSearchParams({ guestEmail: address })}`);
+      assert.ok(prefill.includes(`value="${address}"`));
+      await admin.call('/admin/guests/history?email=bad-email', 'GET', undefined, 400);
+      await admin.call('/admin/guests/history?email=missing@example.test', 'GET', undefined, 404);
+      assert.ok((await admin.call('/admin/guests?q=%25')).includes('No guests found.'));
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

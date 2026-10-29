@@ -12,6 +12,14 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Guests': 'Mga bisita|客人|ゲスト|투숙객|Huéspedes|Voyageurs|Gäste|الضيوف',
+  'Guest history': 'Guest history|客人预订记录|ゲストの予約履歴|투숙객 예약 내역|Historial del huésped|Historique du client|Gästehistorie|سجل الضيف',
+  'View guest history': 'Tingnan ang guest history|查看客人记录|ゲスト履歴を見る|투숙객 내역 보기|Ver historial|Voir l’historique|Gästehistorie ansehen|عرض سجل الضيف',
+  'Back to guests': 'Bumalik sa guests|返回客人列表|ゲスト一覧へ戻る|투숙객 목록으로 돌아가기|Volver a huéspedes|Retour aux clients|Zurück zu Gästen|العودة إلى الضيوف',
+  'Search by guest email': 'Maghanap gamit ang guest email|按客人邮箱搜索|ゲストのメールで検索|투숙객 이메일로 검색|Buscar por correo del huésped|Rechercher par e-mail du client|Nach Gäste-E-Mail suchen|البحث ببريد الضيف',
+  'Active booking value': 'Halaga ng active bookings|有效预订金额|有効な予約金額|활성 예약 금액|Valor de reservas activas|Valeur des réservations actives|Wert aktiver Buchungen|قيمة الحجوزات النشطة',
+  'No guests found.': 'Walang nahanap na guest.|未找到客人。|ゲストが見つかりません。|투숙객을 찾을 수 없습니다.|No se encontraron huéspedes.|Aucun client trouvé.|Keine Gäste gefunden.|لم يتم العثور على ضيوف.',
+  'Guest not found.': 'Hindi nahanap ang guest.|未找到客人。|ゲストが見つかりません。|투숙객을 찾을 수 없습니다.|Huésped no encontrado.|Client introuvable.|Gast nicht gefunden.|لم يتم العثور على الضيف.',
   'Availability': 'Availability|可用情况|空室状況|예약 가능 여부|Disponibilidad|Disponibilités|Verfügbarkeit|التوفر',
   'Availability calendar': 'Kalendaryo ng availability|可用情况日历|空室カレンダー|예약 가능 달력|Calendario de disponibilidad|Calendrier des disponibilités|Verfügbarkeitskalender|تقويم التوفر',
   'Starting date': 'Simulang petsa|开始日期|開始日|시작 날짜|Fecha inicial|Date de début|Startdatum|تاريخ البدء',

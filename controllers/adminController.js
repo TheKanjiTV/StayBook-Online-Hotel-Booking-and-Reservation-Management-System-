@@ -3,7 +3,7 @@ import { Reservation, Payment, BookingRoom } from '../models/bookingModel.js';
 import { cancelBooking } from '../services/bookingService.js';
 import { hotelForRoom } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
-import { positiveId, string, fail, today, validDate } from '../services/validation.js';
+import { positiveId, string, fail, today, validDate, email } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
 import { hotels } from '../services/hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
@@ -27,7 +27,8 @@ export const adminController = {
     const checkIn = validDate(req.query.checkIn) ? req.query.checkIn : today(), checkOut = validDate(req.query.checkOut) ? req.query.checkOut : new Date(Date.parse(checkIn) + 86400000).toISOString().slice(0, 10);
     const roomId = req.query.roomId ? positiveId(req.query.roomId, 'room') : null;
     const [rooms, accounts] = await Promise.all([BookingRoom.findAll({ where: { is_published: true }, order: [['room_id', 'ASC']] }), Account.findAll({ where: { role: 'GUEST' }, attributes: ['account_id', 'first_name', 'last_name', 'email'], order: [['first_name', 'ASC']] })]);
-    res.render('admin-booking-new', { title: 'Add booking | StayBook', adminTitle: 'Add booking', requestKey, checkIn, checkOut, today: today(), hotels, methods: paymentMethods, rooms: rooms.map(room => ({ ...room.toJSON(), hotelName: hotelForRoom(room.room_id)?.name, selected: room.room_id === roomId })), accounts: accounts.map(row => row.toJSON()) });
+    const guest = req.query.guestEmail ? await Reservation.findOne({ where: { email: email(req.query.guestEmail) }, attributes: ['first_name', 'last_name', 'email', 'phone', 'address'], order: [['reservation_id', 'DESC']] }) : null;
+    res.render('admin-booking-new', { title: 'Add booking | StayBook', adminTitle: 'Add booking', requestKey, checkIn, checkOut, today: today(), guest: guest?.toJSON(), hotels, methods: paymentMethods, rooms: rooms.map(room => ({ ...room.toJSON(), hotelName: hotelForRoom(room.room_id)?.name, selected: room.room_id === roomId })), accounts: accounts.map(row => row.toJSON()) });
   },
   create: async (req, res) => {
     const key = req.body.requestKey, requests = req.session.adminBookingRequests || {};
