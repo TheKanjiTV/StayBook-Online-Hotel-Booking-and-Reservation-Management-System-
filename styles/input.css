@@ -370,6 +370,7 @@
 .header-actions > * { flex-shrink: 0; }
 .header-book { white-space: nowrap; min-height: 48px; padding: 12px 24px; font-size: 16px; }
 .header-logout { font-size: 16px; white-space: nowrap; }
+.header-signin { font-size: 16px; white-space: nowrap; }
 .header-tools { gap: 10px; }
 .header-tools .preference-menu summary { min-height: 44px; }
 @media (max-width: 1000px) and (min-width: 761px) { .site-menu { order: 2; flex-basis: 100%; } }
@@ -388,6 +389,7 @@
   .site-menu[open] .hotel-navigation { display: grid; justify-content: stretch; margin-top: 8px; padding: 16px 22px; background: #fff; border: 1px solid var(--line); border-radius: 12px; gap: 4px; }
   .hotel-navigation .nav-link { white-space: normal; }
   .header-tools { grid-column: 2; grid-row: 2; align-self: start; justify-content: flex-end; min-width: 0; gap: 8px; }
+  .header-tools:has(.header-signin) { grid-column: 1 / -1; grid-row: 3; flex-wrap: wrap; }
   .header-logout { grid-column: 2; grid-row: 3; justify-self: end; }
 }
 .payment-sheet { width: 100%; padding: 0; background: transparent; color: var(--ink); border: 0; }
