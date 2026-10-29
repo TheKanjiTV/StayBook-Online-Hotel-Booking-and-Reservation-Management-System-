@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
-import { BookingRoom, Reservation, Payment } from '../models/bookingModel.js';
+import { BookingRoom, Reservation, Payment, activeBookingStatuses } from '../models/bookingModel.js';
 import { AccountBooking, Notification } from '../models/accountModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
@@ -22,7 +22,7 @@ export async function saveBooking(body) {
       return existing;
     }
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
-    const conflict = await Reservation.findOne({ where: { room_id: roomId, status: 'LOCAL_CONFIRMED', check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
+      const conflict = await Reservation.findOne({ where: { room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
     if (conflict) fail(409, 'This sample room is already booked for those dates. Choose another room.');
     if (body.simulateFailure === true) fail(402, 'Payment could not be processed. No booking was saved. Please retry.');
     const total = amount(cents(room.price) * dates.nights);
@@ -54,18 +54,21 @@ export async function findBooking(reference, guestEmail) {
   return booking;
 }
 export async function cancelBooking(id, token, options = {}) {
-  const reference = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token } });
+  const reference = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token }, transaction: options.transaction });
   if (!reference) fail(404, 'Booking not found.');
   const perform = async transaction => {
     await BookingRoom.findByPk(reference.room_id, { transaction, lock: transaction.LOCK.UPDATE });
     const booking = await Reservation.findByPk(reference.reservation_id, { transaction, lock: transaction.LOCK.UPDATE });
+    if (!booking) fail(404, 'Booking not found.');
+    if (booking.room_id !== reference.room_id) fail(409, 'This booking changed. Reload the page and try again.');
     if (booking.status === 'CANCELLED') return false;
-    if (booking.status !== 'LOCAL_CONFIRMED') fail(409, 'This booking cannot be cancelled.');
+    if (!activeBookingStatuses.includes(booking.status)) fail(409, 'This booking cannot be cancelled.');
+    const previousStatus = booking.status;
     await booking.update({ status: 'CANCELLED' }, { transaction });
     await Payment.update({ payment_status: 'REFUNDED' }, { where: { reservation_id: booking.reservation_id, payment_status: 'PAID' }, transaction });
     const owner = await AccountBooking.findByPk(booking.reservation_id, { transaction });
     if (owner) await Notification.create({ account_id: owner.account_id, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_CANCELLED' }, { transaction });
-    if (options.onChange) await options.onChange(booking, transaction);
+    if (options.onChange) await options.onChange(booking, transaction, previousStatus);
     // TODO: agree on cancellation acknowledgement and refunds with the PMS/payment
     // provider before replacing this local-only cancellation workflow.
     return true;

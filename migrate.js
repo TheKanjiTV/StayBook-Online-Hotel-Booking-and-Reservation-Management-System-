@@ -2,7 +2,7 @@ import { Sequelize, DataTypes } from 'sequelize';
 import { pathToFileURL } from 'node:url';
 import { config } from './config.js';
 import { sequelize } from './models/db.js';
-import { BookingRoom } from './models/bookingModel.js';
+import { BookingRoom, Reservation } from './models/bookingModel.js';
 import { Account } from './models/accountModel.js';
 import './models/auditModel.js';
 import { sampleRooms } from './services/pmsApi.js';
@@ -15,6 +15,9 @@ export async function migrate() {
     const columns = await query.describeTable(table);
     if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
     if (!columns.role) await query.addColumn(table, 'role', { type: DataTypes.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' });
+    const bookingColumns = await query.describeTable(Reservation.getTableName());
+    if (!bookingColumns.deleted_at) await query.addColumn(Reservation.getTableName(), 'deleted_at', { type: DataTypes.DATE, allowNull: true });
+    if (!bookingColumns.version) await query.addColumn(Reservation.getTableName(), 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
     for (const room of sampleRooms) {
       await BookingRoom.findOrCreate({ where: { room_id: room.id }, defaults: {
         name: room.name, room_number: room.roomNumber, type: room.type, description: room.description, capacity: room.capacity, price: room.price, image: room.image,

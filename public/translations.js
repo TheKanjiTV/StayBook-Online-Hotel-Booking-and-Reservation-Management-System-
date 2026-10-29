@@ -12,6 +12,20 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Confirmed in StayBook': 'Kumpirmado sa StayBook|已在 StayBook 确认|StayBook で確認済み|StayBook에서 확인됨|Confirmada en StayBook|Confirmée dans StayBook|In StayBook bestätigt|مؤكد في StayBook',
+  'Confirm booking': 'Kumpirmahin ang booking|确认预订|予約を確認|예약 확인|Confirmar reserva|Confirmer la réservation|Buchung bestätigen|تأكيد الحجز',
+  'Confirm this booking?': 'Kumpirmahin ang booking na ito?|确认此预订？|この予約を確認しますか？|이 예약을 확인할까요?|¿Confirmar esta reserva?|Confirmer cette réservation ?|Diese Buchung bestätigen?|تأكيد هذا الحجز؟',
+  'Edit booking': 'I-edit ang booking|编辑预订|予約を編集|예약 수정|Editar reserva|Modifier la réservation|Buchung bearbeiten|تعديل الحجز',
+  'Delete booking': 'I-delete ang booking|删除预订|予約を削除|예약 삭제|Eliminar reserva|Supprimer la réservation|Buchung löschen|حذف الحجز',
+  'Delete this booking?': 'I-delete ang booking na ito?|删除此预订？|この予約を削除しますか？|이 예약을 삭제할까요?|¿Eliminar esta reserva?|Supprimer cette réservation ?|Diese Buchung löschen?|حذف هذا الحجز؟',
+  'Booking updated': 'Na-update ang booking|预订已更新|予約を更新しました|예약이 수정되었습니다|Reserva actualizada|Réservation modifiée|Buchung aktualisiert|تم تحديث الحجز',
+  'Save changes': 'I-save ang pagbabago|保存更改|変更を保存|변경 사항 저장|Guardar cambios|Enregistrer les modifications|Änderungen speichern|حفظ التغييرات',
+  'Back to booking': 'Bumalik sa booking|返回预订|予約へ戻る|예약으로 돌아가기|Volver a la reserva|Retour à la réservation|Zurück zur Buchung|العودة إلى الحجز',
+  'Go back': 'Bumalik|返回|戻る|돌아가기|Volver|Retour|Zurück|رجوع',
+  'Confirm': 'Kumpirmahin|确认|確認|확인|Confirmar|Confirmer|Bestätigen|تأكيد',
+  'This record changed. Reload the page before saving.': 'May pagbabago sa record. I-reload muna ang pahina bago mag-save.|记录已更改，请刷新后保存。|記録が変更されました。再読み込みしてから保存してください。|기록이 변경되었습니다. 새로고침 후 저장하세요.|El registro cambió. Recarga antes de guardar.|Cet enregistrement a changé. Rechargez avant de sauvegarder.|Eintrag geändert. Vor dem Speichern neu laden.|تغيّر السجل. أعد تحميل الصفحة قبل الحفظ.',
+  'Only pending bookings can be confirmed.': 'Pending bookings lang ang puwedeng kumpirmahin.|只能确认待处理的预订。|未確認の予約のみ確認できます。|대기 중인 예약만 확인할 수 있습니다.|Solo se pueden confirmar reservas pendientes.|Seules les réservations en attente peuvent être confirmées.|Nur ausstehende Buchungen können bestätigt werden.|يمكن تأكيد الحجوزات المعلقة فقط.',
+  'Cancelled bookings cannot be edited.': 'Hindi puwedeng i-edit ang nakanselang booking.|无法编辑已取消的预订。|キャンセル済みの予約は編集できません。|취소된 예약은 수정할 수 없습니다.|No se pueden editar reservas canceladas.|Les réservations annulées ne peuvent pas être modifiées.|Stornierte Buchungen sind nicht bearbeitbar.|لا يمكن تعديل الحجوزات الملغاة.',
   'Dashboard': 'Dashboard|仪表盘|ダッシュボード|대시보드|Panel|Tableau de bord|Übersicht|لوحة التحكم',
   'Bookings': 'Mga booking|预订|予約|예약|Reservas|Réservations|Buchungen|الحجوزات',
   'Audit logs': 'Mga audit log|审计日志|監査ログ|감사 로그|Registro de auditoría|Journal d’audit|Prüfprotokoll|سجلات التدقيق',

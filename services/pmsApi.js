@@ -3,7 +3,7 @@
 // server-to-server API calls after the team agrees on endpoints and room IDs.
 // Do not connect directly to another team's database.
 import { Op } from 'sequelize';
-import { BookingRoom, Reservation } from '../models/bookingModel.js';
+import { BookingRoom, Reservation, activeBookingStatuses } from '../models/bookingModel.js';
 import { hotelForRoom, hotels } from './hotelCatalog.js';
 const types = [
   { type: 'Deluxe Room', price: 2500, capacity: 2, description: 'Queen bed, air conditioning, Wi-Fi and a private bathroom.', image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=900' },
@@ -13,7 +13,7 @@ const types = [
 export const sampleRooms = types.flatMap((room, index) => [1, 2].map(n => ({ ...room, id: index * 2 + n, roomNumber: `${index + 1}0${n}`, name: `${room.type} · ${index + 1}0${n}` })));
 const dto = room => ({ id: room.room_id, roomNumber: room.room_number, name: room.name, type: room.type, description: room.description, capacity: room.capacity, price: Number(room.price), image: room.image, hotel: hotelForRoom(room.room_id) });
 export async function getAvailableRooms(checkIn, checkOut, guests, hotelId) {
-  const booked = await Reservation.findAll({ where: { status: 'LOCAL_CONFIRMED', check_in: { [Op.lt]: checkOut }, check_out: { [Op.gt]: checkIn } }, attributes: ['room_id'] });
+  const booked = await Reservation.findAll({ where: { status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: checkOut }, check_out: { [Op.gt]: checkIn } }, attributes: ['room_id'] });
   const rooms = await BookingRoom.findAll({ where: { capacity: { [Op.gte]: guests }, ...(booked.length ? { room_id: { [Op.notIn]: booked.map(r => r.room_id) } } : {}) }, order: [['room_id', 'ASC']] });
   if (hotelId && !hotels.some(hotel => hotel.id === Number(hotelId))) return [];
   return rooms.map(dto).filter(room => !hotelId || room.hotel?.id === Number(hotelId));

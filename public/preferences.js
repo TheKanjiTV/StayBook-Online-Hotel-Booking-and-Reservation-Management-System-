@@ -40,12 +40,12 @@ for (const [id, field] of [['languageSelect', 'language'], ['currencySelect', 'c
   const control = event.target, error = document.getElementById(field === 'language' ? 'languageError' : 'currencyError'); control.disabled = true; error.textContent = '';
   try {
     // A preference change must not discard unsaved guest/account form fields.
-    const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup');
+    const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup') || document.querySelector('[data-admin-form]');
     if (form) { try { sessionStorage.setItem(`staybook-form:${location.pathname}`, JSON.stringify([...new FormData(form)].filter(([name]) => name !== 'password'))); } catch {} }
     await StayBook.request('/api/preferences', { method: 'POST', body: { [field]: control.value } }); location.reload();
   } catch (problem) { try { sessionStorage.removeItem(`staybook-form:${location.pathname}`); } catch {} error.textContent = StayBook.t(problem.message); control.value = field === 'language' ? lang : currency; control.disabled = false; }
 });
-const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup');
+const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup') || document.querySelector('[data-admin-form]');
 let saved; try { saved = sessionStorage.getItem(`staybook-form:${location.pathname}`); } catch {}
 if (form && saved) { try { for (const [name, value] of JSON.parse(saved)) if (form.elements[name] && name !== 'password') form.elements[name].value = value; } catch {} sessionStorage.removeItem(`staybook-form:${location.pathname}`); }
 localize(document.body);
