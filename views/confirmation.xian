@@ -3,4 +3,4 @@
 <main id="main" class="shell checkout-page">
 <div id="content"><p class="muted py-12" role="status">Preparing your stay details…</p></div>
 <p id="message" role="alert" tabindex="-1" class="form-error mt-6"></p>
-</main>{{> footer}}<script src="/confirmation.js"></script></body></html>
+</main>{{> footer}}<script type="module" src="/confirmation.js"></script></body></html>

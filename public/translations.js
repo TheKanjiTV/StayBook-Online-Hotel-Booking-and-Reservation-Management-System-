@@ -12,6 +12,16 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Choose a demo payment method': 'Pumili ng demo na paraan ng bayad|选择模拟付款方式|デモ決済方法を選択|모의 결제 방법 선택|Elige un método de pago de prueba|Choisir un mode de paiement de démonstration|Demo-Zahlungsart wählen|اختر طريقة الدفع التجريبية',
+  'No card, wallet login or bank details are collected. All methods simulate payment.': 'Walang kukuning card, wallet login o bank details. Lahat ay simulated.|不收集银行卡、钱包登录或银行信息。所有方式均为模拟付款。|カード・ウォレット・銀行情報は収集しません。すべて模擬決済です。|카드, 지갑 로그인, 은행 정보를 수집하지 않습니다. 모두 모의 결제입니다.|No se recopilan datos bancarios ni de tarjetas. Todos los pagos son simulados.|Aucune donnée bancaire ni de connexion n’est collectée. Tous les paiements sont simulés.|Keine Karten-, Wallet- oder Bankdaten werden erfasst. Alle Zahlungen sind simuliert.|لا تُجمع بيانات البطاقة أو المحفظة أو البنك. جميع طرق الدفع محاكاة.',
+  'E-wallet': 'E-wallet|电子钱包|電子ウォレット|전자지갑|Monedero electrónico|Portefeuille électronique|E-Wallet|محفظة إلكترونية',
+  'Digital wallet': 'Digital wallet|数字钱包|デジタルウォレット|디지털 지갑|Cartera digital|Portefeuille numérique|Digitale Wallet|محفظة رقمية',
+  'Card': 'Card|银行卡|カード|카드|Tarjeta|Carte|Karte|بطاقة',
+  'Bank': 'Bangko|银行|銀行|은행|Banco|Banque|Bank|بنك',
+  'Demo': 'Demo|演示|デモ|데모|Demo|Démo|Demo|تجريبي',
+  'Bank transfer': 'Bank transfer|银行转账|銀行振込|계좌이체|Transferencia bancaria|Virement bancaire|Banküberweisung|تحويل بنكي',
+  'Choose a supported demo payment method.': 'Pumili ng suportadong demo payment method.|请选择支持的模拟付款方式。|対応するデモ決済方法を選んでください。|지원되는 모의 결제 방법을 선택하세요.|Elige un método de prueba compatible.|Choisissez un mode de paiement de démonstration valide.|Wählen Sie eine unterstützte Demo-Zahlungsart.|اختر طريقة دفع تجريبية مدعومة.',
+  'Simulated payment failed. No booking was saved. Please retry.': 'Nabigo ang simulated payment. Walang na-save na booking. Subukan ulit.|模拟付款失败，未保存预订。请重试。|模擬決済に失敗しました。予約は保存されていません。再試行してください。|모의 결제가 실패했습니다. 예약은 저장되지 않았습니다. 다시 시도하세요.|Falló el pago simulado. No se guardó la reserva. Reintenta.|Échec du paiement simulé. Aucune réservation enregistrée. Réessayez.|Simulierte Zahlung fehlgeschlagen. Keine Buchung gespeichert. Bitte erneut versuchen.|فشل الدفع التجريبي. لم يُحفظ الحجز. حاول مجدداً.',
   'Notifications': 'Mga abiso|通知|通知|알림|Notificaciones|Notifications|Benachrichtigungen|الإشعارات',
   'Mark all read': 'Markahang nabasa lahat|全部标为已读|すべて既読にする|모두 읽음 표시|Marcar todo leído|Tout marquer comme lu|Alle als gelesen markieren|تحديد الكل كمقروء',
   'Loading notifications…': 'Nilo-load ang mga abiso…|正在加载通知…|通知を読み込み中…|알림 불러오는 중…|Cargando notificaciones…|Chargement des notifications…|Benachrichtigungen werden geladen…|جارٍ تحميل الإشعارات…',

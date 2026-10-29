@@ -77,6 +77,8 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 ## Development and commits
 
+Review offers selectable demo methods: GCash, Maya, Apple Pay, Google Pay, Visa, Mastercard and bank transfer. The selected method and an internal demo transaction reference are saved with the payment. No wallet SDK, card processing, provider login or real bank details are used. A future production integration needs a chosen provider, server-issued payment intents and verified webhooks before a payment can be treated as real. Changing the selected method on an already-confirmed request is rejected instead of creating another payment.
+
 Signed-in guests have a header notification bell. Saving or cancelling their account bookings creates a persisted notification in the same database transaction. Confirmation retries and repeated cancellation do not duplicate notices. Guests without accounts have no bell and cannot access notification APIs. Read status is scoped to the signed-in account; the panel refreshes on opening and every minute while the page is visible. It is an in-app inbox, not push/email/SMS messaging.
 
 The guest interface follows the existing ivory/green identity with self-hosted Cormorant Garamond and Manrope, a date-search landing page and room previews sourced from the local catalog. See `DESIGN.md` for the shared visual rules. Font licenses are included in `public/fonts/`; hotel photography is illustrative.

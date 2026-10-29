@@ -23,6 +23,14 @@
   summary { cursor: pointer; }
 }
 @layer components {
+  .payment-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-block: 24px; }
+  .payment-choices legend { grid-column: 1 / -1; }
+  .payment-choice { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; margin: 0; cursor: pointer; min-width: 0; }
+  .payment-choice:has(input:checked) { border-color: var(--ink); background: var(--wash); }
+  .payment-choice input { flex: 0 0 17px; width: 17px; height: 17px; padding: 0; accent-color: var(--ink); }
+  .payment-choice strong { font-size: .8125rem; }
+  .payment-choice small { display: block; font-size: .6875rem; color: var(--subtle); font-weight: 400; }
+  .payment-choice .badge { margin-inline-start: auto; font-size: .625rem; padding-inline: 8px; }
   .notification-menu > summary { min-width: 38px; min-height: 38px; display: flex; align-items: center; gap: 5px; list-style: none; }
   .notification-menu summary::-webkit-details-marker { display: none; }
   .notification-badge { font-size: .625rem; font-weight: 700; background: var(--ink); color: white; padding: 1px 5px; border-radius: 10px; }
@@ -250,6 +258,7 @@
   .booking-note { align-items: start; flex-direction: column; gap: 16px; }
 }
 @media (max-width: 540px) {
+  .payment-choices { grid-template-columns: 1fr; }
   .utility-bar .reservation-link { display: none; }
   .booking-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 10px; font-size: .68rem; margin-bottom: 30px; }
   .booking-steps li { align-items: start; min-width: 0; }

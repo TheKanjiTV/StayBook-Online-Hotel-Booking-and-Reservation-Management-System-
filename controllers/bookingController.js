@@ -48,7 +48,7 @@ export const bookingController = {
   },
   confirmBooking: async (req, res) => {
     if (!req.session.bookingPreview) fail(404, 'Start a room search first.');
-    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, simulateFailure: req.body.simulateFailure === true });
+    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, paymentMethod: req.body.paymentMethod, simulateFailure: req.body.simulateFailure === true });
     req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
     res.json({ success: true, reservation: await getBooking(req.session.bookingId, req.session.bookingToken) });
   },

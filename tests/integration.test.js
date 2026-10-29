@@ -123,6 +123,21 @@ await test('Online booking scope and guest review', async t => {
       const { Account } = await import('../models/accountModel.js');
       assert.ok(!(await Account.findOne({ where: { email: credentials.email } })).password_hash.includes(credentials.password));
     });
+    await t.test('Demo payment methods persist without accepting unsupported methods or changing totals', async () => {
+      const { paymentMethods } = await import('../public/payment-methods.js');
+      const client = new Client(guest.base); await client.call('/');
+      for (const [index, method] of paymentMethods.entries()) {
+        const ci = new Date(Date.parse(today()) + (index + 10) * 86400000).toISOString().slice(0, 10);
+        const co = new Date(Date.parse(ci) + 86400000).toISOString().slice(0, 10);
+        await client.call('/booking/preview', 'POST', { checkIn: ci, checkOut: co, guests: 2, roomId: 6, firstName: 'Method', lastName: 'Test', email: 'method@example.test', phone: '09123456789' });
+        await client.call('/api/bookings/confirm', 'POST', { paymentMethod: 'UNSUPPORTED' }, 400);
+        await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id, simulateFailure: true }, 402);
+        const { reservation } = await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id, totalAmount: 1 });
+        assert.equal(reservation.payments[0].payment_method, method.id); assert.equal(Number(reservation.total_amount), 5000);
+        const again = await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id }); assert.equal(again.reservation.reference, reservation.reference);
+        await client.call('/api/bookings/confirm', 'POST', { paymentMethod: paymentMethods[(index + 1) % paymentMethods.length].id }, 409);
+      }
+    });
     await t.test('Only account owners receive persisted booking notifications with safe retries', async () => {
       const member = new Client(guest.base), other = new Client(guest.base);
       const plainHome = await other.call('/'); assert.ok(!plainHome.includes('id="notificationBadge"'));
