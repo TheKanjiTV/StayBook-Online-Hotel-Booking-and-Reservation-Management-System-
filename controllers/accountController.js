@@ -19,7 +19,7 @@ export function requireAccount(req, res, next) { if (!req.account) return next(O
 export function requireAdmin(req, res, next) {
   if (!req.account) return req.path.startsWith('/api/') ? next(Object.assign(new Error('Sign in to continue.'), { status: 401 })) : res.redirect('/sign-in');
   if (req.account.role !== 'ADMIN') return next(Object.assign(new Error('Administrator access is required.'), { status: 403 }));
-  Object.assign(res.locals, { navDashboard: req.path === '/admin', navBookings: req.path.startsWith('/admin/bookings'), navAudit: req.path.startsWith('/admin/audit-logs'), navUsers: req.path.startsWith('/admin/users') });
+  Object.assign(res.locals, { navDashboard: req.path === '/admin', navBookings: req.path.startsWith('/admin/bookings'), navAudit: req.path.startsWith('/admin/audit-logs'), navUsers: req.path.startsWith('/admin/users'), navRooms: req.path.startsWith('/admin/rooms') });
   next();
 }
 const accountHome = account => account.role === 'ADMIN' ? '/admin' : '/account';

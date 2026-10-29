@@ -1,7 +1,7 @@
 {{> head}}
 <body class="admin-app"><a class="sr-only focus:not-sr-only" href="#main">Skip to content</a><div class="admin-shell">
 <aside class="admin-sidebar"><a class="brand" href="/admin">StayBook</a><details id="adminMenu" open><summary>Admin menu</summary><nav aria-label="Administration">
-<a href="/admin" {{#if navDashboard}}aria-current="page"{{/if}}>Dashboard</a><a href="/admin/bookings" {{#if navBookings}}aria-current="page"{{/if}}>Bookings</a><a href="/admin/users" {{#if navUsers}}aria-current="page"{{/if}}>Users</a><a href="/admin/audit-logs" {{#if navAudit}}aria-current="page"{{/if}}>Audit logs</a>
+<a href="/admin" {{#if navDashboard}}aria-current="page"{{/if}}>Dashboard</a><a href="/admin/bookings" {{#if navBookings}}aria-current="page"{{/if}}>Bookings</a><a href="/admin/rooms" {{#if navRooms}}aria-current="page"{{/if}}>Rooms &amp; rates</a><a href="/admin/users" {{#if navUsers}}aria-current="page"{{/if}}>Users</a><a href="/admin/audit-logs" {{#if navAudit}}aria-current="page"{{/if}}>Audit logs</a>
 </nav></details><a class="admin-guest-link" href="/">View guest site {{> arrow}}</a></aside>
 <div class="admin-workspace"><header class="admin-topbar"><p>Admin portal</p><div class="admin-tools auth-tools">{{> language}}{{> currency}}<button type="button" class="nav-link session-action" data-sign-out>Log out</button></div><p id="headerError" class="form-error" role="alert" tabindex="-1"></p></header>
 <main id="main" class="admin-content">

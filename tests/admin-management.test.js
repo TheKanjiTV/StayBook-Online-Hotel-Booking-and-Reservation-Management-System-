@@ -111,6 +111,20 @@ await test('Admin booking and account management', async t => {
       const unlinked = await admin.call('/api/admin/bookings', 'POST', { ...input, requestKey: nextKey, accountId: '', checkIn: day(101), checkOut: day(102) });
       const unlinkedRow = await Reservation.findOne({ where: { reference: unlinked.reference } }); assert.equal(await AccountBooking.findByPk(unlinkedRow.reservation_id), null);
     });
+    await t.test('Room catalog changes affect new quotes but preserve existing reservations', async () => {
+      const { BookingRoom } = await import('../models/bookingModel.js'); const room = await BookingRoom.findByPk(1);
+      const values = { type: room.type, description: room.description, capacity: 2, price: '3000.00', published: '1', version: room.version };
+      await owner.call('/api/admin/rooms/1', 'POST', values, 403);
+      await admin.call('/api/admin/rooms/1', 'POST', { ...values, capacity: 1 }, 409);
+      await admin.call('/api/admin/rooms/1', 'POST', values);
+      await admin.call('/api/admin/rooms/1', 'POST', values, 409);
+      const query = new URLSearchParams({ checkIn: day(120), checkOut: day(121), guests: 2 });
+      assert.equal((await owner.call(`/rooms/search?${query}`)).rooms.find(item => item.id === 1).price, 3000);
+      assert.ok((await Reservation.findAll({ where: { room_id: 1 } })).every(row => Number(row.total_amount) === 2500));
+      await room.reload(); await admin.call('/api/admin/rooms/1', 'POST', { ...values, version: room.version, published: '0' });
+      assert.ok(!(await owner.call(`/rooms/search?${query}`)).rooms.some(item => item.id === 1));
+      assert.equal(await AuditLog.count({ where: { action: 'ROOM_UPDATED', target_id: 1 } }), 2);
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

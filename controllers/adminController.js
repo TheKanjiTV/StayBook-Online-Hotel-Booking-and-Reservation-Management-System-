@@ -26,7 +26,7 @@ export const adminController = {
     req.session.adminBookingRequests[requestKey] = now;
     const checkIn = validDate(req.query.checkIn) ? req.query.checkIn : today(), checkOut = validDate(req.query.checkOut) ? req.query.checkOut : new Date(Date.parse(checkIn) + 86400000).toISOString().slice(0, 10);
     const roomId = req.query.roomId ? positiveId(req.query.roomId, 'room') : null;
-    const [rooms, accounts] = await Promise.all([BookingRoom.findAll({ order: [['room_id', 'ASC']] }), Account.findAll({ where: { role: 'GUEST' }, attributes: ['account_id', 'first_name', 'last_name', 'email'], order: [['first_name', 'ASC']] })]);
+    const [rooms, accounts] = await Promise.all([BookingRoom.findAll({ where: { is_published: true }, order: [['room_id', 'ASC']] }), Account.findAll({ where: { role: 'GUEST' }, attributes: ['account_id', 'first_name', 'last_name', 'email'], order: [['first_name', 'ASC']] })]);
     res.render('admin-booking-new', { title: 'Add booking | StayBook', adminTitle: 'Add booking', requestKey, checkIn, checkOut, today: today(), hotels, methods: paymentMethods, rooms: rooms.map(room => ({ ...room.toJSON(), hotelName: hotelForRoom(room.room_id)?.name, selected: room.room_id === roomId })), accounts: accounts.map(row => row.toJSON()) });
   },
   create: async (req, res) => {
@@ -77,7 +77,7 @@ export const adminController = {
     const booking = await Reservation.findByPk(positiveId(req.params.id), { attributes: [...fields, 'phone', 'address', 'guests', 'version'] });
     if (!booking) fail(404, 'Booking not found.');
     if (booking.status === 'CANCELLED') fail(409, 'Cancelled bookings cannot be edited.');
-    const rooms = await BookingRoom.findAll({ order: [['room_id', 'ASC']] });
+    const rooms = await BookingRoom.findAll({ where: { [Op.or]: [{ is_published: true }, { room_id: booking.room_id }] }, order: [['room_id', 'ASC']] });
     res.render('admin-booking-edit', { title: 'Edit booking | StayBook', adminTitle: 'Edit booking', booking: booking.toJSON(), rooms: rooms.map(room => ({ ...room.toJSON(), hotelName: hotelForRoom(room.room_id)?.name, selected: room.room_id === booking.room_id })) });
   },
   update: async (req, res) => { const id = positiveId(req.params.id); await updateAdminBooking(id, req.body, req.account); res.json({ success: true, redirect: `/admin/bookings/${id}` }); },

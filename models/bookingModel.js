@@ -5,12 +5,13 @@ const money = () => ({ type: D.DECIMAL(12, 2), allowNull: false });
 const id = () => ({ type: D.INTEGER, primaryKey: true, autoIncrement: true });
 const options = { timestamps: true, underscored: true };
 export const activeBookingStatuses = ['LOCAL_CONFIRMED', 'ADMIN_CONFIRMED'];
-// Read-only sample catalog used by this booking application until PMS integration.
+// Local sales catalog used by this booking application until PMS integration.
 // This is not the hotel's operational room inventory or room-status management.
 export const BookingRoom = sequelize.define('BookingRoom', {
   room_id: { type: D.INTEGER, primaryKey: true }, name: text(), room_number: text(20), type: text(),
   description: text(500), capacity: { type: D.INTEGER, allowNull: false }, price: money(), image: text(500),
-}, options);
+  is_published: { type: D.BOOLEAN, allowNull: false, defaultValue: true },
+}, { ...options, version: true });
 export const Reservation = sequelize.define('Reservation', {
   reservation_id: id(), reference: { ...text(30), unique: true }, request_key: { ...text(), unique: true }, request_hash: text(), access_token: text(),
   room_id: { type: D.INTEGER, allowNull: false }, room_name: text(), room_number: text(20), room_type: text(),

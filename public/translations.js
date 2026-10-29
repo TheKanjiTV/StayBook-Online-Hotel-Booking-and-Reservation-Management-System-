@@ -12,6 +12,18 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Rooms & rates': 'Mga kuwarto at presyo|客房和房价|客室と料金|객실 및 요금|Habitaciones y tarifas|Chambres et tarifs|Zimmer und Preise|الغرف والأسعار',
+  'Edit room': 'I-edit ang kuwarto|编辑客房|客室を編集|객실 수정|Editar habitación|Modifier la chambre|Zimmer bearbeiten|تعديل الغرفة',
+  'Back to rooms': 'Bumalik sa mga kuwarto|返回客房|客室一覧へ戻る|객실 목록으로 돌아가기|Volver a habitaciones|Retour aux chambres|Zurück zu Zimmern|العودة إلى الغرف',
+  'Search rooms': 'Maghanap ng kuwarto|搜索客房|客室を検索|객실 검색|Buscar habitaciones|Rechercher des chambres|Zimmer suchen|البحث عن الغرف',
+  'Room number or room type': 'Room number o uri ng kuwarto|房号或房型|部屋番号または客室タイプ|객실 번호 또는 유형|Número o tipo de habitación|Numéro ou type de chambre|Zimmernummer oder Zimmertyp|رقم الغرفة أو نوعها',
+  'Publication': 'Publication|发布状态|公開状態|게시 상태|Publicación|Publication|Veröffentlichung|حالة النشر',
+  'Published': 'Naka-publish|已发布|公開中|게시됨|Publicada|Publiée|Veröffentlicht|منشور',
+  'Hidden from booking': 'Nakatago sa booking|不显示于预订|予約画面に非表示|예약에서 숨김|Oculta en reservas|Masquée des réservations|Bei Buchungen ausgeblendet|مخفي من الحجز',
+  'Capacity': 'Kapasidad|容纳人数|定員|수용 인원|Capacidad|Capacité|Kapazität|السعة',
+  'Nightly rate (PHP)': 'Presyo bawat gabi (PHP)|每晚价格 (PHP)|1泊の料金 (PHP)|1박 요금 (PHP)|Tarifa por noche (PHP)|Tarif par nuit (PHP)|Preis pro Nacht (PHP)|السعر الليلي (PHP)',
+  'Description': 'Paglalarawan|描述|説明|설명|Descripción|Description|Beschreibung|الوصف',
+  'Rate changes apply to new bookings. Existing booking prices remain unchanged.': 'Sa bagong bookings lang magagamit ang bagong presyo. Hindi mababago ang dating presyo.|价格更改仅适用于新预订，现有预订价格不变。|新料金は新しい予約に適用され、既存の予約料金は変わりません。|요금 변경은 새 예약에만 적용됩니다. 기존 예약 요금은 유지됩니다.|Los nuevos precios se aplican solo a reservas nuevas.|Les nouveaux tarifs s’appliquent aux nouvelles réservations uniquement.|Neue Preise gelten nur für neue Buchungen.|تُطبق الأسعار الجديدة على الحجوزات الجديدة فقط.',
   'Add booking': 'Magdagdag ng booking|添加预订|予約を追加|예약 추가|Añadir reserva|Ajouter une réservation|Buchung hinzufügen|إضافة حجز',
   'Save booking': 'I-save ang booking|保存预订|予約を保存|예약 저장|Guardar reserva|Enregistrer la réservation|Buchung speichern|حفظ الحجز',
   'Available rooms': 'Available na kuwarto|可用客房|空室|예약 가능한 객실|Habitaciones disponibles|Chambres disponibles|Verfügbare Zimmer|الغرف المتاحة',

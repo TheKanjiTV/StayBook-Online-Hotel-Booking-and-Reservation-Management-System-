@@ -14,8 +14,8 @@ export const sampleRooms = types.flatMap((room, index) => [1, 2].map(n => ({ ...
 const dto = room => ({ id: room.room_id, roomNumber: room.room_number, name: room.name, type: room.type, description: room.description, capacity: room.capacity, price: Number(room.price), image: room.image, hotel: hotelForRoom(room.room_id) });
 export async function getAvailableRooms(checkIn, checkOut, guests, hotelId) {
   const booked = await Reservation.findAll({ where: { status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: checkOut }, check_out: { [Op.gt]: checkIn } }, attributes: ['room_id'] });
-  const rooms = await BookingRoom.findAll({ where: { capacity: { [Op.gte]: guests }, ...(booked.length ? { room_id: { [Op.notIn]: booked.map(r => r.room_id) } } : {}) }, order: [['room_id', 'ASC']] });
+  const rooms = await BookingRoom.findAll({ where: { is_published: true, capacity: { [Op.gte]: guests }, ...(booked.length ? { room_id: { [Op.notIn]: booked.map(r => r.room_id) } } : {}) }, order: [['room_id', 'ASC']] });
   if (hotelId && !hotels.some(hotel => hotel.id === Number(hotelId))) return [];
   return rooms.map(dto).filter(room => !hotelId || room.hotel?.id === Number(hotelId));
 }
-export async function getRoomById(id) { const room = await BookingRoom.findByPk(Number(id)); return room ? dto(room) : null; }
+export async function getRoomById(id) { const room = await BookingRoom.findOne({ where: { room_id: Number(id), is_published: true } }); return room ? dto(room) : null; }

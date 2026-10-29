@@ -3,10 +3,12 @@ import { searchInput, guestInput, positiveId, fail } from '../services/validatio
 import { randomUUID } from 'node:crypto';
 import { hotels } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
+import { BookingRoom } from '../models/bookingModel.js';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
 export const bookingController = {
+  hotels: async (req, res) => { const rooms = await BookingRoom.findAll({ where: { is_published: true }, attributes: ['room_id'] }); res.render('hotels', { title: 'Hotels & Resorts | StayBook', hotels: hotels.map(hotel => ({ ...hotel, rooms: rooms.filter(room => hotel.rooms.includes(room.room_id)) })) }); },
   home: async (req, res) => {
     const rooms = await Promise.all([1, 3, 5].map(getRoomById));
     const featuredRooms = rooms.filter(Boolean).map(room => ({ ...room, formattedPrice: Number(room.price).toLocaleString('en-PH') }));

@@ -21,6 +21,9 @@ export async function migrate() {
     const bookingColumns = await query.describeTable(Reservation.getTableName());
     if (!bookingColumns.deleted_at) await query.addColumn(Reservation.getTableName(), 'deleted_at', { type: DataTypes.DATE, allowNull: true });
     if (!bookingColumns.version) await query.addColumn(Reservation.getTableName(), 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
+    const roomColumns = await query.describeTable(BookingRoom.getTableName());
+    if (!roomColumns.version) await query.addColumn(BookingRoom.getTableName(), 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
+    if (!roomColumns.is_published) await query.addColumn(BookingRoom.getTableName(), 'is_published', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true });
     for (const room of sampleRooms) {
       await BookingRoom.findOrCreate({ where: { room_id: room.id }, defaults: {
         name: room.name, room_number: room.roomNumber, type: room.type, description: room.description, capacity: room.capacity, price: room.price, image: room.image,

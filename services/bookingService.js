@@ -21,6 +21,7 @@ export async function saveBooking(body, options = {}) {
       if (existing.request_hash !== requestHash && !legacyRetry) fail(409, 'This request key was already used for different details.');
       return existing;
     }
+    if (!room.is_published) fail(409, 'This room is not available for new bookings.');
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
       const conflict = await Reservation.findOne({ where: { room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
     if (conflict) fail(409, 'This sample room is already booked for those dates. Choose another room.');

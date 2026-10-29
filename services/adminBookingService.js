@@ -54,6 +54,7 @@ export async function updateAdminBooking(id, body, actor) {
     const datesChanged = body.checkIn !== booking.check_in || body.checkOut !== booking.check_out;
     const dates = datesChanged ? searchInput(body) : { checkIn: booking.check_in, checkOut: booking.check_out, nights: booking.nights };
     const stayChanged = datesChanged || roomId !== booking.room_id;
+    if (stayChanged && !room.is_published) fail(409, 'This room is not available for new bookings.');
     const conflict = await Reservation.findOne({ where: { reservation_id: { [Op.ne]: booking.reservation_id }, room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
     if (conflict) fail(409, 'This room is already booked for those dates.');
     const rate = stayChanged ? room.price : booking.nightly_rate;
