@@ -1,5 +1,5 @@
 import { getAvailableRooms, getRoomById } from '../services/pmsApi.js';
-import { searchInput, guestInput, fail } from '../services/validation.js';
+import { searchInput, guestInput, positiveId, fail } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
@@ -11,7 +11,17 @@ export const bookingController = {
     res.render('home', { title: 'StayBook | A comfortable stay, simply booked', featuredRooms, guestOptions });
   },
   roomsPage: (req, res) => res.render('rooms', { title: 'Choose your room | StayBook', guestOptions }),
-  guestDetailsPage: (req, res) => res.render('guest-details', { title: 'Guest details | StayBook' }),
+  guestDetailsPage: async (req, res) => {
+    if (!req.query.roomId) return res.redirect('/rooms');
+    const stay = searchInput(req.query), room = await getRoomById(positiveId(req.query.roomId, 'room'));
+    if (!room) fail(404, 'Room not found.');
+    if (stay.guests > room.capacity) fail(400, 'Room capacity exceeded.');
+    const money = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
+    const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString('en-PH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests }).toString();
+    res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview,
+      searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(room.price), total: money(room.price * stay.nights), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });
+  },
   confirmationPage: (req, res) => {
     if (!req.session.bookingPreview && !req.session.bookingId) return res.redirect('/');
     res.render('confirmation', { title: 'Your online booking | StayBook' });
@@ -22,11 +32,11 @@ export const bookingController = {
   },
   createBookingPreview: async (req, res) => {
     const dates = searchInput(req.body), guest = guestInput(req.body);
-    const room = await getRoomById(req.body.roomId);
+    const room = await getRoomById(positiveId(req.body.roomId, 'room'));
     if (!room) fail(404, 'Room not found.');
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
     req.session.bookingPreview = { ...dates, roomId: room.id, roomName: room.name, firstName: guest.first_name, lastName: guest.last_name,
-      email: guest.email, phone: guest.phone, address: guest.address, pricePerNight: room.price, totalAmount: room.price * dates.nights, status: 'REVIEW', requestKey: randomUUID() };
+      email: guest.email, phone: guest.phone, address: guest.address, roomImage: room.image, roomType: room.type, roomNumber: room.roomNumber, pricePerNight: room.price, totalAmount: room.price * dates.nights, status: 'REVIEW', requestKey: randomUUID() };
     delete req.session.bookingId; delete req.session.bookingToken;
     res.json({ success: true, redirect: '/confirmation' });
   },

@@ -75,6 +75,8 @@ The guest interface follows the existing ivory/green identity with self-hosted C
 
 Room results group matching rooms by type, capacity and nightly rate. Guests can update dates, filter room types and sort prices/capacity. Both nightly rates and the estimated whole-stay total are shown before room selection; the server recalculates the final amount during booking.
 
+The guest-details and review pages keep a shared room/date/price summary, preserve entered details when going back to edit, and clearly separate demo payment from real hotel confirmation. The booking result includes its reference, printing, cancellation and reference copying. My Booking uses the same visual system and keeps errors recoverable without clearing the form.
+
 Keep XianFire, `.xian` views and Tailwind. Complete and verify one feature, then commit it before starting a different feature. For example, an explicitly requested login feature and registration feature should have separate commits after each works; these examples do not add those features to the current scope.
 
 Use `npm run build`, `npm test` and `npm run route:list` as applicable. The integration tests create an isolated `online_booking_test_TIMESTAMP` MySQL database and delete only that named test database afterward. They verify that other systems' endpoints are absent, as well as guest validation, pricing, local payments, concurrency, booking ownership, lookup, cancellation and session persistence.

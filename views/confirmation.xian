@@ -1,6 +1,6 @@
 {{> head}}
 <body>{{> nav}}
-<main class="max-w-3xl mx-auto px-5 py-10">
-<div id="content" class="panel"><p>Loading booking…</p></div>
-<p id="message" role="status" aria-live="polite" class="text-sm text-red-700 mt-4"></p>
-</main><script src="/confirmation.js"></script></body></html>
+<main id="main" class="shell checkout-page">
+<div id="content"><p class="muted py-12" role="status">Preparing your stay details…</p></div>
+<p id="message" role="alert" tabindex="-1" class="form-error mt-6"></p>
+</main>{{> footer}}<script src="/confirmation.js"></script></body></html>

@@ -5,7 +5,7 @@ const router = express.Router();
 router.get('/', a(b.home));
 router.get('/rooms', b.roomsPage);
 router.get('/rooms/search', a(b.searchRooms));
-router.get('/guest-details', b.guestDetailsPage);
+router.get('/guest-details', a(b.guestDetailsPage));
 router.post('/booking/preview', a(b.createBookingPreview));
 router.get('/confirmation', b.confirmationPage);
 router.get('/api/booking-preview', b.getBookingPreview);

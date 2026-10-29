@@ -43,6 +43,13 @@ await test('Online booking scope and guest review', async t => {
       assert.equal(await Reservation.count(), 1); assert.equal(await Payment.count(), 1);
       const other = new Client(guest.base); await other.call('/'); assert.equal((await other.call('/api/bookings/current')).reservation, null);
     });
+    await t.test('Guest details use the server quote and preserve guest information when editing', async () => {
+      await guest.call('/guest-details', 'GET', undefined, 302);
+      const query = new URLSearchParams({ ...dates, roomId: 1, price: 1, totalAmount: 1 });
+      const html = await guest.call(`/guest-details?${query}`);
+      assert.ok(html.includes('₱2,500.00')); assert.ok(html.includes('value="Test"'));
+      await guest.call(`/guest-details?${new URLSearchParams({ ...dates, roomId: 'invalid' })}`, 'GET', undefined, 400);
+    });
     await t.test('Concurrent local reservations prevent overlapping bookings', async () => {
       const clients = [new Client(guest.base), new Client(guest.base)];
       for (const c of clients) { await c.call('/'); await c.call('/booking/preview', 'POST', { ...dates, roomId: 2, firstName: 'Concurrent', lastName: 'Guest', email: 'concurrent@example.test', phone: '09123456789' }); }
