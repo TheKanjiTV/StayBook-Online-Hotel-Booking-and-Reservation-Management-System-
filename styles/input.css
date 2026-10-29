@@ -373,24 +373,41 @@
 }
 @media (max-width: 540px) { .booking-steps { display: flex; flex-wrap: wrap; gap: 12px 20px; } }
 .payment-availability { margin-block: 14px 22px; font-size: 16px; color: var(--subtle); }
-.payment-options { display: grid; grid-template-columns: 1fr; gap: 12px; margin-block: 24px; }
-.payment-options legend { font-size: 18px; }
-.payment-logo-choice { display: flex; align-items: center; gap: 20px; padding: 16px 20px; border: 1px solid var(--line); border-radius: 12px; min-height: 78px; margin: 0; cursor: pointer; }
-.payment-logo-choice:hover { background: var(--wash); }
-.payment-logo-choice:has(input:checked) { border-color: var(--ink); background: var(--wash); }
-.payment-logo-choice input { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; accent-color: var(--ink); }
-.payment-logo { width: 140px; height: 42px; object-fit: contain; object-position: left center; }
-.payment-logo.card-logo, .payment-logo.bank-logo { width: 64px; }
-.payment-logo-choice:has([value=MAYA]) .payment-logo { background: #122d23; padding: 7px 10px; border-radius: 6px; }
-.payment-selection { margin-inline-start: auto; visibility: hidden; }
-.payment-logo-choice:has(input:checked) .payment-selection { visibility: visible; }
-.card-fields { margin-top: 24px; }
-.card-fields[hidden] { display: none; }
-.card-number-wrap { position: relative; }
-.card-number-wrap input { min-height: 58px; padding-inline-end: 96px; font-size: 18px; font-variant-numeric: tabular-nums; }
-.card-number-wrap img { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); width: 64px; height: 40px; object-fit: contain; }
-[dir=rtl] .payment-logo { object-position: right center; }
-@media (max-width: 540px) { .payment-logo-choice { padding: 16px; gap: 16px; } .card-number-wrap input { font-size: 16px; padding-inline-end: 78px; } .card-number-wrap img { width: 52px; } }
+.payment-sheet { max-width: 600px; padding: 30px; background: #070707; color: #fff; border-radius: 16px; }
+.payment-sheet h3 { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 650; line-height: 1.5; letter-spacing: 0; margin-bottom: 18px; }
+.wallet-buttons { display: grid; gap: 12px; }
+.wallet-button { display: flex; align-items: center; justify-content: center; width: 100%; height: 50px; border-radius: 18px; background: #fff; border: 1px solid #dedede; }
+.wallet-button:hover { background: #ededed; }
+.wallet-button[aria-pressed=true] { outline: 3px solid #a8d6ba; outline-offset: 3px; }
+.wallet-button img { width: 100px; height: 28px; object-fit: contain; }
+.payment-divider { display: flex; align-items: center; gap: 18px; margin-block: 22px; color: #bdbdbd; font-size: 13px; font-weight: 650; }
+.payment-divider::before, .payment-divider::after { content: ''; height: 1px; background: #333; flex: 1; }
+.sheet-input { position: relative; min-width: 0; }
+.sheet-input input { width: 100%; min-width: 0; height: 80px; border: 1px solid transparent; border-radius: 20px; background: #303030; color: #fff; padding: 20px 18px; font-size: 18px; font-weight: 500; caret-color: white; }
+.sheet-input input::placeholder { color: #c7c7c7; opacity: 1; }
+.sheet-input input:focus-visible { outline: 2px solid #a8d6ba; outline-offset: 3px; }
+.sheet-input input[aria-invalid=true] { border-color: #ffb6ae; }
+.card-number-wrap input { padding-inline-end: 185px; font-variant-numeric: tabular-nums; }
+.card-number-wrap:has(#cardBrandImage:not([hidden])) input { padding-inline-end: 94px; }
+.card-brand-strip { position: absolute; inset-inline-end: 16px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 4px; }
+.card-brand-strip img { width: 34px; height: 25px; object-fit: contain; background: white; border-radius: 2px; padding: 2px; }
+.card-brand-strip[hidden], #cardBrandImage[hidden] { display: none; }
+#cardBrandImage { position: absolute; inset-inline-end: 16px; top: 50%; transform: translateY(-50%); width: 60px; height: 38px; object-fit: contain; background: white; padding: 4px; border-radius: 4px; }
+.sheet-field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 12px; }
+.sheet-card-fields { direction: ltr; }
+.cvc-wrap input { padding-inline-end: 54px; }
+.cvc-wrap svg { position: absolute; inset-inline-end: 16px; top: 50%; transform: translateY(-50%); width: 30px; height: 25px; color: #bdbdbd; }
+.remember-method { display: flex; align-items: start; gap: 12px; margin: 20px 0 0; font-size: 16px; line-height: 1.5; font-weight: 450; cursor: pointer; }
+.remember-method input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 2px; padding: 0; accent-color: #a8d6ba; }
+.remember-method input { appearance: none; position: relative; background: #303030; border: 1px solid #686868; border-radius: 4px; }
+.remember-method input:checked { background: #a8d6ba; border-color: #a8d6ba; }
+.remember-method input:checked::after { content: ''; position: absolute; width: 10px; height: 6px; border-left: 2px solid #122d23; border-bottom: 2px solid #122d23; transform: rotate(-45deg); top: 4px; left: 4px; }
+.header-tools .notification-menu > summary { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+.sheet-help, .wallet-status { color: #c7c7c7; font-size: 14px; line-height: 1.6; margin-top: 14px; }
+.wallet-status:empty { display: none; }
+.payment-sheet .sr-only { margin: 0; }
+@media (max-width: 540px) { .payment-sheet { padding: 24px 16px; } .sheet-input input { font-size: 16px; padding-inline-start: 16px; } .card-number-wrap input { padding-inline-end: 150px; } .card-brand-strip { gap: 3px; inset-inline-end: 12px; } .card-brand-strip img { width: 29px; height: 22px; } .wallet-button { height: 50px; } }
+@media (max-width: 360px) { .sheet-field-row { grid-template-columns: 1fr; } .remember-method { font-size: 14px; } .card-brand-strip img { width: 24px; } .card-number-wrap input { padding-inline-end: 126px; } }
 @media print { nav, .site-header, .site-footer, .no-print, button, .booking-steps, .summary-toggle { display: none !important; } body { background: white; } main { max-width: none !important; padding: 0 !important; } .checkout-grid { display: block; } .stay-summary { position: static; margin-top: 25px; break-inside: avoid; } .summary-body > img { display: none; } .result-actions { display: none; } }
 
 @media print {

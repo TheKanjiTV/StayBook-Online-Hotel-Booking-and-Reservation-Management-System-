@@ -12,6 +12,18 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Pay with': 'Magbayad gamit ang|支付方式|お支払い方法|결제 수단|Pagar con|Payer avec|Bezahlen mit|الدفع بواسطة',
+  'Payment details': 'Detalye ng bayad|付款详情|支払い情報|결제 정보|Datos de pago|Informations de paiement|Zahlungsdetails|تفاصيل الدفع',
+  'OR': 'O|或|または|또는|O|OU|ODER|أو',
+  'Expiration date': 'Petsa ng expiration|有效期|有効期限|유효기간|Fecha de caducidad|Date d’expiration|Gültig bis|تاريخ الانتهاء',
+  'Security code': 'Security code|安全码|セキュリティコード|보안 코드|Código de seguridad|Cryptogramme|Sicherheitscode|رمز الأمان',
+  'Accepted cards': 'Mga tinatanggap na card|支持的银行卡|対応カード|사용 가능한 카드|Tarjetas aceptadas|Cartes acceptées|Akzeptierte Karten|البطاقات المقبولة',
+  'Selected': 'Napili|已选择|選択済み|선택됨|Seleccionado|Sélectionné|Ausgewählt|تم الاختيار',
+  'Remember my payment method on this device': 'Tandaan ang paraan ng bayad sa device na ito|在此设备记住付款方式|この端末に支払い方法を記憶する|이 기기에 결제 방법 기억|Recordar el método en este dispositivo|Mémoriser le mode de paiement sur cet appareil|Zahlungsart auf diesem Gerät merken|تذكّر طريقة الدفع على هذا الجهاز',
+  'Use test card details. No payment will be made.': 'Gumamit ng test card details. Walang bayad na ipoproseso.|请使用测试卡信息，不会付款。|テスト用カード情報を使用してください。決済は行いません。|테스트 카드 정보를 사용하세요. 결제되지 않습니다.|Usa datos de tarjeta de prueba. No se realizará ningún pago.|Utilisez des données de carte de test. Aucun paiement ne sera effectué.|Verwenden Sie Testkartendaten. Es erfolgt keine Zahlung.|استخدم بيانات بطاقة اختبارية. لن يتم أي دفع.',
+  'Enter a valid test card number.': 'Maglagay ng wastong test card number.|请输入有效的测试卡号。|有効なテストカード番号を入力してください。|유효한 테스트 카드 번호를 입력하세요.|Introduce un número de tarjeta de prueba válido.|Saisissez un numéro de carte de test valide.|Geben Sie eine gültige Testkartennummer ein.|أدخل رقم بطاقة اختبارية صالحاً.',
+  'Enter a valid expiration date (MM/YY).': 'Maglagay ng wastong expiration date (MM/YY).|请输入有效的到期日（月/年）。|有効な有効期限（月/年）を入力してください。|올바른 유효기간(MM/YY)을 입력하세요.|Introduce una caducidad válida (MM/AA).|Saisissez une date valide (MM/AA).|Geben Sie ein gültiges Ablaufdatum ein (MM/JJ).|أدخل تاريخ انتهاء صالحاً (شهر/سنة).',
+  'Enter the correct security code for this test card.': 'Maglagay ng tamang security code para sa test card.|请输入此测试卡的正确安全码。|テストカードの正しいセキュリティコードを入力してください。|테스트 카드의 올바른 보안 코드를 입력하세요.|Introduce el código correcto de la tarjeta de prueba.|Saisissez le cryptogramme de cette carte de test.|Geben Sie den korrekten Sicherheitscode der Testkarte ein.|أدخل رمز الأمان الصحيح لهذه البطاقة الاختبارية.',
   'Choose a payment method': 'Pumili ng paraan ng bayad|选择付款方式|支払い方法を選択|결제 방법 선택|Elige un método de pago|Choisir un mode de paiement|Zahlungsart wählen|اختر طريقة الدفع',
   'Payment preference': 'Napiling paraan ng bayad|首选付款方式|希望する支払い方法|선호 결제 방법|Preferencia de pago|Mode de paiement souhaité|Gewünschte Zahlungsart|طريقة الدفع المفضلة',
   'Card number': 'Numero ng card|卡号|カード番号|카드 번호|Número de tarjeta|Numéro de carte|Kartennummer|رقم البطاقة',

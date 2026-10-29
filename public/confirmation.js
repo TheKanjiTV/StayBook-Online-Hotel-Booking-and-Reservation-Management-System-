@@ -1,36 +1,46 @@
 import { paymentMethods, paymentLabel } from './payment-methods.js';
-import { cardBrand, formatCardNumber, validCardNumber } from './card.js';
+import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry, validSecurityCode } from './card.js';
 (() => {
   const { request, money, escape: esc, icon } = StayBook;
   const content = document.getElementById('content'), message = document.getElementById('message');
   const row = (label, value) => `<div class="review-row"><dt>${esc(label)}</dt><dd ${label === 'Payment preference' ? '' : 'data-no-translate'}>${esc(value)}</dd></div>`;
   const dateLabel = date => new Date(`${date}T12:00:00Z`).toLocaleDateString(StayBook.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  const methodChoices = () => `<fieldset class="payment-options"><legend class="form-heading mb-4">Choose a payment method</legend>${paymentMethods.filter(method => method.kind !== 'Card').map((method, index) => `<label class="payment-logo-choice"><input type="radio" name="paymentChoice" value="${method.id}" ${index === 0 ? 'checked' : ''} required><img class="payment-logo ${method.id === 'BANK_TRANSFER' ? 'bank-logo' : ''}" src="/payment-logos/${method.logo}" alt="${method.label}" width="140" height="42"><span class="payment-selection" aria-hidden="true">${icon('check')}</span></label>`).join('')}<label class="payment-logo-choice"><input type="radio" name="paymentChoice" value="CARD" required><img class="payment-logo card-logo" src="/payment-logos/card.svg" alt="Card" width="64" height="42"><span class="payment-selection" aria-hidden="true">${icon('check')}</span></label></fieldset><div id="cardFields" class="card-fields" hidden><label for="cardNumber">Card number</label><div class="card-number-wrap"><input id="cardNumber" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="0000 0000 0000 0000" aria-describedby="cardHelp" disabled><img id="cardBrandImage" src="/payment-logos/card.svg" alt="Card" width="64" height="42"></div><p id="cardHelp" class="field-help">Use a test card number. This field does not make a payment.</p><p id="cardBrandStatus" class="sr-only" role="status"></p></div>`;
+  const methodChoices = () => `<section class="payment-sheet" aria-label="Payment details"><h3>Pay with</h3><div class="wallet-buttons">${paymentMethods.filter(method => method.kind === 'Digital wallet').map(method => `<button type="button" class="wallet-button" data-wallet="${method.id}" aria-pressed="false" aria-label="${method.label}"><img src="/payment-logos/${method.logo}" alt="${method.label}" width="100" height="28"></button>`).join('')}</div><div class="payment-divider"><span>OR</span></div><div id="cardFields" class="sheet-card-fields"><label class="sr-only" for="cardNumber">Card number</label><div class="sheet-input card-number-wrap"><input id="cardNumber" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="Card number" aria-describedby="cardHelp" required><div id="acceptedCardBrands" class="card-brand-strip" aria-label="Accepted cards">${['MASTERCARD', 'VISA', 'AMEX', 'DISCOVER'].map(id => { const method = paymentMethods.find(item => item.id === id); return `<img src="/payment-logos/${method.logo}" alt="${method.label}" width="38" height="26">`; }).join('')}</div><img id="cardBrandImage" src="/payment-logos/card.svg" alt="Card" width="64" height="42" hidden></div><div class="sheet-field-row"><div class="sheet-input"><label class="sr-only" for="cardExpiry">Expiration date</label><input id="cardExpiry" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="Expiration date" aria-describedby="cardHelp" required></div><div class="sheet-input cvc-wrap"><label class="sr-only" for="cardSecurity">Security code</label><input id="cardSecurity" type="password" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="Security code" aria-describedby="cardHelp" required><svg viewBox="0 0 32 26" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="28" height="20" rx="3"/><path d="M2 7h28m-19 9h1m4 0h1m4 0h1"/></svg></div></div></div><label class="remember-method"><input id="rememberMethod" type="checkbox"><span>Remember my payment method on this device</span></label><p id="walletStatus" class="wallet-status" role="status"></p><p id="cardHelp" class="sheet-help">Use test card details. No payment will be made.</p><p id="cardBrandStatus" class="sr-only" role="status"></p></section>`;
   function configurePayment(form) {
-    const number = document.getElementById('cardNumber'), fields = document.getElementById('cardFields'), image = document.getElementById('cardBrandImage');
-    const status = document.getElementById('cardBrandStatus');
-    function resetCard() { number.value = ''; number.setCustomValidity(''); number.removeAttribute('aria-invalid'); image.src = '/payment-logos/card.svg'; image.alt = StayBook.t('Card'); status.textContent = ''; }
-    form.addEventListener('change', event => {
-      if (event.target.name !== 'paymentChoice') return;
-      const card = event.target.value === 'CARD'; fields.hidden = !card; number.disabled = !card; number.required = card;
-      if (card) number.focus(); else resetCard();
-    });
+    const number = document.getElementById('cardNumber'), expiry = document.getElementById('cardExpiry'), security = document.getElementById('cardSecurity');
+    const image = document.getElementById('cardBrandImage'), accepted = document.getElementById('acceptedCardBrands'), status = document.getElementById('cardBrandStatus');
+    const remember = document.getElementById('rememberMethod'), walletStatus = document.getElementById('walletStatus'), fields = [number, expiry, security];
+    let selected = 'CARD';
+    function resetCard() { fields.forEach(field => { field.value = ''; field.setCustomValidity(''); field.removeAttribute('aria-invalid'); }); image.hidden = true; accepted.hidden = false; status.textContent = ''; }
+    function choose(method) {
+      selected = method; fields.forEach(field => { field.required = method === 'CARD'; field.setCustomValidity(''); field.removeAttribute('aria-invalid'); });
+      form.querySelectorAll('[data-wallet]').forEach(button => { button.setAttribute('aria-pressed', String(button.dataset.wallet === method)); });
+      walletStatus.textContent = method === 'CARD' ? '' : `${paymentLabel(method)} · ${StayBook.t('Selected')}`;
+    }
+    form.querySelectorAll('[data-wallet]').forEach(button => button.addEventListener('click', () => { resetCard(); choose(button.dataset.wallet); }));
+    fields.forEach(field => field.addEventListener('input', () => { choose('CARD'); field.setCustomValidity(''); field.removeAttribute('aria-invalid'); }));
     number.addEventListener('input', () => {
-      const cursor = number.selectionStart, atEnd = cursor === number.value.length, before = number.value;
       number.value = formatCardNumber(number.value);
-      if (!atEnd && cursor !== null) number.setSelectionRange(Math.min(cursor + number.value.length - before.length, number.value.length), Math.min(cursor + number.value.length - before.length, number.value.length));
-      number.setCustomValidity(''); number.removeAttribute('aria-invalid');
-      const brand = cardBrand(number.value), method = paymentMethods.find(item => item.id === brand);
-      image.src = `/payment-logos/${method?.logo || 'card.svg'}`; image.alt = method?.label || StayBook.t('Card');
-      status.textContent = method ? `${method.label}` : '';
+      const method = paymentMethods.find(item => item.id === cardBrand(number.value));
+      image.hidden = !method; accepted.hidden = Boolean(method);
+      if (method) { image.src = `/payment-logos/${method.logo}`; image.alt = method.label; }
+      status.textContent = method?.label || '';
+      security.maxLength = method?.id === 'AMEX' ? 4 : 3; security.value = security.value.slice(0, security.maxLength);
     });
+    expiry.addEventListener('input', () => { expiry.value = formatExpiry(expiry.value); });
+    security.addEventListener('input', () => { security.value = security.value.replace(/\D/g, '').slice(0, security.maxLength); });
     window.addEventListener('pagehide', resetCard, { once: true });
-    return () => {
-      const selected = form.querySelector('[name=paymentChoice]:checked').value;
+    try { const saved = localStorage.getItem('staybook.paymentMethod'); if (paymentMethods.some(method => method.id === saved)) { remember.checked = true; if (['APPLE_PAY', 'GOOGLE_PAY'].includes(saved)) choose(saved); } } catch {}
+    const invalid = (field, message) => { field.setCustomValidity(StayBook.t(message)); field.setAttribute('aria-invalid', 'true'); field.reportValidity(); field.focus(); return null; };
+    const getMethod = () => {
       if (selected !== 'CARD') return selected;
-      if (!validCardNumber(number.value)) { number.setCustomValidity(StayBook.t('Enter a valid Visa or Mastercard test number.')); number.setAttribute('aria-invalid', 'true'); number.reportValidity(); number.focus(); return null; }
+      if (!validCardNumber(number.value)) return invalid(number, 'Enter a valid test card number.');
+      if (!validExpiry(expiry.value)) return invalid(expiry, 'Enter a valid expiration date (MM/YY).');
+      if (!validSecurityCode(security.value, cardBrand(number.value))) return invalid(security, 'Enter the correct security code for this test card.');
       return cardBrand(number.value);
     };
+    getMethod.complete = method => { try { if (remember.checked) localStorage.setItem('staybook.paymentMethod', method); else localStorage.removeItem('staybook.paymentMethod'); } catch {} resetCard(); };
+    return getMethod;
   }
   function summary({ image, hotelName, room, roomNumber, checkIn, checkOut, nights, guests, rate, total }) {
     return `<aside class="stay-summary" aria-label="Your stay"><details class="summary-disclosure" open><summary class="summary-toggle"><span>Your stay</span><strong>${money(total)}</strong><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="summary-body">${image ? `<img src="${esc(image)}" alt="${esc(room)} interior, illustrative photograph" width="500" height="310">` : ''}<div class="summary-content"><h2>${esc(room)}</h2><p class="muted mt-2" data-no-translate>${esc(hotelName || '')}</p><p class="muted mt-2">Room ${esc(roomNumber)}</p><dl class="summary-dates"><div><dt>Check-in</dt><dd>${esc(dateLabel(checkIn))}</dd></div><div><dt>Check-out</dt><dd>${esc(dateLabel(checkOut))}</dd></div></dl><p class="muted summary-occupancy">${nights} ${nights === 1 ? 'night' : 'nights'} · ${guests} ${guests === 1 ? 'guest' : 'guests'}</p><div class="summary-rate"><span>${money(rate)} × ${nights} ${nights === 1 ? 'night' : 'nights'}</span><span>${money(total)}</span></div><div class="summary-total"><span>Total for your stay</span><strong>${money(total)}</strong></div></div></div></details></aside>`;
@@ -62,7 +72,7 @@ import { cardBrand, formatCardNumber, validCardNumber } from './card.js';
       const payForm = document.getElementById('pay'), selectedMethod = configurePayment(payForm);
       payForm.addEventListener('submit', async e => {
         e.preventDefault(); const paymentMethod = selectedMethod(); if (!paymentMethod) return; message.textContent = ''; const button = e.target.querySelector('button'), original = button.innerHTML; button.disabled = true; button.textContent = 'Saving your booking…';
-        try { await request('/api/bookings/confirm', { method: 'POST', body: { paymentMethod } }); document.getElementById('cardNumber').value = ''; await load(); window.scrollTo({ top: 0 }); }
+        try { await request('/api/bookings/confirm', { method: 'POST', body: { paymentMethod } }); selectedMethod.complete(paymentMethod); await load(); window.scrollTo({ top: 0 }); }
         catch (error) { message.textContent = error.message; message.focus(); button.disabled = false; button.innerHTML = original; }
       });
     } catch (error) { content.innerHTML = `<div class="empty-state"><h1>Let’s find your booking.</h1><p>${esc(error.message)}</p><a class="btn" href="/manage-booking">Find my booking</a><a class="btn-secondary ml-3" href="/">Start a new stay</a></div>`; }
