@@ -189,6 +189,8 @@ const rows = {
   'First name': 'Pangalan|名|名|이름|Nombre|Prénom|Vorname|الاسم الأول',
   'Last name': 'Apelyido|姓|姓|성|Apellidos|Nom|Nachname|اسم العائلة',
   'Email address': 'Email address|电子邮箱|メールアドレス|이메일|Correo electrónico|Adresse e-mail|E-Mail-Adresse|البريد الإلكتروني',
+  'Email or username': 'Email o username|邮箱或用户名|メールアドレスまたはユーザー名|이메일 또는 사용자 이름|Correo o usuario|E-mail ou nom d’utilisateur|E-Mail oder Benutzername|البريد الإلكتروني أو اسم المستخدم',
+  'Email, username or password is incorrect.': 'Mali ang email, username o password.|邮箱、用户名或密码不正确。|メールアドレス、ユーザー名またはパスワードが違います。|이메일, 사용자 이름 또는 비밀번호가 잘못되었습니다.|Correo, usuario o contraseña incorrectos.|E-mail, nom d’utilisateur ou mot de passe incorrect.|E-Mail, Benutzername oder Passwort ist falsch.|البريد الإلكتروني أو اسم المستخدم أو كلمة المرور غير صحيحة.',
   'Use this email to find your booking later.': 'Gamitin ang email na ito para mahanap ang booking.|之后可用此邮箱查找预订。|このメールアドレスで後から予約を検索できます。|나중에 이 이메일로 예약을 찾을 수 있습니다.|Usa este correo para buscar tu reserva después.|Cet e-mail vous permettra de retrouver votre réservation.|Mit dieser E-Mail finden Sie Ihre Buchung später.|استخدم هذا البريد للعثور على حجزك لاحقاً.',
   'Phone number': 'Numero ng telepono|电话号码|電話番号|전화번호|Teléfono|Téléphone|Telefonnummer|رقم الهاتف',
   'Address': 'Tirahan|地址|住所|주소|Dirección|Adresse|Adresse|العنوان',

@@ -1,15 +1,18 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import { pathToFileURL } from 'node:url';
 import { config } from './config.js';
 import { sequelize } from './models/db.js';
 import { BookingRoom } from './models/bookingModel.js';
-import './models/accountModel.js';
+import { Account } from './models/accountModel.js';
 import { sampleRooms } from './services/pmsApi.js';
 export async function migrate() {
   const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });
   try {
     await root.query(`CREATE DATABASE IF NOT EXISTS \`${config.dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
     await sequelize.sync(); // Add missing booking tables only. Never drop existing tables.
+    const query = sequelize.getQueryInterface(), table = Account.getTableName();
+    const columns = await query.describeTable(table);
+    if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
     for (const room of sampleRooms) {
       await BookingRoom.findOrCreate({ where: { room_id: room.id }, defaults: {
         name: room.name, room_number: room.roomNumber, type: room.type, description: room.description, capacity: room.capacity, price: room.price, image: room.image,

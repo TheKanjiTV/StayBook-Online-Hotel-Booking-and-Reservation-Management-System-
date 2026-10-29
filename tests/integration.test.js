@@ -144,6 +144,24 @@ await test('Online booking scope and guest review', async t => {
       const { Account } = await import('../models/accountModel.js');
       assert.ok(!(await Account.findOne({ where: { email: credentials.email } })).password_hash.includes(credentials.password));
     });
+    await t.test('Username migration preserves accounts and supports username or email sign in', async () => {
+      assert.match(config.dbName, /^online_booking_test_\d+$/);
+      const { Account } = await import('../models/accountModel.js');
+      const account = await Account.findOne({ where: { email: 'member@example.test' } });
+      const passwordHash = account.password_hash;
+      await sequelize.getQueryInterface().removeColumn(Account.getTableName(), 'username');
+      await migrate(); await migrate();
+      await account.reload(); assert.equal(account.password_hash, passwordHash);
+      await account.update({ username: 'member-login' });
+      const client = new Client(guest.base); await client.call('/sign-in');
+      await client.call('/api/auth/sign-in', 'POST', { email: 'missing-username', password: 'example-test-password' }, 401);
+      await client.call('/api/auth/sign-in', 'POST', { email: 'member-login', password: 'incorrect' }, 401);
+      await client.call('/api/auth/sign-in', 'POST', { email: ' MEMBER-LOGIN ', password: 'example-test-password' });
+      const memberPage = await client.call('/account'); assert.ok(memberPage.includes('Welcome, Member.')); assert.ok(!memberPage.includes('header-signin'));
+      await client.call('/api/auth/sign-out', 'POST', {}); await client.call('/sign-in');
+      await client.call('/api/auth/sign-in', 'POST', { email: account.email, password: 'example-test-password' });
+      await client.call('/account');
+    });
     await t.test('Demo payment methods persist without accepting unsupported methods or changing totals', async () => {
       const { paymentMethods } = await import('../public/payment-methods.js');
       const client = new Client(guest.base); await client.call('/');

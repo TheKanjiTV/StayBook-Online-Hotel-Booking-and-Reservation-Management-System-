@@ -23,12 +23,16 @@ export async function register(body) {
   catch (error) { if (error.name === 'SequelizeUniqueConstraintError') fail(409, 'Unable to create this account. Try signing in or use another email.'); throw error; }
 }
 export async function authenticate(body) {
-  const address = email(body.email);
-  if (typeof body.password !== 'string' || body.password.length > 128) fail(401, 'Email or password is incorrect.');
-  const account = await Account.findOne({ where: { email: address } });
+  const identifier = string(body.email, 'Email or username', 255).toLowerCase();
+  const message = 'Email, username or password is incorrect.';
+  if (typeof body.password !== 'string' || body.password.length > 128) fail(401, message);
+  const field = identifier.includes('@') ? 'email' : 'username';
+  if (field === 'email') email(identifier);
+  else if (!/^[a-z0-9][a-z0-9_.-]{1,99}$/.test(identifier)) fail(401, message);
+  const account = await Account.findOne({ where: { [field]: identifier } });
   const [salt, stored] = (account?.password_hash || `${'0'.repeat(32)}:${'0'.repeat(128)}`).split(':');
   const digest = await scrypt(body.password, salt, 64);
-  if (!account || !timingSafeEqual(digest, Buffer.from(stored, 'hex'))) fail(401, 'Email or password is incorrect.');
+  if (!account || !timingSafeEqual(digest, Buffer.from(stored, 'hex'))) fail(401, message);
   return safe(account);
 }
 export async function accountFor(id) { return id ? safe(await Account.findByPk(id)) : null; }
