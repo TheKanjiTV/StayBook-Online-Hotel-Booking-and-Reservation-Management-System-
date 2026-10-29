@@ -123,6 +123,24 @@ await test('Online booking scope and guest review', async t => {
       const { Account } = await import('../models/accountModel.js');
       assert.ok(!(await Account.findOne({ where: { email: credentials.email } })).password_hash.includes(credentials.password));
     });
+    await t.test('Only account owners receive persisted booking notifications with safe retries', async () => {
+      const member = new Client(guest.base), other = new Client(guest.base);
+      const plainHome = await other.call('/'); assert.ok(!plainHome.includes('id="notificationBadge"'));
+      await other.call('/api/account/notifications', 'GET', undefined, 401);
+      await member.call('/join');
+      await member.call('/api/auth/register', 'POST', { firstName: 'Notify', lastName: 'Guest', email: 'notify@example.test', password: 'notification-test-pass' });
+      assert.ok((await member.call('/account')).includes('id="notificationBadge"'));
+      assert.equal((await member.call('/api/account/notifications')).unread, 0);
+      await member.call('/booking/preview', 'POST', { ...dates, roomId: 4, firstName: 'Notify', lastName: 'Guest', email: 'notify@example.test', phone: '09123456789' });
+      await member.call('/api/bookings/confirm', 'POST', {}); await member.call('/api/bookings/confirm', 'POST', {});
+      let data = await member.call('/api/account/notifications'); assert.equal(data.unread, 1); assert.equal(data.notifications.length, 1);
+      await other.call('/api/auth/register', 'POST', { firstName: 'Other', lastName: 'Guest', email: 'notify-other@example.test', password: 'notification-test-pass' }); await other.call('/account');
+      await other.call('/api/account/notifications/read', 'POST', { notificationId: data.notifications[0].notification_id });
+      assert.equal((await member.call('/api/account/notifications')).unread, 1);
+      await member.call('/api/account/notifications/read', 'POST', {}); assert.equal((await member.call('/api/account/notifications')).unread, 0);
+      await member.call('/api/bookings/cancel', 'POST', {}); await member.call('/api/bookings/cancel', 'POST', {});
+      data = await member.call('/api/account/notifications'); assert.equal(data.unread, 1); assert.equal(data.notifications.length, 2); assert.equal(data.notifications[0].kind, 'BOOKING_CANCELLED');
+    });
   } finally {
     if (server?.listening) await new Promise(resolve => server.close(resolve));
     await sequelize.close();

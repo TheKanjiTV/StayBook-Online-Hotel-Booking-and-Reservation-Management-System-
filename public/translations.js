@@ -12,6 +12,14 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Notifications': 'Mga abiso|通知|通知|알림|Notificaciones|Notifications|Benachrichtigungen|الإشعارات',
+  'Mark all read': 'Markahang nabasa lahat|全部标为已读|すべて既読にする|모두 읽음 표시|Marcar todo leído|Tout marquer comme lu|Alle als gelesen markieren|تحديد الكل كمقروء',
+  'Loading notifications…': 'Nilo-load ang mga abiso…|正在加载通知…|通知を読み込み中…|알림 불러오는 중…|Cargando notificaciones…|Chargement des notifications…|Benachrichtigungen werden geladen…|جارٍ تحميل الإشعارات…',
+  'Refresh': 'I-refresh|刷新|更新|새로고침|Actualizar|Actualiser|Aktualisieren|تحديث',
+  'Unread': 'Hindi pa nababasa|未读|未読|읽지 않음|Sin leer|Non lu|Ungelesen|غير مقروء',
+  'Booking saved': 'Naka-save ang booking|预订已保存|予約を保存しました|예약 저장됨|Reserva guardada|Réservation enregistrée|Buchung gespeichert|تم حفظ الحجز',
+  'Booking cancelled': 'Nakansela ang booking|预订已取消|予約をキャンセルしました|예약 취소됨|Reserva cancelada|Réservation annulée|Buchung storniert|تم إلغاء الحجز',
+  'You’re all caught up. Updates about your account bookings will appear here.': 'Wala pang bagong abiso. Dito makikita ang mga update ng account bookings.|暂无新通知。账户预订的更新会显示在此。|新しい通知はありません。予約の更新はこちらに表示されます。|새 알림이 없습니다. 예약 업데이트가 여기에 표시됩니다.|No tienes novedades. Las actualizaciones de tus reservas aparecerán aquí.|Vous êtes à jour. Les nouvelles de vos réservations apparaîtront ici.|Alles gelesen. Aktualisierungen Ihrer Buchungen erscheinen hier.|لا توجد إشعارات جديدة. ستظهر تحديثات حجوزاتك هنا.',
   'Hotel or resort': 'Hotel o resort|酒店或度假酒店|ホテル・リゾート|호텔 또는 리조트|Hotel o resort|Hôtel ou complexe|Hotel oder Resort|فندق أو منتجع',
   'A place for your next chapter.': 'Lugar para sa susunod mong kuwento.|开启下一段旅程。|次の物語が始まる場所。|다음 이야기가 시작되는 곳.|Un lugar para tu próxima historia.|Un lieu pour votre prochain chapitre.|Ein Ort für Ihr nächstes Kapitel.|مكان لفصلك القادم.',
   'Browse our sample hotels and resorts, then choose the room that suits your plans.': 'Tingnan ang mga halimbawang hotel at resort at piliin ang kuwarto.|浏览示例酒店与度假酒店，选择适合您的客房。|サンプルホテル・リゾートから客室をお選びください。|샘플 호텔과 리조트를 둘러보고 객실을 선택하세요.|Explora nuestros hoteles de muestra y elige tu habitación.|Découvrez nos hôtels de démonstration et choisissez votre chambre.|Entdecken Sie unsere Beispielhotels und wählen Sie Ihr Zimmer.|تصفّح الفنادق التجريبية واختر الغرفة المناسبة.',

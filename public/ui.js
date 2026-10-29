@@ -21,5 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   StayBook.configureSummaries();
   const current = ['/rooms', '/guest-details', '/confirmation'].includes(location.pathname) ? '/rooms' : location.pathname;
   document.querySelectorAll('.site-header nav a').forEach(link => { if (link.getAttribute('href') === current) link.setAttribute('aria-current', 'page'); });
+  const menus = [...document.querySelectorAll('.utility-bar details')];
+  menus.forEach(menu => menu.addEventListener('toggle', () => { if (menu.open) menus.filter(other => other !== menu).forEach(other => { other.open = false; }); }));
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') menus.filter(menu => menu.open).forEach(menu => { menu.open = false; menu.querySelector('summary').focus(); }); });
+  document.addEventListener('click', event => menus.filter(menu => menu.open && !menu.contains(event.target)).forEach(menu => { menu.open = false; }));
 });
 matchMedia('(max-width: 760px)').addEventListener('change', () => StayBook.configureSummaries());

@@ -13,6 +13,8 @@ router.post('/api/auth/register', a(account.register));
 router.post('/api/auth/sign-in', a(account.signInApi));
 router.post('/api/auth/sign-out', a(account.signOut));
 router.get('/api/account/bookings', requireAccount, a(account.bookings));
+router.get('/api/account/notifications', requireAccount, a(account.notifications));
+router.post('/api/account/notifications/read', requireAccount, a(account.readNotifications));
 router.post('/api/account/bookings/open', requireAccount, a(account.openBooking));
 router.get('/', a(b.home));
 router.get('/hotels', (req, res) => res.render('hotels', { title: 'Hotels & Resorts | StayBook', hotels }));

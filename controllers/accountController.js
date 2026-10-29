@@ -1,5 +1,5 @@
 import { register, authenticate, accountFor, accountBookings, limitAuth } from '../services/accountService.js';
-import { AccountBooking } from '../models/accountModel.js';
+import { AccountBooking, Notification } from '../models/accountModel.js';
 import { Reservation } from '../models/bookingModel.js';
 import { fail, positiveId } from '../services/validation.js';
 async function startSession(req, account) {
@@ -20,6 +20,17 @@ export const accountController = {
   signInApi: async (req, res) => { limitAuth(req.ip); const account = await authenticate(req.body); await startSession(req, account); res.json({ success: true, redirect: req.session.bookingPreview ? '/confirmation' : '/account' }); },
   signOut: async (req, res) => { await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve())); res.clearCookie('staybook.sid'); res.json({ success: true, redirect: '/' }); },
   bookings: async (req, res) => res.json({ success: true, bookings: await accountBookings(req.account.id) }),
+  notifications: async (req, res) => {
+    const notifications = await Notification.findAll({ where: { account_id: req.account.id }, attributes: ['notification_id', 'reservation_id', 'reference', 'kind', 'read_at', 'created_at'], order: [['created_at', 'DESC'], ['notification_id', 'DESC']], limit: 25 });
+    const unread = await Notification.count({ where: { account_id: req.account.id, read_at: null } });
+    res.json({ success: true, notifications, unread });
+  },
+  readNotifications: async (req, res) => {
+    const where = { account_id: req.account.id, read_at: null };
+    if (req.body.notificationId !== undefined) where.notification_id = positiveId(req.body.notificationId);
+    await Notification.update({ read_at: new Date() }, { where });
+    res.json({ success: true });
+  },
   openBooking: async (req, res) => {
     const id = positiveId(req.body.reservationId);
     const link = await AccountBooking.findOne({ where: { account_id: req.account.id, reservation_id: id } });

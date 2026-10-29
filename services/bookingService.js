@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment } from '../models/bookingModel.js';
-import { AccountBooking } from '../models/accountModel.js';
+import { AccountBooking, Notification } from '../models/accountModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
 export async function saveBooking(body) {
@@ -23,7 +23,10 @@ export async function saveBooking(body) {
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,
       guests: dates.guests, nights: dates.nights, nightly_rate: room.price, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });
     await Payment.create({ reservation_id: booking.reservation_id, amount: total, payment_method: 'SIMULATED', payment_status: 'PAID', paid_at: new Date(), reference: randomUUID(), purpose: 'BOOKING' }, { transaction });
-    if (body.accountId) await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });
+    if (body.accountId) {
+      await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });
+      await Notification.create({ account_id: body.accountId, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_SAVED' }, { transaction });
+    }
     // TODO: send the agreed reservation payload to the PMS API in a later phase.
     // A locally saved booking must not be presented as acknowledged by the PMS.
     return booking;
@@ -53,6 +56,8 @@ export async function cancelBooking(id, token) {
     if (booking.status !== 'LOCAL_CONFIRMED') fail(409, 'This booking cannot be cancelled.');
     await booking.update({ status: 'CANCELLED' }, { transaction });
     await Payment.update({ payment_status: 'REFUNDED' }, { where: { reservation_id: booking.reservation_id, payment_status: 'PAID' }, transaction });
+    const owner = await AccountBooking.findByPk(booking.reservation_id, { transaction });
+    if (owner) await Notification.create({ account_id: owner.account_id, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_CANCELLED' }, { transaction });
     // TODO: agree on cancellation acknowledgement and refunds with the PMS/payment
     // provider before replacing this local-only cancellation workflow.
   });

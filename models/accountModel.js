@@ -12,3 +12,9 @@ export const AccountBooking = sequelize.define('AccountBooking', {
   reservation_id: { type: D.INTEGER, primaryKey: true, references: { model: Reservation, key: 'reservation_id' } },
   account_id: { type: D.INTEGER, allowNull: false, references: { model: Account, key: 'account_id' } },
 }, options);
+export const Notification = sequelize.define('GuestNotification', {
+  notification_id: { type: D.INTEGER, primaryKey: true, autoIncrement: true },
+  account_id: { type: D.INTEGER, allowNull: false, references: { model: Account, key: 'account_id' } },
+  reservation_id: { type: D.INTEGER, allowNull: false, references: { model: Reservation, key: 'reservation_id' } },
+  reference: { type: D.STRING(30), allowNull: false }, kind: { type: D.STRING(30), allowNull: false }, read_at: { type: D.DATE },
+}, { ...options, indexes: [{ unique: true, fields: ['reservation_id', 'kind'] }, { fields: ['account_id', 'read_at'] }] });
