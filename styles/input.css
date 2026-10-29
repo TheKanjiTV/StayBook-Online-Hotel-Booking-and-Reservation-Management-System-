@@ -278,9 +278,9 @@
 .account-action { font-weight: 750; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 7px; }
 .header-tools, .auth-tools { display: flex; align-items: center; gap: 12px; position: relative; }
 .header-tools > details { flex-shrink: 0; }
-.preference-menu summary { font-size: 16px; font-weight: 600; min-height: 48px; gap: 7px; }
-.preference-menu .icon { width: 20px; height: 20px; }
-.menu-chevron { width: 14px; height: 14px; flex-shrink: 0; }
+.preference-menu summary { font-size: 14px; font-weight: 500; min-height: 36px; gap: 4px; }
+.preference-menu .icon { width: 16px; height: 16px; }
+.menu-chevron { width: 11px; height: 11px; flex-shrink: 0; }
 .preference-panel, .notification-panel { top: calc(100% + 10px); z-index: 50; font-size: 16px; }
 .session-action { font-size: 16px; font-weight: 600; }
 .notification-menu > summary { position: relative; justify-content: center; width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: var(--wash); }
@@ -372,7 +372,7 @@
 .header-logout { font-size: 16px; white-space: nowrap; }
 .header-signin { font-size: 16px; white-space: nowrap; }
 .header-tools { gap: 10px; }
-.header-tools .preference-menu summary { min-height: 44px; }
+.header-tools .preference-menu summary { min-height: 36px; }
 @media (max-width: 1000px) and (min-width: 761px) { .site-menu { order: 2; flex-basis: 100%; } }
 @media (max-width: 760px) {
   .header-shell { width: calc(100% - 32px); }

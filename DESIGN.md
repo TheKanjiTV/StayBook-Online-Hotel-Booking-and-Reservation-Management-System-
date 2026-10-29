@@ -4,6 +4,7 @@ Refine the existing green-and-ivory identity into a welcoming hotel-booking expe
 
 - Paper `#faf9f6`, deep green ink `#233e35`, secondary text `#45584e`, dividers `#dedfd7`, soft green surfaces `#eef1e9`. Body copy is 18px, with 16px minimum for normal labels and controls. Compact printed receipts retain separate document sizing.
 - Self-hosted Cormorant Garamond for display headings and Manrope for controls/body copy. Their OFL licenses ship in `public/fonts/`.
+- Language/currency summaries use compact 14px text, 16px globe and 11px chevrons at the user's request. Dropdown labels/options and ordinary form text retain their readable sizes.
 - A 1240px page container, generous section spacing, 12–16px image/panel corners, and a consistent 48px control height. Use borders or a subtle shadow as appropriate; avoid nested decorative cards.
 - Use the room catalog's actual local prices and descriptions. Photography is illustrative. Do not invent reviews, ratings, a hotel address, discounts, or verified hotel availability.
 - Keep booking steps, totals, form labels, loading/empty/error states, keyboard focus and reduced-motion support consistent across pages.
