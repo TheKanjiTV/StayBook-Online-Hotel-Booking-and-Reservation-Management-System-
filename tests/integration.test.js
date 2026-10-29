@@ -112,6 +112,11 @@ await test('Online booking scope and guest review', async t => {
       html = await client.call('/'); assert.ok(html.includes('dir="rtl"')); assert.ok(html.includes('data-currency="AED"'));
       await client.call('/api/preferences', 'POST', { currency: 'JPY' });
       html = await client.call('/'); assert.ok(html.includes('lang="ar"')); assert.ok(html.includes('data-currency="JPY"'));
+      if (config.exchangeRateApiKey) {
+        const { exchangeRates } = await import('../services/preferences.js');
+        const rates = await exchangeRates(); assert.equal(rates.provider, 'standard');
+        assert.ok(!html.includes(config.exchangeRateApiKey)); assert.ok(!JSON.stringify(rates).includes(config.exchangeRateApiKey));
+      }
       const { reservation } = await guest.call('/api/bookings/current'); assert.equal(Number(reservation.total_amount), 2500);
     });
     await t.test('Guest accounts rotate sessions and restrict booking ownership', async () => {

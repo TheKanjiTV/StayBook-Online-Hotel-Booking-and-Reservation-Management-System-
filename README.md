@@ -20,6 +20,8 @@ Future integration is deferred: `services/pmsApi.js` contains the local sample c
 
 ## Project scope
 
+Set `EXCHANGERATE_API_KEY` in the local ignored `.env` to use the authenticated ExchangeRate-API Standard endpoint. The key is read only by the server; `.env.example` contains an empty placeholder. Standard responses use `conversion_rates`; the no-key open endpoint remains available for a fresh checkout. Daily cached data is separated by provider/key fingerprint, and provider URLs/keys are never returned in browser responses or logged on errors.
+
 | System | Responsibility in this repository |
 | --- | --- |
 | Online Booking | Implemented here: room search, guest information, local reservations, simulated payments, booking review/printing, lookup and cancellation |
