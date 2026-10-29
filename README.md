@@ -63,9 +63,18 @@ Integration steps for the next phase:
 | Method | Route | Purpose |
 | --- | --- | --- |
 | GET | `/`, `/rooms`, `/guest-details` | Guest booking pages |
+| GET | `/hotels` | Search/filter the sample property directory |
+| GET | `/sign-in`, `/join`, `/account` | Optional guest account pages |
+| POST | `/api/auth/register`, `/api/auth/sign-in`, `/api/auth/sign-out` | Account session actions |
+| GET | `/api/account/bookings` | Signed-in account's booking history |
+| POST | `/api/account/bookings/open` | Open an account-owned booking |
+| GET | `/api/account/notifications` | Account-only booking notifications |
+| POST | `/api/account/notifications/read` | Mark the account's notifications read |
+| POST | `/api/preferences` | Persist language and display currency |
 | GET | `/rooms/search` | Search local sample rooms by dates and guest count |
 | POST | `/booking/preview` | Validate guest details and calculate the total server-side |
 | GET | `/confirmation` | Review or display the current local booking |
+| GET | `/receipt` | Compact printable receipt for the session-owned booking |
 | GET | `/api/booking-preview` | Current session's review data |
 | POST | `/api/bookings/confirm` | Save the local booking and simulated payment atomically |
 | GET | `/api/bookings/current` | Current session's saved booking |

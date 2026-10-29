@@ -19,7 +19,8 @@
     if (sort.value === 'price-high') shown.sort((a,b) => b.room.price - a.room.price);
     if (sort.value === 'capacity') shown.sort((a,b) => b.room.capacity - a.room.capacity);
     const count = shown.reduce((sum, g) => sum + g.rooms.length, 0), n = nights(), d = dates();
-    document.getElementById('resultCount').textContent = `${shown.length} room ${shown.length === 1 ? 'type' : 'types'} available`;
+    const typeCount = new Set(shown.map(group => group.room.type)).size;
+    document.getElementById('resultCount').textContent = `${typeCount} room ${typeCount === 1 ? 'type' : 'types'} available`;
     document.getElementById('searchSummary').textContent = `${shortDate(d.checkIn)} – ${shortDate(d.checkOut)} · ${n} ${n === 1 ? 'night' : 'nights'} · ${d.guests} ${Number(d.guests) === 1 ? 'guest' : 'guests'}${count ? ` · ${count} ${count === 1 ? 'room' : 'rooms'} to choose from` : ''}`;
     if (!shown.length) {
       container.innerHTML = `<div class="empty-state">${icon('search')}<h2>No rooms for these plans.</h2><p>Try different dates or a smaller guest count. Your next stay might be just a change away.</p><button id="changeDates" class="btn-secondary">Change your dates</button></div>`;

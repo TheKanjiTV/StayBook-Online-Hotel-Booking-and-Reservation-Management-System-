@@ -16,6 +16,7 @@ window.StayBook = {
   money(value) { const root = document.documentElement; return new Intl.NumberFormat(root.dataset.locale || 'en-PH', { style: 'currency', currency: root.dataset.currency || 'PHP' }).format(Number(value) * Number(root.dataset.rate || 1)); },
   escape(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); },
   date(value) { return value ? new Date(value).toLocaleString(StayBook.locale, { timeZone: 'Asia/Manila' }) : '—'; },
+  stayDate(value) { return new Date(`${value}T12:00:00Z`).toLocaleDateString(StayBook.locale, { day: 'numeric', month: 'short', year: 'numeric' }); },
 };
 document.addEventListener('DOMContentLoaded', () => {
   StayBook.configureSummaries();

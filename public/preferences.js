@@ -24,7 +24,7 @@ function sentence(text) {
 }
 function localize(node) {
   if (node.nodeType === Node.TEXT_NODE) {
-    if (!node.parentElement || node.parentElement.closest('script,style,textarea,[data-no-translate],.review-row dd')) return;
+    if (!node.parentElement || node.parentElement.closest('script,style,textarea,[data-no-translate]')) return;
     const text = node.textContent.trim(); if (!text) return;
     const result = sentence(text); if (text !== result) node.textContent = node.textContent.replace(text, result);
     return;
@@ -41,12 +41,13 @@ for (const [id, field] of [['languageSelect', 'language'], ['currencySelect', 'c
   try {
     // A preference change must not discard unsaved guest/account form fields.
     const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup');
-    if (form) sessionStorage.setItem(`staybook-form:${location.pathname}`, JSON.stringify([...new FormData(form)].filter(([name]) => name !== 'password')));
+    if (form) { try { sessionStorage.setItem(`staybook-form:${location.pathname}`, JSON.stringify([...new FormData(form)].filter(([name]) => name !== 'password'))); } catch {} }
     await StayBook.request('/api/preferences', { method: 'POST', body: { [field]: control.value } }); location.reload();
-  } catch (problem) { error.textContent = StayBook.t(problem.message); control.value = field === 'language' ? lang : currency; control.disabled = false; }
+  } catch (problem) { try { sessionStorage.removeItem(`staybook-form:${location.pathname}`); } catch {} error.textContent = StayBook.t(problem.message); control.value = field === 'language' ? lang : currency; control.disabled = false; }
 });
 const form = document.getElementById('guestForm') || document.getElementById('authForm') || document.getElementById('lookup');
-const saved = sessionStorage.getItem(`staybook-form:${location.pathname}`);
+let saved; try { saved = sessionStorage.getItem(`staybook-form:${location.pathname}`); } catch {}
 if (form && saved) { try { for (const [name, value] of JSON.parse(saved)) if (form.elements[name] && name !== 'password') form.elements[name].value = value; } catch {} sessionStorage.removeItem(`staybook-form:${location.pathname}`); }
 localize(document.body);
+document.title = document.title.split(' | ').map(part => StayBook.t(part)).join(' | ');
 new MutationObserver(records => { for (const record of records) { if (record.type === 'characterData') localize(record.target); else record.addedNodes.forEach(localize); } }).observe(document.body, { subtree: true, childList: true, characterData: true });

@@ -82,27 +82,18 @@
   .hotel-search { display: grid; grid-template-columns: 1fr .6fr auto; gap: 20px; align-items: end; padding-block: 25px; border-block: 1px solid var(--line); }
   .hotel-directory .listing-info h2 { font-size: clamp(2.3rem, 4vw, 3rem); }
   .room-listing[hidden], .empty-state[hidden] { display: none; }
-  .preference-bar { display: flex; justify-content: flex-end; padding-top: 8px; font-size: .75rem; position: relative; z-index: 40; }
   .preference-menu summary { display: flex; align-items: center; gap: 8px; min-height: 38px; list-style: none; }
   .preference-menu summary::-webkit-details-marker { display: none; }
   .preference-menu .icon { width: 16px; height: 16px; }
   .preference-panel { position: absolute; inset-inline-end: 0; top: 100%; padding: 24px; width: min(370px, calc(100vw - 40px)); background: white; border: 1px solid var(--line); border-radius: 12px; }
   [dir=rtl] .review-row dd { text-align: left; }
-  [dir=rtl] .mobile-menu { right: auto; left: 0; }
   [dir=rtl] .hero-copy h1, :lang(zh-CN) h1, :lang(ja) h1, :lang(ko) h1 { line-height: 1.2; letter-spacing: 0; }
   .account-booking { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: center; padding-block: 26px; border-bottom: 1px solid var(--line); }
   .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
   .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.25rem; font-weight: 600; line-height: 1; letter-spacing: -0.04em; }
   .site-header { border-bottom: 1px solid var(--line); background: var(--paper); }
-  .header-inner { min-height: 94px; @apply flex items-center justify-between gap-6; }
-  .nav-links { @apply flex items-center gap-8 text-sm; }
   .nav-link { color: var(--subtle); @apply hover:text-emerald-950; }
   .nav-link[aria-current=page] { color: var(--ink); text-decoration: underline; }
-  .mobile-nav { display: none; position: relative; }
-  .mobile-nav summary { @apply text-sm list-none py-3; }
-  .mobile-nav summary::-webkit-details-marker { display: none; }
-  .mobile-menu { position: absolute; right: 0; top: 100%; min-width: 210px; z-index: 30; background: white; border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
-  .mobile-menu a { @apply block px-4 py-3 text-sm rounded-lg hover:bg-stone-50; }
   .btn { @apply inline-flex items-center justify-center gap-3 px-6 py-3 text-sm font-semibold; min-height: 48px; border-radius: 8px; background: var(--ink); color: #fff; transition: background-color .2s, box-shadow .2s; }
   .btn:hover { background: #365446; }
   .btn-secondary { @apply inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold; min-height: 48px; border: 1px solid var(--line); border-radius: 8px; background: transparent; }
@@ -276,9 +267,6 @@
   .results-toolbar { align-items: start; flex-direction: column; }
   .sort-control { min-width: 260px; }
   .shell { width: calc(100% - 40px); }
-  .header-inner { min-height: 76px; }
-  .nav-links { gap: 20px; }
-  .nav-links .nav-book { display: none; }
   .hero-grid { gap: 30px; grid-template-columns: 1fr 1fr; }
   .hero-copy h1 { font-size: clamp(3rem, 7vw, 4rem); }
   .hero-copy p { font-size: .875rem; margin-top: 20px; }
@@ -309,11 +297,11 @@
   .listing-photo { height: 230px; min-height: 0; }
   .listing-bottom { gap: 15px; }
   .listing-bottom .btn { padding-inline: 18px; }
-  .nav-links { display: none; } .mobile-nav { display: block; }
   .home-hero { padding-top: 30px; }
   .hero-grid { grid-template-columns: 1fr; gap: 26px; }
   .hero-copy { padding-block: 0; }
-  .hero-copy h1 { font-size: 3.6rem; max-width: 12ch; }
+  .hero-copy h1 { font-size: clamp(2.75rem, 11.5vw, 3.6rem); max-width: 12ch; }
+  .manage-copy h1 { font-size: clamp(2.8rem, 12vw, 3.4rem); }
   .hero-copy p { max-width: 43ch; }
   .hero-copy .text-link { margin-top: 14px; }
   .hero-photo { height: 250px; }

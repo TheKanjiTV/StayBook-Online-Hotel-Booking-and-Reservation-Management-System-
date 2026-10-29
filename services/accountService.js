@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import { Account, AccountBooking } from '../models/accountModel.js';
 import { Reservation } from '../models/bookingModel.js';
 import { email, string, fail } from './validation.js';
+import { hotelForRoom } from './hotelCatalog.js';
 const scrypt = promisify(scryptCallback);
 const safe = row => row ? { id: row.account_id, firstName: row.first_name, lastName: row.last_name, email: row.email } : null;
 const attempts = new Map();
@@ -34,6 +35,7 @@ export async function accountFor(id) { return id ? safe(await Account.findByPk(i
 export async function accountBookings(id) {
   const links = await AccountBooking.findAll({ where: { account_id: id }, attributes: ['reservation_id'] });
   if (!links.length) return [];
-  return Reservation.findAll({ where: { reservation_id: links.map(link => link.reservation_id) },
-    attributes: ['reservation_id', 'reference', 'room_type', 'check_in', 'check_out', 'total_amount', 'status'], order: [['created_at', 'DESC']] });
+  const bookings = await Reservation.findAll({ where: { reservation_id: links.map(link => link.reservation_id) },
+    attributes: ['reservation_id', 'reference', 'room_id', 'room_type', 'check_in', 'check_out', 'total_amount', 'status'], order: [['created_at', 'DESC']] });
+  return bookings.map(booking => ({ ...booking.toJSON(), hotelName: hotelForRoom(booking.room_id)?.name }));
 }

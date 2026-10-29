@@ -2,7 +2,11 @@ const hotelForm = document.getElementById('hotelSearch'), hotelRows = [...docume
 function filterHotels() {
   const query = document.getElementById('hotelQuery').value.trim().toLocaleLowerCase(), kind = document.getElementById('hotelKind').value;
   let count = 0;
-  for (const row of hotelRows) { row.hidden = !(row.dataset.hotel.toLocaleLowerCase().includes(query) && (kind === 'all' || kind === row.dataset.kind)); if (!row.hidden) count++; }
+  for (const row of hotelRows) {
+    const visibleName = `${row.querySelector('h2').textContent} ${row.querySelector('.listing-features').textContent}`.toLocaleLowerCase();
+    row.hidden = !((row.dataset.hotel.toLocaleLowerCase().includes(query) || visibleName.includes(query)) && (kind === 'all' || kind === row.dataset.kind));
+    if (!row.hidden) count++;
+  }
   document.getElementById('hotelCount').textContent = `${count} ${count === 1 ? 'property' : 'properties'}`;
   document.getElementById('hotelEmpty').hidden = count > 0;
 }
