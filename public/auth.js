@@ -1,7 +1,3 @@
-document.getElementById('togglePassword').addEventListener('click', event => {
-  const input = document.getElementById('password'), visible = input.type === 'password';
-  input.type = visible ? 'text' : 'password'; event.target.textContent = visible ? 'Hide password' : 'Show password'; event.target.setAttribute('aria-pressed', String(visible));
-});
 document.getElementById('authForm').addEventListener('submit', async event => {
   event.preventDefault(); const form = event.target, button = form.querySelector('button.btn'), original = button.innerHTML, error = document.getElementById('authError');
   error.textContent = ''; button.disabled = true; button.textContent = 'Please wait…';
