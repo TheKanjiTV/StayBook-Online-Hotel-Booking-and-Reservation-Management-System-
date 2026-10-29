@@ -10,3 +10,6 @@ dist/
 
 .DS_Store
 Thumbs.db
+.local-accounts*.txt
+artifacts/
+.test-data/

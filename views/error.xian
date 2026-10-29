@@ -1,0 +1,2 @@
+{{> head}}
+<body>{{> nav}}<main class="max-w-xl mx-auto px-5 py-12"><h1>{{title}}</h1><p class="mt-4">{{message}}</p><a class="btn mt-6" href="/">Home</a></main></body></html>

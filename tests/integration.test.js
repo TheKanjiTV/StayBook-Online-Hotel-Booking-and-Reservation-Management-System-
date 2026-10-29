@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Client } from './client.js';
+process.env.HOST = '127.0.0.1';
+const { startServer } = await import('../index.js');
+const { today } = await import('../services/validation.js');
+await test('Online booking scope and guest review', async t => {
+  const server = await startServer(0), guest = new Client(`http://127.0.0.1:${server.address().port}`);
+  const dates = { checkIn: today(), checkOut: new Date(Date.parse(today()) + 86400000).toISOString().slice(0, 10), guests: 2 };
+  try {
+    await t.test('Only guest booking pages and APIs are available', async () => {
+      const home = await guest.call('/'); assert.ok(!home.includes('Staff portal'));
+      for (const path of ['/staff', '/login', '/api/pms/overview', '/api/housekeeping', '/api/pos', '/api/hr', '/api/events']) await guest.call(path, 'GET', undefined, 404);
+      const data = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.equal(data.rooms.length, 6);
+    });
+    await t.test('Invalid dates and forged prices cannot affect the reservation review', async () => {
+      await guest.call('/rooms/search?checkIn=2026-02-30&checkOut=2026-03-02&guests=2', 'GET', undefined, 400);
+      const body = { ...dates, roomId: 1, firstName: 'Test', lastName: 'Guest', email: 'guest@example.test', phone: '09123456789', totalAmount: 1 };
+      await guest.call('/booking/preview', 'POST', body, 403, { 'x-csrf-token': 'wrong' });
+      await guest.call('/booking/preview', 'POST', { ...body, guests: 5 }, 400);
+      await guest.call('/booking/preview', 'POST', body);
+      const { booking } = await guest.call('/api/booking-preview'); assert.equal(booking.totalAmount, 2500);
+      const html = await guest.call('/confirmation'); assert.ok(html.includes('Review your reservation'));
+      const other = new Client(guest.base); await other.call('/'); await other.call('/api/booking-preview', 'GET', undefined, 404);
+    });
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});

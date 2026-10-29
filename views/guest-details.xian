@@ -48,8 +48,7 @@
             <div class="grid md:grid-cols-2 gap-6">
 
               <div>
-                <label class="block text-sm font-semibold mb-2">
-                  First Name
+                <label for="firstName" class="block text-sm font-semibold mb-2">First Name
                 </label>
 
                 <input
@@ -63,8 +62,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-semibold mb-2">
-                  Last Name
+                <label for="lastName" class="block text-sm font-semibold mb-2">Last Name
                 </label>
 
                 <input
@@ -80,8 +78,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-semibold mb-2">
-                Email Address
+              <label for="email" class="block text-sm font-semibold mb-2">Email Address
               </label>
 
               <input
@@ -95,8 +92,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-semibold mb-2">
-                Phone Number
+              <label for="phone" class="block text-sm font-semibold mb-2">Phone Number
               </label>
 
               <input
@@ -111,7 +107,7 @@
 
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p class="text-sm text-amber-900">
-                This is a booking preview. No reservation or payment
+                Review your details before confirming. No reservation or payment
                 will be processed yet.
               </p>
             </div>
@@ -246,7 +242,7 @@
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json", "X-CSRF-Token": document.querySelector('meta[name=csrf-token]').content
           },
 
           body: JSON.stringify(bookingData)
