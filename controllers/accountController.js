@@ -5,11 +5,15 @@ import { fail, positiveId } from '../services/validation.js';
 async function startSession(req, account) {
   const { bookingPreview, bookingId, bookingToken, language, currency } = req.session;
   await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
-  Object.assign(req.session, { accountId: account.id, bookingPreview, bookingId, bookingToken, language, currency });
+  Object.assign(req.session, { accountId: account.id, accountSessionVersion: account.sessionVersion, bookingPreview, bookingId, bookingToken, language, currency });
   await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
 }
 export async function accountContext(req, res, next) {
-  try { req.account = await accountFor(req.session.accountId); res.locals.account = req.account; res.locals.isAdmin = req.account?.role === 'ADMIN'; next(); } catch (error) { next(error); }
+  try {
+    req.account = await accountFor(req.session.accountId);
+    if (req.account && Number(req.session.accountSessionVersion || 0) !== req.account.sessionVersion) { req.account = null; delete req.session.accountId; delete req.session.accountSessionVersion; }
+    res.locals.account = req.account; res.locals.isAdmin = req.account?.role === 'ADMIN'; next();
+  } catch (error) { next(error); }
 }
 export function requireAccount(req, res, next) { if (!req.account) return next(Object.assign(new Error('Sign in to continue.'), { status: 401 })); next(); }
 export function requireAdmin(req, res, next) {

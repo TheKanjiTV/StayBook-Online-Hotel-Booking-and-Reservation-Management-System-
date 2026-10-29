@@ -370,6 +370,9 @@
 .admin-topbar > p:first-child { font-weight: 600; }
 .admin-tools { flex-wrap: wrap; }
 .admin-content { padding: 24px 32px 56px; width: 100%; max-width: 1500px; margin-inline: auto; }
+.admin-content .review-heading { flex-wrap: wrap; align-items: center; gap: 16px; }
+.admin-heading > div { min-width: 0; }
+.admin-content .btn, .admin-content .btn-secondary { max-width: 100%; }
 .admin-stats { display: flex; flex-wrap: wrap; gap: 24px 48px; border-block: 1px solid var(--line); padding-block: 24px; }
 .admin-stats dt { color: var(--subtle); }
 .admin-stats dd { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 6px; }

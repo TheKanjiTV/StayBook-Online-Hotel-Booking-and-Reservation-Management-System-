@@ -15,6 +15,9 @@ export async function migrate() {
     const columns = await query.describeTable(table);
     if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
     if (!columns.role) await query.addColumn(table, 'role', { type: DataTypes.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' });
+    if (!columns.deleted_at) await query.addColumn(table, 'deleted_at', { type: DataTypes.DATE, allowNull: true });
+    if (!columns.version) await query.addColumn(table, 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
+    if (!columns.session_version) await query.addColumn(table, 'session_version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
     const bookingColumns = await query.describeTable(Reservation.getTableName());
     if (!bookingColumns.deleted_at) await query.addColumn(Reservation.getTableName(), 'deleted_at', { type: DataTypes.DATE, allowNull: true });
     if (!bookingColumns.version) await query.addColumn(Reservation.getTableName(), 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });

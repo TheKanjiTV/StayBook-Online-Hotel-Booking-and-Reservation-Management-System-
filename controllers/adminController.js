@@ -70,7 +70,8 @@ export const adminController = {
     const page = req.query.page === undefined ? 1 : positiveId(req.query.page, 'page');
     if (page > 10000) fail(400, 'Choose a valid page.');
     const pattern = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
-    const where = q ? { [Op.or]: ['action', 'actor_name', 'reference'].map(field => ({ [field]: { [Op.like]: pattern } })) } : {};
+    const actionPattern = `%${q.replace(/\s+/g, '_').replace(/[\\%_]/g, '\\$&')}%`;
+    const where = q ? { [Op.or]: ['action', 'actor_name', 'reference'].map(field => ({ [field]: { [Op.like]: field === 'action' ? actionPattern : pattern } })) } : {};
     const { count, rows } = await AuditLog.findAndCountAll({ where, order: [['audit_id', 'DESC']], limit: 25, offset: (page - 1) * 25 });
     const pages = Math.max(1, Math.ceil(count / 25)), link = target => `/admin/audit-logs?${new URLSearchParams({ q, page: target })}`;
     res.render('admin-audit', { title: 'Audit logs | StayBook', adminTitle: 'Audit logs', q, count, page, pages, audits: rows.map(row => auditDisplay(row, res.locals.preferences.locale)), previous: page > 1 ? link(page - 1) : null, next: page < pages ? link(page + 1) : null });
