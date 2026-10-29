@@ -17,6 +17,8 @@ function sentence(text) {
   if (stayPrice) return `${stayPrice[1]} / ${StayBook.count('nights', stayPrice[2])}`;
   const choice = text.match(/^(\d+) rooms? to choose from$/);
   if (choice) return templates.available[index].replace('{n}', choice[1]);
+  const properties = text.match(/^(\d+) propert(?:y|ies)$/);
+  if (properties) return [text, `${properties[1]} hotel`, `${properties[1]} 家酒店`, `${properties[1]}施設`, `숙소 ${properties[1]}개`, `${properties[1]} alojamiento(s)`, `${properties[1]} établissement(s)`, `${properties[1]} Unterkünfte`, `${properties[1]} منشآت`][index];
   if (text.includes(' · ') || text.includes(' × ')) return text.split(/( · | × )/).map(part => part === ' · ' || part === ' × ' ? part : sentence(part)).join('');
   return text;
 }

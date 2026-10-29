@@ -4,6 +4,7 @@
   <ol class="booking-steps" aria-label="Booking progress"><li aria-current="step"><span>1</span> Choose your room</li><li><span>2</span> Guest details</li><li><span>3</span> Review booking</li></ol>
   <div class="page-intro"><h1>Find your place to unwind.</h1><p>Choose the room that fits your stay. We’ll take care of the details next.</p></div>
   <section class="rooms-search" aria-label="Change your stay dates"><form action="/rooms" method="GET" class="search-grid" data-room-search>
+    <div class="search-field"><label for="hotelId">Hotel or resort</label><select id="hotelId" name="hotelId"><option value="">All stays</option>{{#each hotels}}<option value="{{id}}">{{name}}</option>{{/each}}</select></div>
     <div class="search-field"><label for="checkIn">Check-in</label><input id="checkIn" name="checkIn" type="date" required></div>
     <div class="search-field"><label for="checkOut">Check-out</label><input id="checkOut" name="checkOut" type="date" required></div>
     <div class="search-field"><label for="guests">Guests</label><select id="guests" name="guests">{{#each guestOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>

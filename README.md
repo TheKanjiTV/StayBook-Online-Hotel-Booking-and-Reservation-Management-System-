@@ -58,6 +58,8 @@ Integration steps for the next phase:
 
 ## Current local endpoints
 
+`/hotels` browses two explicitly illustrative properties, with name/collection search and hotel/resort filters. The original six sample rooms are divided between them; `/rooms?hotelId=1` or `2` searches that property's rooms. This is a local catalog, not a live PMS hotel directory. Restaurants & Bars stays disabled until Denver supplies the HotelPOS URL. My StayBook provides the optional account area; there are no invented loyalty rewards or discounts.
+
 | Method | Route | Purpose |
 | --- | --- | --- |
 | GET | `/`, `/rooms`, `/guest-details` | Guest booking pages |

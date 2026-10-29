@@ -1,6 +1,7 @@
 import { getAvailableRooms, getRoomById } from '../services/pmsApi.js';
 import { searchInput, guestInput, positiveId, fail } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
+import { hotels } from '../services/hotelCatalog.js';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
@@ -8,9 +9,9 @@ export const bookingController = {
   home: async (req, res) => {
     const rooms = await Promise.all([1, 3, 5].map(getRoomById));
     const featuredRooms = rooms.filter(Boolean).map(room => ({ ...room, formattedPrice: Number(room.price).toLocaleString('en-PH') }));
-    res.render('home', { title: 'StayBook | A comfortable stay, simply booked', featuredRooms, guestOptions });
+    res.render('home', { title: 'StayBook | A comfortable stay, simply booked', featuredRooms, guestOptions, hotels });
   },
-  roomsPage: (req, res) => res.render('rooms', { title: 'Choose your room | StayBook', guestOptions }),
+  roomsPage: (req, res) => res.render('rooms', { title: 'Choose your room | StayBook', guestOptions, hotels }),
   guestDetailsPage: async (req, res) => {
     if (!req.query.roomId) return res.redirect('/rooms');
     const stay = searchInput(req.query), room = await getRoomById(positiveId(req.query.roomId, 'room'));
@@ -19,7 +20,7 @@ export const bookingController = {
     const preferences = res.locals.preferences;
     const money = value => new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(value * preferences.rate);
     const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(preferences.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests }).toString();
+    const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests, hotelId: room.hotel?.id || '' }).toString();
     res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview || req.account,
       searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(room.price), total: money(room.price * stay.nights), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });
   },
@@ -29,7 +30,7 @@ export const bookingController = {
   },
   searchRooms: async (req, res) => {
     const { checkIn, checkOut, guests } = searchInput(req.query);
-    res.json({ success: true, rooms: await getAvailableRooms(checkIn, checkOut, guests) });
+    res.json({ success: true, rooms: await getAvailableRooms(checkIn, checkOut, guests, req.query.hotelId) });
   },
   createBookingPreview: async (req, res) => {
     const dates = searchInput(req.body), guest = guestInput(req.body);
@@ -37,7 +38,7 @@ export const bookingController = {
     if (!room) fail(404, 'Room not found.');
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
     req.session.bookingPreview = { ...dates, roomId: room.id, roomName: room.name, firstName: guest.first_name, lastName: guest.last_name,
-      email: guest.email, phone: guest.phone, address: guest.address, roomImage: room.image, roomType: room.type, roomNumber: room.roomNumber, pricePerNight: room.price, totalAmount: room.price * dates.nights, status: 'REVIEW', requestKey: randomUUID() };
+      email: guest.email, phone: guest.phone, address: guest.address, hotelName: room.hotel?.name, hotelId: room.hotel?.id, roomImage: room.image, roomType: room.type, roomNumber: room.roomNumber, pricePerNight: room.price, totalAmount: room.price * dates.nights, status: 'REVIEW', requestKey: randomUUID() };
     delete req.session.bookingId; delete req.session.bookingToken;
     res.json({ success: true, redirect: '/confirmation' });
   },

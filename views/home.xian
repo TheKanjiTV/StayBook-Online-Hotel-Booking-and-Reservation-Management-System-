@@ -9,6 +9,7 @@
     </div>
     <div id="booking" class="booking-bar"><h2>Where does your next stay begin?</h2>
       <form action="/rooms" method="GET" class="search-grid" data-room-search>
+        <div class="search-field"><label for="hotelId">Hotel or resort</label><select id="hotelId" name="hotelId"><option value="">All stays</option>{{#each hotels}}<option value="{{id}}">{{name}}</option>{{/each}}</select></div>
         <div class="search-field"><label for="checkIn">Check-in</label><input type="date" id="checkIn" name="checkIn" required></div>
         <div class="search-field"><label for="checkOut">Check-out</label><input type="date" id="checkOut" name="checkOut" required></div>
         <div class="search-field"><label for="guests">Guests</label><select id="guests" name="guests">{{#each guestOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>

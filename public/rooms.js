@@ -4,7 +4,7 @@
   const filterBox = document.getElementById('roomFilters'), sort = document.getElementById('sortOrder');
   const params = new URLSearchParams(location.search);
   let groups = [], selectedType = params.get('type') || 'all';
-  const dates = () => ({ checkIn: form.elements.checkIn.value, checkOut: form.elements.checkOut.value, guests: form.elements.guests.value });
+  const dates = () => ({ checkIn: form.elements.checkIn.value, checkOut: form.elements.checkOut.value, guests: form.elements.guests.value, hotelId: form.elements.hotelId?.value || '' });
   const shortDate = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(StayBook.locale, { day: 'numeric', month: 'short' });
   const nights = () => (Date.parse(dates().checkOut) - Date.parse(dates().checkIn)) / 86400000;
   sort.value = ['price-low', 'price-high', 'capacity'].includes(params.get('sort')) ? params.get('sort') : 'recommended';
@@ -30,7 +30,7 @@
       const query = new URLSearchParams({ ...d, roomId: r.id });
       return `<article class="room-listing"><img class="listing-photo" src="${esc(r.image)}" alt="${esc(r.type)} interior, illustrative photograph" width="600" height="420" loading="lazy">
         <div class="listing-info"><div class="listing-top"><h2>${esc(r.type)}</h2><span class="availability-label">${rooms.length} ${rooms.length === 1 ? 'room' : 'rooms'} available</span></div>
-        <p class="listing-description">${esc(r.description)}</p><div class="listing-features"><span>${icon('guests')} Up to ${esc(r.capacity)} guests</span><span>${icon('bed')} Room ${esc(rooms.map(room => room.roomNumber).join(' / '))}</span></div>
+        <p class="muted mt-3">${esc(r.hotel?.name || '')}</p><p class="listing-description">${esc(r.description)}</p><div class="listing-features"><span>${icon('guests')} Up to ${esc(r.capacity)} guests</span><span>${icon('bed')} Room ${esc(rooms.map(room => room.roomNumber).join(' / '))}</span></div>
         <div class="listing-bottom"><div class="listing-price"><strong>${money(r.price)}</strong><span> / night</span><p>${money(r.price * n)} for ${n} ${n === 1 ? 'night' : 'nights'}</p></div><a class="btn" href="/guest-details?${esc(query.toString())}">Select room ${icon('arrow')}</a></div></div></article>`;
     }).join('');
   }
@@ -39,7 +39,7 @@
     try {
       const { rooms } = await request(`/rooms/search?${new URLSearchParams(dates())}`);
       const map = new Map();
-      rooms.forEach(room => { const key = `${room.type}:${room.price}:${room.capacity}`; if (!map.has(key)) map.set(key, { room, rooms: [] }); map.get(key).rooms.push(room); });
+      rooms.forEach(room => { const key = `${room.hotel?.id}:${room.type}:${room.price}:${room.capacity}`; if (!map.has(key)) map.set(key, { room, rooms: [] }); map.get(key).rooms.push(room); });
       groups = [...map.values()]; renderFilters(); render();
     } catch (error) {
       document.getElementById('resultCount').textContent = 'Rooms could not be loaded'; filterBox.innerHTML = '';

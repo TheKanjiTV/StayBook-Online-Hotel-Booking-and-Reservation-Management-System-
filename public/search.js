@@ -7,6 +7,7 @@ document.querySelectorAll('[data-room-search]').forEach(form => {
   ci.min = today; ci.value = isDate(params.get('checkIn')) && params.get('checkIn') >= today ? params.get('checkIn') : today;
   co.min = nextDay(ci.value); co.value = isDate(params.get('checkOut')) && params.get('checkOut') > ci.value ? params.get('checkOut') : co.min;
   const count = Number(params.get('guests')); if (Number.isInteger(count) && count >= 1 && count <= 10) guests.value = String(count);
+  if (form.elements.hotelId && ['1', '2'].includes(params.get('hotelId'))) form.elements.hotelId.value = params.get('hotelId');
   ci.addEventListener('change', () => { if (!isDate(ci.value)) return; co.min = nextDay(ci.value); if (co.value <= ci.value) co.value = co.min; });
   form.addEventListener('submit', event => {
     const error = form.parentElement.querySelector('[data-search-error]'); if (error) error.textContent = '';

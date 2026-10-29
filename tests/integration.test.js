@@ -22,6 +22,14 @@ await test('Online booking scope and guest review', async t => {
       for (const path of ['/staff', '/login', '/api/pms/overview', '/api/housekeeping', '/api/pos', '/api/hr', '/api/events']) await guest.call(path, 'GET', undefined, 404);
       const data = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.equal(data.rooms.length, 6);
     });
+    await t.test('Hotel directory filters rooms by their sample property', async () => {
+      const directory = await guest.call('/hotels'); assert.ok(directory.includes('StayBook City Hotel')); assert.ok(directory.includes('aria-disabled="true"'));
+      const first = await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 1 })}`);
+      assert.equal(first.rooms.length, 3); assert.ok(first.rooms.every(room => room.hotel.id === 1));
+      const second = await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 2 })}`);
+      assert.equal(second.rooms.length, 3); assert.ok(second.rooms.every(room => room.hotel.id === 2));
+      assert.equal((await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 999 })}`)).rooms.length, 0);
+    });
     await t.test('Invalid dates and forged prices cannot affect the reservation review', async () => {
       await guest.call('/rooms/search?checkIn=2026-02-30&checkOut=2026-03-02&guests=2', 'GET', undefined, 400);
       const body = { ...dates, roomId: 1, firstName: 'Test', lastName: 'Guest', email: 'guest@example.test', phone: '09123456789', totalAmount: 1 };

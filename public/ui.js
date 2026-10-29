@@ -19,7 +19,7 @@ window.StayBook = {
 };
 document.addEventListener('DOMContentLoaded', () => {
   StayBook.configureSummaries();
-  const current = location.pathname === '/manage-booking' ? '/manage-booking' : ['/rooms', '/guest-details', '/confirmation'].includes(location.pathname) ? '/#rooms' : '/';
+  const current = ['/rooms', '/guest-details', '/confirmation'].includes(location.pathname) ? '/rooms' : location.pathname;
   document.querySelectorAll('.site-header nav a').forEach(link => { if (link.getAttribute('href') === current) link.setAttribute('aria-current', 'page'); });
 });
 matchMedia('(max-width: 760px)').addEventListener('change', () => StayBook.configureSummaries());
