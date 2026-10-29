@@ -16,8 +16,9 @@ export const bookingController = {
     const stay = searchInput(req.query), room = await getRoomById(positiveId(req.query.roomId, 'room'));
     if (!room) fail(404, 'Room not found.');
     if (stay.guests > room.capacity) fail(400, 'Room capacity exceeded.');
-    const money = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
-    const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString('en-PH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const preferences = res.locals.preferences;
+    const money = value => new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(value * preferences.rate);
+    const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(preferences.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests }).toString();
     res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview || req.account,
       searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(room.price), total: money(room.price * stay.nights), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });

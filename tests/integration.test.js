@@ -77,6 +77,20 @@ await test('Online booking scope and guest review', async t => {
       assert.equal(cancelled.status, 'CANCELLED'); assert.equal(cancelled.payments[0].payment_status, 'REFUNDED');
       const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(available.rooms.some(r => r.id === 1));
     });
+    await t.test('Language and currency preferences persist and never change PHP booking totals', async () => {
+      const client = new Client(guest.base); await client.call('/');
+      await client.call('/api/preferences', 'POST', { language: 'fil' });
+      let html = await client.call('/'); assert.ok(html.includes('lang="fil"')); assert.ok(html.includes('data-currency="PHP"'));
+      await client.call('/api/preferences', 'POST', { language: 'unsupported' }, 400);
+      await client.call('/api/preferences', 'POST', { currency: 'BAD' }, 400);
+      const { languages, dictionary } = await import('../public/translations.js');
+      assert.equal(languages.length, 9); for (const values of Object.values(dictionary)) assert.equal(values.length, 8);
+      await client.call('/api/preferences', 'POST', { language: 'ar' });
+      html = await client.call('/'); assert.ok(html.includes('dir="rtl"')); assert.ok(html.includes('data-currency="AED"'));
+      await client.call('/api/preferences', 'POST', { currency: 'JPY' });
+      html = await client.call('/'); assert.ok(html.includes('lang="ar"')); assert.ok(html.includes('data-currency="JPY"'));
+      const { reservation } = await guest.call('/api/bookings/current'); assert.equal(Number(reservation.total_amount), 2500);
+    });
     await t.test('Guest accounts rotate sessions and restrict booking ownership', async () => {
       const member = new Client(guest.base), stranger = new Client(guest.base);
       await member.call('/join');

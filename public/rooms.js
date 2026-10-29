@@ -5,7 +5,7 @@
   const params = new URLSearchParams(location.search);
   let groups = [], selectedType = params.get('type') || 'all';
   const dates = () => ({ checkIn: form.elements.checkIn.value, checkOut: form.elements.checkOut.value, guests: form.elements.guests.value });
-  const shortDate = value => new Date(`${value}T12:00:00Z`).toLocaleDateString('en-PH', { day: 'numeric', month: 'short' });
+  const shortDate = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(StayBook.locale, { day: 'numeric', month: 'short' });
   const nights = () => (Date.parse(dates().checkOut) - Date.parse(dates().checkIn)) / 86400000;
   sort.value = ['price-low', 'price-high', 'capacity'].includes(params.get('sort')) ? params.get('sort') : 'recommended';
   function renderFilters() {

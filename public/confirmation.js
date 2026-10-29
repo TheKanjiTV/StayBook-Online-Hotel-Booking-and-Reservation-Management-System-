@@ -2,7 +2,7 @@
   const { request, money, escape: esc, icon } = StayBook;
   const content = document.getElementById('content'), message = document.getElementById('message');
   const row = (label, value) => `<div class="review-row"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
-  const dateLabel = date => new Date(`${date}T12:00:00Z`).toLocaleDateString('en-PH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const dateLabel = date => new Date(`${date}T12:00:00Z`).toLocaleDateString(StayBook.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   function summary({ image, room, roomNumber, checkIn, checkOut, nights, guests, rate, total }) {
     return `<aside class="stay-summary" aria-label="Your stay summary"><details class="summary-disclosure" open><summary class="summary-toggle"><span>Your stay</span><strong>${money(total)}</strong><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="summary-body">${image ? `<img src="${esc(image)}" alt="${esc(room)} interior, illustrative photograph" width="500" height="310">` : ''}<div class="summary-content"><h2>${esc(room)}</h2><p class="muted mt-2">Room ${esc(roomNumber)}</p><dl class="summary-dates"><div><dt>Check-in</dt><dd>${esc(dateLabel(checkIn))}</dd></div><div><dt>Check-out</dt><dd>${esc(dateLabel(checkOut))}</dd></div></dl><p class="muted summary-occupancy">${nights} ${nights === 1 ? 'night' : 'nights'} · ${guests} ${guests === 1 ? 'guest' : 'guests'}</p><div class="summary-rate"><span>${money(rate)} × ${nights} ${nights === 1 ? 'night' : 'nights'}</span><span>${money(total)}</span></div><div class="summary-total"><span>Total for your stay</span><strong>${money(total)}</strong></div></div></div></details></aside>`;
   }
@@ -23,7 +23,7 @@
         };
         document.getElementById('copyReference').onclick = async e => { try { await navigator.clipboard.writeText(r.reference); e.target.textContent = 'Copied'; } catch { message.textContent = 'Select your booking reference and copy it manually.'; } };
         document.getElementById('cancel')?.addEventListener('click', async e => {
-          if (!confirm('Cancel this local booking and refund its simulated payment?')) return;
+          if (!confirm(StayBook.t('Cancel this local booking and refund its simulated payment?'))) return;
           e.target.disabled = true;
           try { await request('/api/bookings/cancel', { method: 'POST', body: {} }); message.textContent = ''; await load(); }
           catch (error) { message.textContent = error.message; message.focus(); e.target.disabled = false; }

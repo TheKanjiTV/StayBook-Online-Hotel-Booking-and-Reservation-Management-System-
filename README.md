@@ -32,6 +32,8 @@ There is no staff operations dashboard, PMS inventory management, check-in/out, 
 
 Guest accounts are optional. `/sign-in` and `/join` provide sign-in and account creation; `/account` lists bookings made while signed in. Passwords use salted scrypt hashes, sign-in rotates the session, and account APIs enforce ownership. Existing guest reservations are never claimed just because an account uses the same email. Guests can continue using reference/email lookup. This local account flow does not send verification or password-reset emails.
 
+The header supports English, Filipino, Simplified Chinese, Japanese, Korean, Spanish, French, German and Arabic (including right-to-left layout). Changing language also selects its default display currency; Filipino selects PHP. Currency can then be changed independently to any of the 36 codes in the supplied reference. Preferences persist in the session. Conversion is indicative; booking/payment amounts remain in PHP. ExchangeRate-API supplies daily rates, cached locally in ignored `.test-data/`; a last available rate retains its date, and PHP remains usable when rates are unavailable. Language changes preserve non-password form fields in session storage for the immediate reload. JavaScript is required for translated interface copy and booking interactions.
+
 ## Future API and database integration — not implemented yet
 
 The following are **proposed contracts to discuss with the PMS member**, not working endpoints in this repository:

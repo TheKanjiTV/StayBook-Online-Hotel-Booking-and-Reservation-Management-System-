@@ -23,6 +23,14 @@
   summary { cursor: pointer; }
 }
 @layer components {
+  .preference-bar { display: flex; justify-content: flex-end; padding-top: 8px; font-size: .75rem; position: relative; z-index: 40; }
+  .preference-menu summary { display: flex; align-items: center; gap: 8px; min-height: 38px; list-style: none; }
+  .preference-menu summary::-webkit-details-marker { display: none; }
+  .preference-menu .icon { width: 16px; height: 16px; }
+  .preference-panel { position: absolute; inset-inline-end: 0; top: 100%; padding: 24px; width: min(370px, calc(100vw - 40px)); background: white; border: 1px solid var(--line); border-radius: 12px; }
+  [dir=rtl] .review-row dd { text-align: left; }
+  [dir=rtl] .mobile-menu { right: auto; left: 0; }
+  [dir=rtl] .hero-copy h1, :lang(zh-CN) h1, :lang(ja) h1, :lang(ko) h1 { line-height: 1.2; letter-spacing: 0; }
   .account-booking { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: center; padding-block: 26px; border-bottom: 1px solid var(--line); }
   .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
   .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.25rem; font-weight: 600; line-height: 1; letter-spacing: -0.04em; }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{preferences.language}}" dir="{{preferences.direction}}" data-locale="{{preferences.locale}}" data-currency="{{preferences.currency}}" data-rate="{{preferences.rate}}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,5 +10,6 @@
   <link rel="preload" href="/fonts/manrope.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/tailwind.css">
   <script src="/ui.js"></script>
+  <script type="module" src="/preferences.js"></script>
   <title>{{title}}</title>
 </head>
