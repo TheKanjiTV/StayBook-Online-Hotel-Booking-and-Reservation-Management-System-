@@ -2,7 +2,7 @@ import express from 'express';
 import { bookingController as b } from '../controllers/bookingController.js';
 import { asyncRoute as a } from '../services/validation.js';
 const router = express.Router();
-router.get('/', b.home);
+router.get('/', a(b.home));
 router.get('/rooms', b.roomsPage);
 router.get('/rooms/search', a(b.searchRooms));
 router.get('/guest-details', b.guestDetailsPage);

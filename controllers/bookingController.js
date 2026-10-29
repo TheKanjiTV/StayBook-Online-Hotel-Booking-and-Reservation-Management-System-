@@ -4,7 +4,12 @@ import { randomUUID } from 'node:crypto';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 export const bookingController = {
-  home: (req, res) => res.render('home', { title: 'StayBook | Online booking' }),
+  home: async (req, res) => {
+    const rooms = await Promise.all([1, 3, 5].map(getRoomById));
+    const featuredRooms = rooms.filter(Boolean).map(room => ({ ...room, formattedPrice: Number(room.price).toLocaleString('en-PH') }));
+    const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
+    res.render('home', { title: 'StayBook | A comfortable stay, simply booked', featuredRooms, guestOptions });
+  },
   roomsPage: (req, res) => res.render('rooms', { title: 'Rooms | StayBook' }),
   guestDetailsPage: (req, res) => res.render('guest-details', { title: 'Guest details | StayBook' }),
   confirmationPage: (req, res) => {

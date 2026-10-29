@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{csrf}}">
+  <meta name="theme-color" content="#233e35">
+  <meta name="description" content="Find your room, choose your dates and plan your next stay with StayBook.">
+  <link rel="preload" href="/fonts/cormorantgaramond.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/manrope.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/tailwind.css">
   <script src="/ui.js"></script>
   <title>{{title}}</title>

@@ -1,33 +1,26 @@
 {{> head}}
 <body>
 {{> nav}}
-<main class="max-w-6xl mx-auto px-5 py-12">
-  <section class="grid md:grid-cols-2 gap-10 items-center mb-12">
-    <div>
-      <p class="text-sm text-emerald-800 font-medium mb-4">WELCOME TO STAYBOOK</p>
-      <h1 class="text-4xl md:text-5xl font-serif text-emerald-950 leading-tight">A comfortable stay,<br>simply booked.</h1>
-      <p class="mt-5 text-slate-600 max-w-md leading-relaxed">Choose your dates, find a room and make your reservation. Everything you need for your next stay.</p>
-      <a href="#booking" class="btn mt-6">Find a room</a>
+<main id="main">
+  <section class="shell home-hero">
+    <div class="hero-grid">
+      <div class="hero-copy"><h1>A comfortable stay,<br>simply booked.</h1><p>Choose your dates, find a room and make your reservation. A little less planning. A little more looking forward.</p><a href="#booking" class="text-link">Find your room {{> arrow}}</a></div>
+      <figure><img class="hero-photo" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=85" alt="Sunlit hotel pool beside a timber-roofed resort" width="700" height="590" fetchpriority="high"><figcaption class="hero-caption"><span>Space to slow down.</span><span>Illustrative hotel photography</span></figcaption></figure>
     </div>
-    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1000" alt="Hotel and pool" class="rounded-lg w-full h-72 object-cover" width="560" height="288">
+    <div id="booking" class="booking-bar"><h2>Where does your next stay begin?</h2>
+      <form action="/rooms" method="GET" class="search-grid" data-room-search>
+        <div class="search-field"><label for="checkIn">Check-in</label><input type="date" id="checkIn" name="checkIn" required></div>
+        <div class="search-field"><label for="checkOut">Check-out</label><input type="date" id="checkOut" name="checkOut" required></div>
+        <div class="search-field"><label for="guests">Guests</label><select id="guests" name="guests">{{#each guestOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>
+        <button class="btn">Search rooms {{> arrow}}</button>
+      </form><p class="form-error mt-3" data-search-error role="alert"></p>
+    </div><p class="demo-caption">Explore our sample room collection. Booking payments are simulated.</p>
   </section>
-  <section id="booking" class="panel">
-    <h2>Find your room</h2><p class="muted mt-1 mb-5">Browse sample rooms and prepare your online reservation.</p>
-    <form action="/rooms" method="GET" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-      <div><label for="checkIn">Check-in</label><input type="date" id="checkIn" name="checkIn" required></div>
-      <div><label for="checkOut">Check-out</label><input type="date" id="checkOut" name="checkOut" required></div>
-      <div><label for="guests">Guests</label><input type="number" id="guests" name="guests" min="1" max="10" value="2" required></div>
-      <button class="btn py-2.5">Search rooms</button>
-    </form>
+  <section id="rooms" class="shell section-space"><div class="section-heading"><h2>A room for<br>your kind of stay.</h2><p>From a quiet getaway to a family trip, find the space that feels right for you.</p></div>
+    <div class="room-grid">{{#each featuredRooms}}<article class="room-preview"><a href="#booking" aria-label="Find dates for {{type}}"><img src="{{image}}" alt="{{type}} interior, illustrative photograph" width="480" height="360" loading="lazy"></a><div class="room-meta"><span>Up to {{capacity}} guests</span><span>Per room</span></div><h3>{{type}}</h3><p>{{description}}</p><div class="room-price"><span>From </span><strong>₱{{formattedPrice}}</strong><span> / night</span></div><a class="text-link mt-3" href="#booking">Check availability {{> arrow}}</a></article>{{/each}}</div>
   </section>
-  <p class="muted mt-4">Online booking module · sample room catalog · integration with the other systems is planned.</p>
+  <section class="shell booking-note"><div><h3>Already looking forward to your stay?</h3><p class="mt-3">Find your saved booking with its reference and your email address. Review your details or manage a change of plans.</p></div><a class="btn-secondary shrink-0" href="/manage-booking">Find my booking {{> arrow}}</a></section>
 </main>
-<script>
-const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Manila'});
-const ci = document.getElementById('checkIn'), co = document.getElementById('checkOut');
-ci.min = today; ci.value = today;
-function nextDay(date) { return new Date(Date.parse(date) + 86400000).toISOString().slice(0,10); }
-co.min = nextDay(today); co.value = co.min;
-ci.addEventListener('change', () => { co.min = nextDay(ci.value); if(co.value <= ci.value) co.value = co.min; });
-</script>
+{{> footer}}
+<script src="/search.js"></script>
 </body></html>

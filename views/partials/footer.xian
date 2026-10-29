@@ -1,5 +1,1 @@
-<footer class="mt-8 py-4 text-center text-gray-500 text-sm">
-  &copy; 2026 XianFire Framework — Built with ❤️ at Mindoro State University
-</footer>
-</body>
-</html>
+<footer class="site-footer no-print"><div class="shell footer-inner"><div><a class="brand" href="/">StayBook</a><p class="muted mt-2">A comfortable stay, simply booked.</p></div><div class="footer-links"><a href="/#rooms">Explore rooms</a><a href="/manage-booking">My booking</a></div><p class="muted">Demo booking experience · 2026</p></div></footer>
