@@ -1,7 +1,8 @@
 import { getAvailableRooms, getRoomById } from '../services/pmsApi.js';
 import { searchInput, guestInput, fail } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
-import { saveBooking, getBooking } from '../services/bookingService.js';
+import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
+const lookupAttempts = new Map();
 export const bookingController = {
   home: (req, res) => res.render('home', { title: 'StayBook | Online booking' }),
   roomsPage: (req, res) => res.render('rooms', { title: 'Rooms | StayBook' }),
@@ -37,5 +38,19 @@ export const bookingController = {
   currentBooking: async (req, res) => {
     const reservation = req.session.bookingId ? await getBooking(req.session.bookingId, req.session.bookingToken) : null;
     res.json({ success: true, reservation });
+  },
+  lookupBooking: async (req, res) => {
+    const previous = lookupAttempts.get(req.ip), now = Date.now();
+    const attempts = previous && previous.until > now ? previous : { count: 0, until: now + 900000 };
+    lookupAttempts.set(req.ip, attempts);
+    if (++attempts.count > 20) fail(429, 'Too many lookup attempts. Try again in 15 minutes.');
+    const booking = await findBooking(req.body.reference, req.body.email);
+    req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
+    res.json({ success: true, redirect: '/confirmation' });
+  },
+  cancelBooking: async (req, res) => {
+    if (!req.session.bookingId) fail(404, 'Booking not found.');
+    await cancelBooking(req.session.bookingId, req.session.bookingToken);
+    res.json({ success: true });
   },
 };

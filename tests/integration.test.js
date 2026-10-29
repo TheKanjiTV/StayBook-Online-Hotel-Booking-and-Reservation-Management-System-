@@ -58,6 +58,18 @@ await test('Online booking scope and guest review', async t => {
       const port = server.address().port; await new Promise(resolve => server.close(resolve)); server = await startServer(port);
       const after = (await guest.call('/api/bookings/current')).reservation; assert.equal(after.reference, before.reference);
     });
+    await t.test('Booking lookup restores access and cancellation refunds only local simulated payments', async () => {
+      const booking = (await guest.call('/api/bookings/current')).reservation;
+      const lookup = new Client(guest.base); await lookup.call('/manage-booking');
+      await lookup.call('/api/bookings/cancel', 'POST', {}, 404);
+      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'wrong@example.test' }, 404);
+      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'guest@example.test' });
+      assert.equal((await lookup.call('/api/bookings/current')).reservation.reference, booking.reference);
+      await lookup.call('/api/bookings/cancel', 'POST', {}); await lookup.call('/api/bookings/cancel', 'POST', {});
+      const cancelled = (await lookup.call('/api/bookings/current')).reservation;
+      assert.equal(cancelled.status, 'CANCELLED'); assert.equal(cancelled.payments[0].payment_status, 'REFUNDED');
+      const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(available.rooms.some(r => r.id === 1));
+    });
   } finally {
     if (server?.listening) await new Promise(resolve => server.close(resolve));
     await sequelize.close();

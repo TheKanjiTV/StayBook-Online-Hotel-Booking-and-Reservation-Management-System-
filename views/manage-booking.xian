@@ -1,0 +1,12 @@
+{{> head}}
+<body>{{> nav}}
+<main class="max-w-xl mx-auto px-5 py-12">
+<h1>Find your booking</h1><p class="muted mt-3 mb-6">Enter the reference from your local booking and the guest email address.</p>
+<form id="lookup" class="panel space-y-4">
+<div><label for="reference">Booking reference</label><input id="reference" name="reference" maxlength="30" placeholder="SB-…" required></div>
+<div><label for="email">Email address</label><input id="email" name="email" type="email" maxlength="255" required></div>
+<button class="btn w-full">Find booking</button><p id="error" role="alert" class="text-sm text-red-700"></p>
+</form>
+</main>
+<script>document.getElementById('lookup').addEventListener('submit', async e => { e.preventDefault(); const button=e.target.querySelector('button'); button.disabled=true; try { const data=await StayBook.request('/api/bookings/lookup',{method:'POST',body:Object.fromEntries(new FormData(e.target))}); location.href=data.redirect; } catch(error){document.getElementById('error').textContent=error.message;} finally{button.disabled=false;} });</script>
+</body></html>

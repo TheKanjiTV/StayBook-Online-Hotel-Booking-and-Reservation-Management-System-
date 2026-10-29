@@ -11,4 +11,7 @@ router.get('/confirmation', b.confirmationPage);
 router.get('/api/booking-preview', b.getBookingPreview);
 router.post('/api/bookings/confirm', a(b.confirmBooking));
 router.get('/api/bookings/current', a(b.currentBooking));
+router.get('/manage-booking', (req, res) => res.render('manage-booking', { title: 'My booking | StayBook' }));
+router.post('/api/bookings/lookup', a(b.lookupBooking));
+router.post('/api/bookings/cancel', a(b.cancelBooking));
 export default router;

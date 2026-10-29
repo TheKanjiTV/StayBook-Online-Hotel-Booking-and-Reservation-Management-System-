@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment } from '../models/bookingModel.js';
-import { searchInput, guestInput, positiveId, fail, string, hash, cents, amount } from './validation.js';
+import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
 export async function saveBooking(body) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
   const requestKey = string(body.requestKey, 'Request key');
@@ -33,4 +33,23 @@ export async function getBooking(id, token) {
   const data = booking.toJSON(); delete data.access_token; delete data.request_key; delete data.request_hash;
   return { ...data, guest: { first_name: data.first_name, last_name: data.last_name, email: data.email },
     room: { room_number: data.room_number, roomType: { name: data.room_type } }, payments, integration_status: 'NOT_CONNECTED' };
+}
+export async function findBooking(reference, guestEmail) {
+  const booking = await Reservation.findOne({ where: { reference: string(reference, 'Booking reference', 30).toUpperCase(), email: email(guestEmail) } });
+  if (!booking) fail(404, 'No booking matches that reference and email.');
+  return booking;
+}
+export async function cancelBooking(id, token) {
+  const reference = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token } });
+  if (!reference) fail(404, 'Booking not found.');
+  await sequelize.transaction(async transaction => {
+    await BookingRoom.findByPk(reference.room_id, { transaction, lock: transaction.LOCK.UPDATE });
+    const booking = await Reservation.findByPk(reference.reservation_id, { transaction, lock: transaction.LOCK.UPDATE });
+    if (booking.status === 'CANCELLED') return;
+    if (booking.status !== 'LOCAL_CONFIRMED') fail(409, 'This booking cannot be cancelled.');
+    await booking.update({ status: 'CANCELLED' }, { transaction });
+    await Payment.update({ payment_status: 'REFUNDED' }, { where: { reservation_id: booking.reservation_id, payment_status: 'PAID' }, transaction });
+    // TODO: agree on cancellation acknowledgement and refunds with the PMS/payment
+    // provider before replacing this local-only cancellation workflow.
+  });
 }

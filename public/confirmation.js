@@ -5,11 +5,17 @@ async function load() {
   try {
     const { reservation: r } = await request('/api/bookings/current');
     if (r) {
-      content.innerHTML = `<p class="text-sm text-emerald-800 mb-2">${esc(r.reference)}</p><h1>Booking saved locally</h1>
+      content.innerHTML = `<p class="text-sm text-emerald-800 mb-2">${esc(r.reference)}</p><h1>${r.status === 'CANCELLED' ? 'Booking cancelled' : 'Booking saved locally'}</h1>
         <dl class="text-sm mt-6">${row('Guest', `${r.first_name} ${r.last_name}`)}${row('Email', r.email)}${row('Room', r.room_name)}${row('Check-in', r.check_in)}${row('Check-out', r.check_out)}${row('Guests', r.guests)}${row('Total', money(r.total_amount))}${row('Payment', r.payments[0]?.payment_status || '—')}</dl>
         <p class="my-5 text-sm text-amber-800">This booking and simulated payment are saved in the online booking system only. No real money was charged. The PMS is not connected, so this is not a PMS-confirmed hotel reservation.</p>
-        <div class="flex flex-wrap gap-3 no-print"><button id="print" class="btn-secondary">Print booking</button><a class="btn" href="/">Book another room</a></div>`;
+        <div class="flex flex-wrap gap-3 no-print"><button id="print" class="btn-secondary">Print booking</button>${r.status === 'LOCAL_CONFIRMED' ? '<button id="cancel" class="btn-danger">Cancel booking</button>' : ''}<a class="btn" href="/">Book another room</a></div>`;
       document.getElementById('print').onclick = () => print();
+      document.getElementById('cancel')?.addEventListener('click', async e => {
+        if (!confirm('Cancel this local booking and refund its simulated payment?')) return;
+        e.target.disabled = true;
+        try { await request('/api/bookings/cancel', { method: 'POST', body: {} }); message.textContent = ''; await load(); }
+        catch (error) { message.textContent = error.message; e.target.disabled = false; }
+      });
       return;
     }
     const { booking: p } = await request('/api/booking-preview');
