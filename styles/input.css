@@ -23,6 +23,7 @@
   summary { cursor: pointer; }
 }
 @layer components {
+  .account-booking { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: center; padding-block: 26px; border-bottom: 1px solid var(--line); }
   .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
   .brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.25rem; font-weight: 600; line-height: 1; letter-spacing: -0.04em; }
   .site-header { border-bottom: 1px solid var(--line); background: var(--paper); }

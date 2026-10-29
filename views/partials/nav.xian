@@ -3,8 +3,8 @@
   <div class="shell header-inner">
     <a href="/" class="brand" aria-label="StayBook home">StayBook</a>
     <nav class="nav-links" aria-label="Main navigation">
-      <a class="nav-link" href="/">Discover</a><a class="nav-link" href="/#rooms">Our rooms</a><a class="nav-link" href="/manage-booking">My booking</a><a class="btn nav-book" href="/#booking">Find your stay {{> arrow}}</a>
+      <a class="nav-link" href="/">Discover</a><a class="nav-link" href="/rooms">Our rooms</a><a class="nav-link" href="/manage-booking">Find reservations</a><a class="nav-link" href="{{#if account}}/account{{else}}/sign-in{{/if}}">{{#if account}}My StayBook{{else}}Sign in{{/if}}</a><a class="btn nav-book" href="/#booking">Book now {{> arrow}}</a>
     </nav>
-    <details class="mobile-nav"><summary>Menu</summary><nav class="mobile-menu" aria-label="Mobile navigation"><a href="/">Discover</a><a href="/#rooms">Our rooms</a><a href="/manage-booking">My booking</a><a href="/#booking">Find your stay</a></nav></details>
+    <details class="mobile-nav"><summary>Menu</summary><nav class="mobile-menu" aria-label="Mobile navigation"><a href="/">Discover</a><a href="/rooms">Our rooms</a><a href="/manage-booking">Find reservations</a><a href="{{#if account}}/account{{else}}/sign-in{{/if}}">{{#if account}}My StayBook{{else}}Sign in{{/if}}</a><a href="/#booking">Book now</a></nav></details>
   </div>
 </header>

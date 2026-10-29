@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { config } from './config.js';
 import { sequelize } from './models/db.js';
 import { BookingRoom } from './models/bookingModel.js';
+import './models/accountModel.js';
 import { sampleRooms } from './services/pmsApi.js';
 export async function migrate() {
   const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });

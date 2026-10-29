@@ -28,7 +28,9 @@ Future integration is deferred: `services/pmsApi.js` contains the local sample c
 | Hotel POS | Owned by another member; not implemented here |
 | HR / Payroll | Owned by another member; not implemented here |
 
-There is no staff operations dashboard, PMS inventory management, check-in/out, cleaning task management, POS, payroll, login or registration UI in this project. Login and registration should only be added if they become part of the online booking requirements.
+There is no staff operations dashboard, PMS inventory management, check-in/out, cleaning task management, POS or payroll in this project.
+
+Guest accounts are optional. `/sign-in` and `/join` provide sign-in and account creation; `/account` lists bookings made while signed in. Passwords use salted scrypt hashes, sign-in rotates the session, and account APIs enforce ownership. Existing guest reservations are never claimed just because an account uses the same email. Guests can continue using reference/email lookup. This local account flow does not send verification or password-reset emails.
 
 ## Future API and database integration — not implemented yet
 

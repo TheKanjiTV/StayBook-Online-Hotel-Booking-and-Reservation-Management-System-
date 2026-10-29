@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment } from '../models/bookingModel.js';
+import { AccountBooking } from '../models/accountModel.js';
 import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
 export async function saveBooking(body) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
@@ -21,6 +22,7 @@ export async function saveBooking(body) {
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,
       guests: dates.guests, nights: dates.nights, nightly_rate: room.price, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });
     await Payment.create({ reservation_id: booking.reservation_id, amount: total, payment_method: 'SIMULATED', payment_status: 'PAID', paid_at: new Date(), reference: randomUUID(), purpose: 'BOOKING' }, { transaction });
+    if (body.accountId) await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });
     // TODO: send the agreed reservation payload to the PMS API in a later phase.
     // A locally saved booking must not be presented as acknowledged by the PMS.
     return booking;

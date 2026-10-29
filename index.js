@@ -16,6 +16,7 @@ import 'dotenv/config';
 import { sessionMiddleware, csrf } from './middleware/session.js';
 import { sequelize } from './models/db.js';
 import router from './routes/index.js';
+import { accountContext } from './controllers/accountController.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.disable('x-powered-by');
@@ -26,6 +27,7 @@ app.use(express.json({ limit: '32kb' }));
 app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 app.use(sessionMiddleware);
 app.use(csrf);
+app.use(accountContext);
 app.use((req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 // Retain XianFire's .xian view engine and Handlebars partial convention.
 app.engine('xian', hbs.__express);

@@ -19,7 +19,7 @@ export const bookingController = {
     const money = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
     const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString('en-PH', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests }).toString();
-    res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview,
+    res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview || req.account,
       searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(room.price), total: money(room.price * stay.nights), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });
   },
   confirmationPage: (req, res) => {
@@ -46,7 +46,7 @@ export const bookingController = {
   },
   confirmBooking: async (req, res) => {
     if (!req.session.bookingPreview) fail(404, 'Start a room search first.');
-    const booking = await saveBooking({ ...req.session.bookingPreview, simulateFailure: req.body.simulateFailure === true });
+    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, simulateFailure: req.body.simulateFailure === true });
     req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
     res.json({ success: true, reservation: await getBooking(req.session.bookingId, req.session.bookingToken) });
   },

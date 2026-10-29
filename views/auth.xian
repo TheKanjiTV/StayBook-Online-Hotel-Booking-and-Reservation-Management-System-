@@ -1,0 +1,11 @@
+{{> head}}
+<body>{{> nav}}<main id="main" class="shell manage-page"><div class="manage-layout">
+<section class="manage-copy"><h1>{{#if joining}}Make room for<br>your next stay.{{else}}Good to see<br>you again.{{/if}}</h1><p>Keep the bookings you make while signed in together in My StayBook. You can always book as a guest.</p><a href="/#booking" class="text-link">Continue as a guest {{> arrow}}</a></section>
+<section class="lookup-panel"><h2>{{#if joining}}Create your account{{else}}Sign in{{/if}}</h2>
+<form id="authForm" class="space-y-5 mt-7" data-mode="{{#if joining}}register{{else}}sign-in{{/if}}">
+{{#if joining}}<div class="form-two-col"><div><label for="firstName">First name</label><input id="firstName" name="firstName" autocomplete="given-name" maxlength="100" required></div><div><label for="lastName">Last name</label><input id="lastName" name="lastName" autocomplete="family-name" maxlength="100" required></div></div>{{/if}}
+<div><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" maxlength="255" required></div>
+<div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="{{#if joining}}new-password{{else}}current-password{{/if}}" {{#if joining}}minlength="10"{{/if}} maxlength="128" required>{{#if joining}}<p class="field-help">Use 10–128 characters. Do not reuse a password from another account.</p>{{/if}}<button id="togglePassword" class="back-link mt-2" type="button" aria-pressed="false">Show password</button></div>
+<p id="authError" class="form-error" role="alert" tabindex="-1"></p><button class="btn w-full">{{#if joining}}Create account{{else}}Sign in{{/if}} {{> arrow}}</button>
+</form><p class="muted mt-6">{{#if joining}}Already have an account? <a class="underline" href="/sign-in">Sign in</a>{{else}}New to StayBook? <a class="underline" href="/join">Create an account</a>{{/if}}</p></section>
+</div></main>{{> footer}}<script src="/auth.js"></script></body></html>

@@ -77,6 +77,30 @@ await test('Online booking scope and guest review', async t => {
       assert.equal(cancelled.status, 'CANCELLED'); assert.equal(cancelled.payments[0].payment_status, 'REFUNDED');
       const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(available.rooms.some(r => r.id === 1));
     });
+    await t.test('Guest accounts rotate sessions and restrict booking ownership', async () => {
+      const member = new Client(guest.base), stranger = new Client(guest.base);
+      await member.call('/join');
+      const oldCookie = member.cookies.get('staybook.sid');
+      const credentials = { firstName: 'Member', lastName: 'Guest', email: 'member@example.test', password: 'example-test-password' };
+      await member.call('/api/auth/register', 'POST', { ...credentials, password: 'short' }, 400);
+      await member.call('/api/auth/register', 'POST', credentials);
+      assert.notEqual(member.cookies.get('staybook.sid'), oldCookie);
+      await member.call('/account');
+      assert.equal((await member.call('/api/account/bookings')).bookings.length, 0);
+      await member.call('/booking/preview', 'POST', { ...dates, roomId: 3, ...credentials, phone: '09123456789' });
+      const { reservation } = await member.call('/api/bookings/confirm', 'POST', { accountId: 999 });
+      assert.equal((await member.call('/api/account/bookings')).bookings[0].reservation_id, reservation.reservation_id);
+      await stranger.call('/sign-in'); await stranger.call('/api/account/bookings', 'GET', undefined, 401);
+      await stranger.call('/api/auth/register', 'POST', { ...credentials, email: 'other@example.test' }); await stranger.call('/account');
+      await stranger.call('/api/account/bookings/open', 'POST', { reservationId: reservation.reservation_id }, 404);
+      await member.call('/api/auth/sign-out', 'POST', {}); await member.call('/sign-in');
+      await member.call('/api/auth/sign-in', 'POST', { email: credentials.email, password: 'incorrect' }, 401);
+      await member.call('/api/auth/sign-in', 'POST', credentials); await member.call('/account');
+      await member.call('/api/account/bookings/open', 'POST', { reservationId: reservation.reservation_id });
+      assert.equal((await member.call('/api/bookings/current')).reservation.reference, reservation.reference);
+      const { Account } = await import('../models/accountModel.js');
+      assert.ok(!(await Account.findOne({ where: { email: credentials.email } })).password_hash.includes(credentials.password));
+    });
   } finally {
     if (server?.listening) await new Promise(resolve => server.close(resolve));
     await sequelize.close();

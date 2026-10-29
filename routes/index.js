@@ -1,7 +1,16 @@
 import express from 'express';
 import { bookingController as b } from '../controllers/bookingController.js';
 import { asyncRoute as a } from '../services/validation.js';
+import { accountController as account, requireAccount } from '../controllers/accountController.js';
 const router = express.Router();
+router.get('/sign-in', account.signIn);
+router.get('/join', account.join);
+router.get('/account', account.page);
+router.post('/api/auth/register', a(account.register));
+router.post('/api/auth/sign-in', a(account.signInApi));
+router.post('/api/auth/sign-out', a(account.signOut));
+router.get('/api/account/bookings', requireAccount, a(account.bookings));
+router.post('/api/account/bookings/open', requireAccount, a(account.openBooking));
 router.get('/', a(b.home));
 router.get('/rooms', b.roomsPage);
 router.get('/rooms/search', a(b.searchRooms));
