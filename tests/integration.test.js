@@ -23,7 +23,7 @@ await test('Online booking scope and guest review', async t => {
       const data = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.equal(data.rooms.length, 6);
     });
     await t.test('Hotel directory filters rooms by their sample property', async () => {
-      const directory = await guest.call('/hotels'); assert.ok(directory.includes('StayBook City Hotel')); assert.ok(directory.includes('aria-disabled="true"'));
+      const directory = await guest.call('/hotels'); assert.ok(directory.includes('StayBook City Hotel')); assert.ok(!directory.includes('Restaurants &amp; Bars'));
       const first = await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 1 })}`);
       assert.equal(first.rooms.length, 3); assert.ok(first.rooms.every(room => room.hotel.id === 1));
       const second = await guest.call(`/rooms/search?${new URLSearchParams({ ...dates, hotelId: 2 })}`);

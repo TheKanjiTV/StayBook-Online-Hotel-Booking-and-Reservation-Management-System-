@@ -4,7 +4,7 @@
 <main id="main">
   <section class="home-hero">
     <img class="hero-background" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&amp;fit=crop&amp;w=2200&amp;q=90" alt="Sunlit hotel pool beside a timber-roofed resort" width="2200" height="1200" fetchpriority="high">
-    <div class="shell hero-content"><div class="hero-copy"><h1>A comfortable stay,<br>simply booked.</h1><p>Choose your dates, find a room and make your reservation. A little less planning. A little more looking forward.</p><a href="#booking" class="text-link">Find your room {{> arrow}}</a></div><p class="hero-photo-note">Illustrative hotel photography</p></div>
+    <div class="shell hero-content"><div class="hero-copy"><h1>A comfortable stay,<br>simply booked.</h1><p>Choose your dates, find a room and make your reservation. A little less planning. A little more looking forward.</p><a href="#booking" class="text-link">Find your room {{> arrow}}</a></div></div>
   </section>
   <section class="shell home-search">
     <div id="booking" class="booking-bar"><h2>Where does your next stay begin?</h2>

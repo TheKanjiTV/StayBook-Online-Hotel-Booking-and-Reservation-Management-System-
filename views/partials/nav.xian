@@ -2,8 +2,8 @@
 <header class="site-header no-print"><div class="header-shell header-layout">
 <a href="/" class="brand" aria-label="StayBook home">StayBook</a>
 <details class="site-menu" open><summary>Menu</summary><nav class="hotel-navigation" aria-label="Main navigation">
-<a class="nav-link" href="/hotels">Hotels &amp; Resorts</a><a class="nav-link" href="/rooms">Offers &amp; Rooms</a><span class="nav-link pending-nav" role="link" aria-disabled="true" tabindex="0" title="Not Available yet">Restaurants &amp; Bars</span><a class="nav-link" href="/account">My StayBook</a><a class="nav-link" href="/manage-booking">Find reservations</a>
-{{#if account}}<button class="nav-link account-action" type="button" data-sign-out>Sign out</button>{{else}}<a class="nav-link account-action" href="/sign-in">Sign in</a>{{/if}}
+<a class="nav-link" href="/hotels">Hotels &amp; Resorts</a><a class="nav-link" href="/rooms">Offers &amp; Rooms</a><a class="nav-link" href="/account">My StayBook</a><a class="nav-link" href="/manage-booking">Find reservations</a>
+{{#if account}}<button class="nav-link session-action" type="button" data-sign-out>Sign out</button>{{else}}<a class="nav-link account-action" href="/sign-in">Sign in</a>{{/if}}
 </nav></details>
 <a class="btn header-book" href="/#booking">Book now {{> arrow}}</a>
 <div class="header-tools">{{> notifications}}{{> language}}{{> currency}}</div>
