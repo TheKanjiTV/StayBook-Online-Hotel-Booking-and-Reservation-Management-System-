@@ -56,14 +56,6 @@
   .receipt-stay-total { border-top: 1px solid var(--line); font-size: 10px; }
   .receipt-stay-total strong { font-size: 16px; }
   .receipt-footnote { padding: 6px 22px 20px; text-align: center; color: var(--subtle); font-size: 9px; }
-  .payment-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-block: 24px; }
-  .payment-choices legend { grid-column: 1 / -1; }
-  .payment-choice { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; margin: 0; cursor: pointer; min-width: 0; }
-  .payment-choice:has(input:checked) { border-color: var(--ink); background: var(--wash); }
-  .payment-choice input { flex: 0 0 17px; width: 17px; height: 17px; padding: 0; accent-color: var(--ink); }
-  .payment-choice strong { font-size: 1rem; }
-  .payment-choice small { display: block; font-size: 1rem; color: var(--subtle); font-weight: 400; }
-  .payment-choice .badge { margin-inline-start: auto; font-size: 1rem; padding-inline: 8px; }
   .notification-menu > summary { min-width: 38px; min-height: 38px; display: flex; align-items: center; gap: 5px; list-style: none; }
   .notification-menu summary::-webkit-details-marker { display: none; }
   .notification-badge { font-size: 1rem; font-weight: 700; background: var(--ink); color: white; padding: 1px 5px; border-radius: 10px; }
@@ -165,13 +157,6 @@
   .review-row dt { color: var(--subtle); flex-shrink: 0; }
   .review-row dd { text-align: right; overflow-wrap: anywhere; }
   .payment-section { margin-top: 30px; }
-  .payment-method { @apply flex items-start gap-4; padding: 20px 0; margin-top: 12px; border-block: 1px solid var(--line); }
-  .payment-method strong { font-size: 1rem; font-weight: 650; }
-  .payment-method p { font-size: 1rem; margin-top: 5px; color: var(--subtle); }
-  .payment-method > .icon { margin-top: 2px; }
-  .payment-method > .badge { margin-left: auto; }
-  .demo-options { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 16px; color: var(--subtle); font-size: 1rem; }
-  .demo-options label { font-size: 1rem; font-weight: 400; }
   .booking-result-mark { width: 48px; height: 48px; @apply flex items-center justify-center; border-radius: 50%; background: var(--wash); margin-bottom: 23px; }
   .booking-result-mark .icon { width: 25px; height: 25px; }
   .result-intro { color: var(--subtle); font-size: 1rem; margin-top: 20px; max-width: 53ch; }
@@ -259,7 +244,6 @@
   .booking-note { align-items: start; flex-direction: column; gap: 16px; }
 }
 @media (max-width: 540px) {
-  .payment-choices { grid-template-columns: 1fr; }
   .booking-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 10px; font-size: 1rem; margin-bottom: 30px; }
   .booking-steps li { align-items: start; min-width: 0; }
   .booking-steps li, .booking-steps a { gap: 5px; }
@@ -269,8 +253,6 @@
   .form-two-col { gap: 14px; }
   .form-actions { flex-direction: column-reverse; align-items: stretch; }
   .form-actions .back-link { text-align: center; padding-block: 8px; }
-  .payment-method { flex-wrap: wrap; gap: 12px; }
-  .payment-method > div { flex: 1; min-width: 180px; }
   .lookup-panel { padding: 25px; }
   .room-listing, .room-loading { grid-template-columns: 1fr; gap: 22px; }
   .listing-photo { height: 230px; min-height: 0; }
@@ -380,6 +362,25 @@
   .account-page, .hotel-directory { padding-top: 28px; }
 }
 @media (max-width: 540px) { .booking-steps { display: flex; flex-wrap: wrap; gap: 12px 20px; } }
+.payment-availability { margin-block: 14px 22px; font-size: 16px; color: var(--subtle); }
+.payment-options { display: grid; grid-template-columns: 1fr; gap: 12px; margin-block: 24px; }
+.payment-options legend { font-size: 18px; }
+.payment-logo-choice { display: flex; align-items: center; gap: 20px; padding: 16px 20px; border: 1px solid var(--line); border-radius: 12px; min-height: 78px; margin: 0; cursor: pointer; }
+.payment-logo-choice:hover { background: var(--wash); }
+.payment-logo-choice:has(input:checked) { border-color: var(--ink); background: var(--wash); }
+.payment-logo-choice input { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; accent-color: var(--ink); }
+.payment-logo { width: 140px; height: 42px; object-fit: contain; object-position: left center; }
+.payment-logo.card-logo, .payment-logo.bank-logo { width: 64px; }
+.payment-logo-choice:has([value=MAYA]) .payment-logo { background: #122d23; padding: 7px 10px; border-radius: 6px; }
+.payment-selection { margin-inline-start: auto; visibility: hidden; }
+.payment-logo-choice:has(input:checked) .payment-selection { visibility: visible; }
+.card-fields { margin-top: 24px; }
+.card-fields[hidden] { display: none; }
+.card-number-wrap { position: relative; }
+.card-number-wrap input { min-height: 58px; padding-inline-end: 96px; font-size: 18px; font-variant-numeric: tabular-nums; }
+.card-number-wrap img { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); width: 64px; height: 40px; object-fit: contain; }
+[dir=rtl] .payment-logo { object-position: right center; }
+@media (max-width: 540px) { .payment-logo-choice { padding: 16px; gap: 16px; } .card-number-wrap input { font-size: 16px; padding-inline-end: 78px; } .card-number-wrap img { width: 52px; } }
 @media print { nav, .site-header, .site-footer, .no-print, button, .booking-steps, .summary-toggle { display: none !important; } body { background: white; } main { max-width: none !important; padding: 0 !important; } .checkout-grid { display: block; } .stay-summary { position: static; margin-top: 25px; break-inside: avoid; } .summary-body > img { display: none; } .result-actions { display: none; } }
 
 @media print {

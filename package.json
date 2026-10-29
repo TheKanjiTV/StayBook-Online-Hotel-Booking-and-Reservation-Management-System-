@@ -20,7 +20,7 @@
     "route:cache": "node route-cache.js",
     "setup": "node scripts/setup.js",
     "build": "tailwindcss -i ./styles/input.css -o ./public/tailwind.css --minify",
-    "test": "node --test --test-concurrency=1 tests/integration.test.js"
+    "test": "node --test --test-concurrency=1 tests/card.test.js tests/integration.test.js"
   },
   "dependencies": {
     "connect-flash": "^0.1.1",

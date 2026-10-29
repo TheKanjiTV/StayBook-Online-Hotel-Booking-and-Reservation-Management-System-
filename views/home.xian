@@ -15,7 +15,7 @@
         <div class="search-field"><label for="guests">Guests</label><select id="guests" name="guests">{{#each guestOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></div>
         <button class="btn">Search rooms {{> arrow}}</button>
       </form><p class="form-error mt-3" data-search-error role="alert"></p>
-    </div><p class="demo-caption">Explore our sample room collection. Booking payments are simulated.</p>
+    </div>
   </section>
   <section id="rooms" class="shell section-space"><div class="section-heading"><h2>A room for<br>your kind of stay.</h2><p>From a quiet getaway to a family trip, find the space that feels right for you.</p></div>
     <div class="room-grid">{{#each featuredRooms}}<article class="room-preview"><a href="#booking" aria-label="Find dates for {{type}}"><img src="{{image}}" alt="{{type}} interior, illustrative photograph" width="480" height="360" loading="lazy"></a><div class="room-meta"><span>Up to {{capacity}} guests</span><span>Per room</span></div><h3>{{type}}</h3><p>{{description}}</p><div class="room-price"><span>From </span><strong data-money="{{price}}">₱{{formattedPrice}}</strong><span> / night</span></div><a class="text-link mt-3" href="#booking">Check availability {{> arrow}}</a></article>{{/each}}</div>

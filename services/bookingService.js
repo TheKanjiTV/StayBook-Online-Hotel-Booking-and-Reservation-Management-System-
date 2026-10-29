@@ -10,7 +10,7 @@ export async function saveBooking(body) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
   const requestKey = string(body.requestKey, 'Request key');
   const paymentMethod = body.paymentMethod ?? 'SIMULATED';
-  if (!['SIMULATED', ...paymentMethods.map(method => method.id)].includes(paymentMethod)) fail(400, 'Choose a supported demo payment method.');
+  if (!['SIMULATED', ...paymentMethods.map(method => method.id)].includes(paymentMethod)) fail(400, 'Choose a supported payment method.');
   const requestHash = hash({ dates, guest, roomId, paymentMethod });
   return sequelize.transaction(async transaction => {
     const room = await BookingRoom.findByPk(roomId, { transaction, lock: transaction.LOCK.UPDATE });
@@ -24,7 +24,7 @@ export async function saveBooking(body) {
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
     const conflict = await Reservation.findOne({ where: { room_id: roomId, status: 'LOCAL_CONFIRMED', check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
     if (conflict) fail(409, 'This sample room is already booked for those dates. Choose another room.');
-    if (body.simulateFailure === true) fail(402, 'Simulated payment failed. No booking was saved. Please retry.');
+    if (body.simulateFailure === true) fail(402, 'Payment could not be processed. No booking was saved. Please retry.');
     const total = amount(cents(room.price) * dates.nights);
     const booking = await Reservation.create({ ...guest, reference: `SB-${randomBytes(6).toString('hex').toUpperCase()}`, request_key: requestKey, request_hash: requestHash, access_token: randomBytes(32).toString('hex'),
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,

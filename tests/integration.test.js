@@ -92,11 +92,12 @@ await test('Online booking scope and guest review', async t => {
       assert.equal(cancelled.status, 'CANCELLED'); assert.equal(cancelled.payments[0].payment_status, 'REFUNDED');
       const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(available.rooms.some(r => r.id === 1));
     });
-    await t.test('Compact receipts use session ownership and include the room photo and demo refund status', async () => {
+    await t.test('Compact receipts show the room photo and honest payment/confirmation status', async () => {
       const booking = (await guest.call('/api/bookings/current')).reservation;
       const html = await guest.call('/receipt');
-      assert.ok(html.includes(booking.reference)); assert.ok(html.includes('Cancelled · Simulated refund'));
-      assert.ok(html.includes('class="receipt-photo"')); assert.ok(html.includes('PHP')); assert.ok(html.includes('Demo receipt only.'));
+      assert.ok(html.includes(booking.reference)); assert.ok(html.includes('Booking cancelled'));
+      assert.ok(html.includes('class="receipt-photo"')); assert.ok(html.includes('PHP')); assert.ok(html.includes('No payment has been collected.'));
+      assert.ok(!/demo|simulated/i.test(html));
       const visitor = new Client(guest.base); await visitor.call(`/receipt?reservationId=${booking.reservation_id}`, 'GET', undefined, 302);
     });
     await t.test('Language and currency preferences persist and never change PHP booking totals', async () => {

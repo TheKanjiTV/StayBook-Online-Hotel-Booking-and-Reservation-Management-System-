@@ -13,6 +13,6 @@
   <section aria-label="Room results"><div class="results-toolbar"><div><p id="resultCount" class="font-semibold">Finding your room…</p><p id="searchSummary" class="muted mt-1"></p></div><div class="sort-control"><label for="sortOrder">Sort by</label><select id="sortOrder"><option value="recommended">Recommended</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="capacity">Guest capacity</option></select></div></div>
     <div id="roomFilters" class="room-filters" role="group" aria-label="Filter room types"></div>
     <div id="roomContainer" aria-live="polite" aria-busy="true"><div class="room-loading" role="status"><div class="loading-photo"></div><div><h2>Finding rooms for your stay…</h2><p class="muted mt-3">Checking your selected dates and guest count.</p></div></div></div>
-    <p class="demo-caption mb-12">Availability and prices shown are from the local demo catalog. Room photographs are illustrative.</p>
+    <p class="demo-caption mb-12">Room photographs are illustrative.</p>
   </section>
 </main>{{> footer}}<script src="/search.js"></script><script src="/rooms.js"></script></body></html>
