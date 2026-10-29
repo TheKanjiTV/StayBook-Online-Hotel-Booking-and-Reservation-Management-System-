@@ -125,6 +125,25 @@ await test('Admin booking and account management', async t => {
       assert.ok(!(await owner.call(`/rooms/search?${query}`)).rooms.some(item => item.id === 1));
       assert.equal(await AuditLog.count({ where: { action: 'ROOM_UPDATED', target_id: 1 } }), 2);
     });
+    await t.test('Date closures connect search, booking creation and editing with exclusive end dates', async () => {
+      const values = { roomId: 4, start: day(130), end: day(132), reason: 'Sales pause' };
+      await owner.call('/api/admin/closures', 'POST', values, 403);
+      const created = await admin.call('/api/admin/closures', 'POST', values);
+      const { BookingClosure } = await import('../models/availabilityModel.js'); assert.ok(await BookingClosure.findByPk(created.closureId));
+      await admin.call('/api/admin/closures', 'POST', values, 409);
+      const query = new URLSearchParams({ checkIn: day(130), checkOut: day(131), guests: 2 });
+      assert.ok(!(await owner.call(`/rooms/search?${query}`)).rooms.some(room => room.id === 4));
+      assert.ok((await owner.call(`/rooms/search?${new URLSearchParams({ checkIn: day(132), checkOut: day(133), guests: 2 })}`)).rooms.some(room => room.id === 4));
+      await owner.call('/booking/preview', 'POST', { checkIn: day(130), checkOut: day(131), roomId: 4, guests: 2, firstName: 'Closure', lastName: 'Guest', email: 'management-owner@example.test', phone: '09123456789' });
+      await owner.call('/api/bookings/confirm', 'POST', { paymentMethod: 'VISA' }, 409);
+      const existing = await Reservation.findOne({ where: { room_id: 1 } });
+      await admin.call(`/api/admin/bookings/${existing.reservation_id}/update`, 'POST', { roomId: 4, checkIn: day(130), checkOut: day(131), guests: 2, firstName: 'Manual', lastName: 'Guest', email: existing.email, phone: existing.phone, version: existing.version }, 409);
+      assert.ok((await admin.call(`/admin/availability?start=${day(130)}`)).includes('data-state="closed"'));
+      await admin.call(`/api/admin/closures/${created.closureId}/release`, 'POST', {}); await admin.call(`/api/admin/closures/${created.closureId}/release`, 'POST', {});
+      assert.equal(await BookingClosure.findByPk(created.closureId), null); assert.equal(await AuditLog.count({ where: { action: 'CLOSURE_RELEASED', target_id: created.closureId } }), 1);
+      await owner.call('/api/bookings/confirm', 'POST', { paymentMethod: 'VISA' });
+      await admin.call('/api/admin/closures', 'POST', values, 409);
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

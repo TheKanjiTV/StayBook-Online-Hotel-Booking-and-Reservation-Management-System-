@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment, activeBookingStatuses } from '../models/bookingModel.js';
 import { AccountBooking, Notification } from '../models/accountModel.js';
+import { BookingClosure } from '../models/availabilityModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
 import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
@@ -23,8 +24,9 @@ export async function saveBooking(body, options = {}) {
     }
     if (!room.is_published) fail(409, 'This room is not available for new bookings.');
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
-      const conflict = await Reservation.findOne({ where: { room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
+    const conflict = await Reservation.findOne({ where: { room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE });
     if (conflict) fail(409, 'This sample room is already booked for those dates. Choose another room.');
+    if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
     if (body.simulateFailure === true) fail(402, 'Payment could not be processed. No booking was saved. Please retry.');
     const total = amount(cents(room.price) * dates.nights);
     const booking = await Reservation.create({ ...guest, reference: `SB-${randomBytes(6).toString('hex').toUpperCase()}`, request_key: requestKey, request_hash: requestHash, access_token: randomBytes(32).toString('hex'),

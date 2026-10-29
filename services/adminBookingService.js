@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment, activeBookingStatuses } from '../models/bookingModel.js';
 import { Account, AccountBooking, Notification } from '../models/accountModel.js';
+import { BookingClosure } from '../models/availabilityModel.js';
 import { guestInput, positiveId, searchInput, cents, amount, fail } from './validation.js';
 import { cancelBooking, saveBooking } from './bookingService.js';
 import { recordAudit } from './auditService.js';
@@ -55,8 +56,9 @@ export async function updateAdminBooking(id, body, actor) {
     const dates = datesChanged ? searchInput(body) : { checkIn: booking.check_in, checkOut: booking.check_out, nights: booking.nights };
     const stayChanged = datesChanged || roomId !== booking.room_id;
     if (stayChanged && !room.is_published) fail(409, 'This room is not available for new bookings.');
-    const conflict = await Reservation.findOne({ where: { reservation_id: { [Op.ne]: booking.reservation_id }, room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction });
+    const conflict = await Reservation.findOne({ where: { reservation_id: { [Op.ne]: booking.reservation_id }, room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE });
     if (conflict) fail(409, 'This room is already booked for those dates.');
+    if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
     const rate = stayChanged ? room.price : booking.nightly_rate;
     const values = { ...guest, room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, guests, check_in: dates.checkIn, check_out: dates.checkOut, nights: dates.nights, nightly_rate: rate, total_amount: amount(cents(rate) * dates.nights), status: stayChanged ? 'LOCAL_CONFIRMED' : booking.status };
     const changes = Object.fromEntries(Object.entries(values).filter(([key, value]) => String(booking[key] ?? '') !== String(value ?? '')).map(([key, value]) => [key, { before: booking[key], after: value }]));

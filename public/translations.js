@@ -12,6 +12,21 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Availability': 'Availability|可用情况|空室状況|예약 가능 여부|Disponibilidad|Disponibilités|Verfügbarkeit|التوفر',
+  'Availability calendar': 'Kalendaryo ng availability|可用情况日历|空室カレンダー|예약 가능 달력|Calendario de disponibilidad|Calendrier des disponibilités|Verfügbarkeitskalender|تقويم التوفر',
+  'Starting date': 'Simulang petsa|开始日期|開始日|시작 날짜|Fecha inicial|Date de début|Startdatum|تاريخ البدء',
+  'View calendar': 'Tingnan ang kalendaryo|查看日历|カレンダーを見る|달력 보기|Ver calendario|Voir le calendrier|Kalender ansehen|عرض التقويم',
+  'Close booking dates': 'Isara ang booking dates|关闭预订日期|予約受付日を閉じる|예약 날짜 차단|Cerrar fechas de reserva|Fermer des dates de réservation|Buchungsdaten sperren|إغلاق تواريخ الحجز',
+  'Closed from': 'Sarado mula|关闭起始日|受付停止日|차단 시작일|Cerrado desde|Fermé à partir du|Gesperrt ab|مغلق من',
+  'Available again': 'Available muli|恢复可用日期|受付再開日|다시 예약 가능한 날짜|Disponible de nuevo|Disponible à nouveau|Wieder verfügbar|متاح مجددًا',
+  'Reason': 'Dahilan|原因|理由|사유|Motivo|Motif|Grund|السبب',
+  'Close dates': 'Isara ang dates|关闭日期|受付を停止|날짜 차단|Cerrar fechas|Fermer les dates|Daten sperren|إغلاق التواريخ',
+  'Upcoming closures': 'Paparating na closures|即将关闭的日期|今後の受付停止|예정된 차단|Próximos cierres|Fermetures à venir|Kommende Sperrzeiten|الإغلاقات القادمة',
+  'Reopen dates': 'Buksang muli ang dates|重新开放日期|受付を再開|날짜 차단 해제|Reabrir fechas|Rouvrir les dates|Daten wieder freigeben|إعادة فتح التواريخ',
+  'Reopen these dates?': 'Buksang muli ang mga petsang ito?|重新开放这些日期？|この日程の受付を再開しますか？|이 날짜의 차단을 해제할까요?|¿Reabrir estas fechas?|Rouvrir ces dates ?|Diese Daten wieder freigeben?|إعادة فتح هذه التواريخ؟',
+  'No upcoming closures.': 'Walang paparating na closures.|没有即将关闭的日期。|今後の受付停止はありません。|예정된 차단이 없습니다.|No hay próximos cierres.|Aucune fermeture à venir.|Keine kommenden Sperrzeiten.|لا توجد إغلاقات قادمة.',
+  'Closed': 'Sarado|已关闭|受付停止|차단됨|Cerrado|Fermé|Gesperrt|مغلق',
+  'Available': 'Available|可用|空室|예약 가능|Disponible|Disponible|Verfügbar|متاح',
   'Rooms & rates': 'Mga kuwarto at presyo|客房和房价|客室と料金|객실 및 요금|Habitaciones y tarifas|Chambres et tarifs|Zimmer und Preise|الغرف والأسعار',
   'Edit room': 'I-edit ang kuwarto|编辑客房|客室を編集|객실 수정|Editar habitación|Modifier la chambre|Zimmer bearbeiten|تعديل الغرفة',
   'Back to rooms': 'Bumalik sa mga kuwarto|返回客房|客室一覧へ戻る|객실 목록으로 돌아가기|Volver a habitaciones|Retour aux chambres|Zurück zu Zimmern|العودة إلى الغرف',

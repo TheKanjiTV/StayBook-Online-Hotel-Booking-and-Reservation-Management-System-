@@ -387,6 +387,12 @@
 .admin-quote { display: flex; flex-wrap: wrap; gap: 20px 48px; border-block: 1px solid var(--line); padding-block: 20px; margin-block: 28px 16px; }
 .admin-quote dt { color: var(--subtle); }
 .admin-quote dd { font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.availability-calendar { min-width: 2200px; }
+.availability-calendar th, .availability-calendar td { min-width: 140px; font-size: 14px; }
+.availability-calendar .calendar-room { position: sticky; inset-inline-start: 0; min-width: 220px; max-width: 220px; background: white; z-index: 1; }
+.availability-calendar td[data-state=booked] { background: #e4ece1; }
+.availability-calendar td[data-state=closed], .availability-calendar td[data-state=hidden] { background: #efeee9; }
+.availability-calendar td[data-state=free] a { text-decoration: underline; text-underline-offset: 4px; }
 .password-field { position: relative; }
 .password-field input { padding-inline-end: 52px; }
 .password-toggle { position: absolute; inset-inline-end: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 6px; color: var(--subtle); }

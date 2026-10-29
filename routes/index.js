@@ -5,6 +5,7 @@ import { accountController as account, requireAccount, requireAdmin } from '../c
 import { adminController as admin } from '../controllers/adminController.js';
 import { adminUserController as adminUsers } from '../controllers/adminUserController.js';
 import { adminCatalogController as catalog } from '../controllers/adminCatalogController.js';
+import { adminAvailabilityController as availability } from '../controllers/adminAvailabilityController.js';
 import { savePreferences } from '../services/preferences.js';
 const router = express.Router();
 router.post('/api/preferences', a(savePreferences));
@@ -26,6 +27,9 @@ router.get('/admin/audit-logs', requireAdmin, a(admin.audit));
 router.get('/admin/rooms', requireAdmin, a(catalog.rooms));
 router.get('/admin/rooms/:id/edit', requireAdmin, a(catalog.editRoom));
 router.post('/api/admin/rooms/:id', requireAdmin, a(catalog.updateRoom));
+router.get('/admin/availability', requireAdmin, a(availability.page));
+router.post('/api/admin/closures', requireAdmin, a(availability.close));
+router.post('/api/admin/closures/:id/release', requireAdmin, a(availability.release));
 router.get('/admin/users', requireAdmin, a(adminUsers.list));
 router.get('/admin/users/new', requireAdmin, a(adminUsers.form));
 router.get('/admin/users/:id/edit', requireAdmin, a(adminUsers.form));

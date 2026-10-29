@@ -5,6 +5,7 @@ import { sequelize } from './models/db.js';
 import { BookingRoom, Reservation } from './models/bookingModel.js';
 import { Account } from './models/accountModel.js';
 import './models/auditModel.js';
+import './models/availabilityModel.js';
 import { sampleRooms } from './services/pmsApi.js';
 export async function migrate() {
   const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });
