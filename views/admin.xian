@@ -1,11 +1,9 @@
-{{> head}}
-<body>{{> nav}}
-<main id="main" class="shell admin-page">
-<div class="admin-heading"><h1>Admin portal</h1><p>Search and manage StayBook reservations.</p></div>
-<form action="/admin" method="get" class="admin-filters" role="search">
+{{> admin-start}}
+<div class="admin-heading"><h1>Bookings</h1><p>Search and manage StayBook reservations.</p></div>
+<form action="/admin/bookings" method="get" class="admin-filters" role="search">
 <div><label for="bookingSearch">Search bookings</label><input id="bookingSearch" name="q" value="{{q}}" maxlength="100" placeholder="Reference, guest name or email"></div>
 <div><label for="bookingStatus">Booking status</label><select id="bookingStatus" name="status"><option value="">All bookings</option><option value="LOCAL_CONFIRMED" {{#if activeSelected}}selected{{/if}}>Awaiting confirmation</option><option value="CANCELLED" {{#if cancelledSelected}}selected{{/if}}>Cancelled</option></select></div>
-<button class="btn">Search</button><a class="back-link" href="/admin">Clear filters</a>
+<button class="btn">Search</button><a class="back-link" href="/admin/bookings">Clear filters</a>
 </form>
 <p class="admin-results"><span>Reservations</span>: {{count}}</p>
 {{#if bookings.length}}
@@ -14,4 +12,4 @@
 </tbody></table></div>
 {{else}}<div class="admin-empty"><h2>No bookings found</h2><p>Try another search or clear the filters.</p></div>{{/if}}
 <nav class="admin-pagination" aria-label="Booking pages">{{#if previous}}<a class="btn-secondary" href="{{previous}}">Previous</a>{{/if}}<p><span>Page</span> {{page}} / {{pages}}</p>{{#if next}}<a class="btn-secondary" href="{{next}}">Next</a>{{/if}}</nav>
-</main>{{> footer}}</body></html>
+{{> admin-end}}

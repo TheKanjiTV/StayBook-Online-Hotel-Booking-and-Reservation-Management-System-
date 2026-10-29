@@ -1,0 +1,7 @@
+{{> admin-start}}
+<div class="admin-heading"><h1>Audit logs</h1><p>Admin changes are recorded here. Passwords are never included.</p></div>
+<form method="get" action="/admin/audit-logs" class="admin-search" role="search"><label for="auditSearch">Search activity</label><div><input id="auditSearch" name="q" value="{{q}}" maxlength="100" placeholder="Action, administrator or reference"><button class="btn">Search</button></div></form>
+<p class="admin-results"><span>Records</span>: {{count}}</p>
+{{#if audits.length}}<div class="admin-table-scroll" role="region" tabindex="0" aria-label="Audit logs"><table class="admin-table"><thead><tr><th scope="col">Date and time</th><th scope="col">Administrator</th><th scope="col">Action</th><th scope="col">Record</th><th scope="col">Changes</th></tr></thead><tbody>{{#each audits}}<tr><td data-no-translate>{{timestamp}}</td><td data-no-translate>{{actor_name}}</td><td data-no-translate>{{action}}</td><td data-no-translate>{{reference}}</td><td><details><summary>View changes</summary><pre class="audit-changes" data-no-translate>{{changesText}}</pre></details></td></tr>{{/each}}</tbody></table></div>{{else}}<p class="admin-empty">No admin activity found.</p>{{/if}}
+<nav class="admin-pagination" aria-label="Booking pages">{{#if previous}}<a class="btn-secondary" href="{{previous}}">Previous</a>{{/if}}<p><span>Page</span> {{page}} / {{pages}}</p>{{#if next}}<a class="btn-secondary" href="{{next}}">Next</a>{{/if}}</nav>
+{{> admin-end}}

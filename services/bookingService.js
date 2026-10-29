@@ -53,19 +53,22 @@ export async function findBooking(reference, guestEmail) {
   if (!booking) fail(404, 'No booking matches that reference and email.');
   return booking;
 }
-export async function cancelBooking(id, token) {
+export async function cancelBooking(id, token, options = {}) {
   const reference = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token } });
   if (!reference) fail(404, 'Booking not found.');
-  await sequelize.transaction(async transaction => {
+  const perform = async transaction => {
     await BookingRoom.findByPk(reference.room_id, { transaction, lock: transaction.LOCK.UPDATE });
     const booking = await Reservation.findByPk(reference.reservation_id, { transaction, lock: transaction.LOCK.UPDATE });
-    if (booking.status === 'CANCELLED') return;
+    if (booking.status === 'CANCELLED') return false;
     if (booking.status !== 'LOCAL_CONFIRMED') fail(409, 'This booking cannot be cancelled.');
     await booking.update({ status: 'CANCELLED' }, { transaction });
     await Payment.update({ payment_status: 'REFUNDED' }, { where: { reservation_id: booking.reservation_id, payment_status: 'PAID' }, transaction });
     const owner = await AccountBooking.findByPk(booking.reservation_id, { transaction });
     if (owner) await Notification.create({ account_id: owner.account_id, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_CANCELLED' }, { transaction });
+    if (options.onChange) await options.onChange(booking, transaction);
     // TODO: agree on cancellation acknowledgement and refunds with the PMS/payment
     // provider before replacing this local-only cancellation workflow.
-  });
+    return true;
+  };
+  return options.transaction ? perform(options.transaction) : sequelize.transaction(perform);
 }
