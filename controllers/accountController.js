@@ -9,15 +9,21 @@ async function startSession(req, account) {
   await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
 }
 export async function accountContext(req, res, next) {
-  try { req.account = await accountFor(req.session.accountId); res.locals.account = req.account; next(); } catch (error) { next(error); }
+  try { req.account = await accountFor(req.session.accountId); res.locals.account = req.account; res.locals.isAdmin = req.account?.role === 'ADMIN'; next(); } catch (error) { next(error); }
 }
 export function requireAccount(req, res, next) { if (!req.account) return next(Object.assign(new Error('Sign in to continue.'), { status: 401 })); next(); }
+export function requireAdmin(req, res, next) {
+  if (!req.account) return req.path.startsWith('/api/') ? next(Object.assign(new Error('Sign in to continue.'), { status: 401 })) : res.redirect('/sign-in');
+  if (req.account.role !== 'ADMIN') return next(Object.assign(new Error('Administrator access is required.'), { status: 403 }));
+  next();
+}
+const accountHome = account => account.role === 'ADMIN' ? '/admin' : '/account';
 export const accountController = {
-  signIn: (req, res) => req.account ? res.redirect('/account') : res.render('auth', { title: 'Sign in | StayBook' }),
-  join: (req, res) => req.account ? res.redirect('/account') : res.render('auth', { title: 'Create account | StayBook', joining: true }),
-  page: (req, res) => req.account ? res.render('account', { title: 'My StayBook', account: req.account }) : res.redirect('/sign-in'),
+  signIn: (req, res) => req.account ? res.redirect(accountHome(req.account)) : res.render('auth', { title: 'Sign in | StayBook' }),
+  join: (req, res) => req.account ? res.redirect(accountHome(req.account)) : res.render('auth', { title: 'Create account | StayBook', joining: true }),
+  page: (req, res) => !req.account ? res.redirect('/sign-in') : req.account.role === 'ADMIN' ? res.redirect('/admin') : res.render('account', { title: 'My StayBook', account: req.account }),
   register: async (req, res) => { limitAuth(req.ip); const account = await register(req.body); await startSession(req, account); res.json({ success: true, redirect: req.session.bookingPreview ? '/confirmation' : '/account' }); },
-  signInApi: async (req, res) => { limitAuth(req.ip); const account = await authenticate(req.body); await startSession(req, account); res.json({ success: true, redirect: req.session.bookingPreview ? '/confirmation' : '/account' }); },
+  signInApi: async (req, res) => { limitAuth(req.ip); const account = await authenticate(req.body); await startSession(req, account); res.json({ success: true, redirect: account.role === 'ADMIN' ? '/admin' : req.session.bookingPreview ? '/confirmation' : '/account' }); },
   signOut: async (req, res) => { await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve())); res.clearCookie('staybook.sid'); res.json({ success: true, redirect: '/' }); },
   bookings: async (req, res) => res.json({ success: true, bookings: await accountBookings(req.account.id) }),
   notifications: async (req, res) => {

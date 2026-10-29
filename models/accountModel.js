@@ -7,6 +7,7 @@ export const Account = sequelize.define('GuestAccount', {
   first_name: { type: D.STRING(100), allowNull: false }, last_name: { type: D.STRING(100), allowNull: false },
   email: { type: D.STRING(255), allowNull: false, unique: true }, password_hash: { type: D.STRING(200), allowNull: false },
   username: { type: D.STRING(100), allowNull: true, unique: true },
+  role: { type: D.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' },
 }, options);
 // Ownership is explicit. Matching an unverified email never claims old bookings.
 export const AccountBooking = sequelize.define('AccountBooking', {

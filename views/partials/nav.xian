@@ -2,7 +2,7 @@
 <header class="site-header no-print"><div class="header-shell header-layout">
 <a href="/" class="brand" aria-label="StayBook home">StayBook</a>
 <details class="site-menu" open><summary>Menu</summary><nav class="hotel-navigation" aria-label="Main navigation">
-<a class="nav-link" href="/hotels">Discover</a><a class="nav-link" href="/rooms">Our rooms</a><a class="nav-link" data-booking-hub href="{{#if account}}/account{{else}}/manage-booking{{/if}}">My StayBook</a>
+<a class="nav-link" href="/hotels">Discover</a><a class="nav-link" href="/rooms">Our rooms</a><a class="nav-link" data-booking-hub href="{{#if isAdmin}}/admin{{else}}{{#if account}}/account{{else}}/manage-booking{{/if}}{{/if}}">{{#if isAdmin}}Admin portal{{else}}My StayBook{{/if}}</a>
 </nav></details>
 <div class="header-actions"><a class="btn header-book" href="/#booking">Find your stay {{> arrow}}</a></div>
 <div class="header-tools">{{> language}}{{> currency}}{{#unless account}}<a class="nav-link header-signin" href="/sign-in">Sign in</a>{{/unless}}{{> notifications}}</div>

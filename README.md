@@ -88,6 +88,12 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 ## Development and commits
 
+### Booking administration
+
+Accounts default to `GUEST`. Registration cannot assign admin roles. To grant admin access to an existing local account, run `npm run migrate`, then `node scripts/promote-admin.js <username-or-email>` with access to this module's database. The command grants a role only; it does not create credentials or reset passwords.
+
+Admin sign-in opens `/admin`, with paginated reservation search, status filters, guest/stay details and cancellation. `/admin`, `/admin/bookings/:id` and `/api/admin/bookings/:id/cancel` check the current database role on every request. Cancellation retains CSRF protection and the existing transactional notification/refund-record behavior. Totals are shown in PHP. These remain local bookings: the portal does not confirm hotel/PMS status or collect/refund real money, and has no housekeeping, POS or payroll functions.
+
 `/receipt` renders only the session-owned saved booking. It combines demo payment details, internal transaction/reference/date, the room photo and stay/price breakdown in a compact receipt. Recorded amounts stay in PHP; other selected currencies appear only as an estimate. The print stylesheet requests 105 × 240 mm paper with zero margins. Use the receipt's Print button and the browser's paper settings; actual printer margins depend on the device. The receipt shows booking/cancellation status and explicitly states that no payment was collected, with hotel confirmation pending. It is not proof of a real payment.
 
 Review uses the supplied dark payment layout: Apple Pay and Google Pay buttons, an OR divider, and card-number, expiration-date and security-code inputs. Card preview supports Visa, Mastercard, American Express and Discover test numbers. GCash, Maya and bank transfer are no longer offered; historic records retain readable method labels. The browser validates test details and sends only the method ID to the server. Card number, expiry and security code have no form names and never enter API payloads, storage or logs. The remember-method checkbox saves only the selected method ID in this device's local storage. No gateway SDK, authorization or real charge is performed. See `public/payment-logos/SOURCES.md` for artwork provenance. A future production integration must replace these test inputs with provider-hosted fields, payment intents and verified webhooks.

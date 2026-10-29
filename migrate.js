@@ -13,6 +13,7 @@ export async function migrate() {
     const query = sequelize.getQueryInterface(), table = Account.getTableName();
     const columns = await query.describeTable(table);
     if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
+    if (!columns.role) await query.addColumn(table, 'role', { type: DataTypes.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' });
     for (const room of sampleRooms) {
       await BookingRoom.findOrCreate({ where: { room_id: room.id }, defaults: {
         name: room.name, room_number: room.roomNumber, type: room.type, description: room.description, capacity: room.capacity, price: room.price, image: room.image,

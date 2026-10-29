@@ -5,7 +5,7 @@ import { Reservation } from '../models/bookingModel.js';
 import { email, string, fail } from './validation.js';
 import { hotelForRoom } from './hotelCatalog.js';
 const scrypt = promisify(scryptCallback);
-const safe = row => row ? { id: row.account_id, firstName: row.first_name, lastName: row.last_name, email: row.email } : null;
+const safe = row => row ? { id: row.account_id, firstName: row.first_name, lastName: row.last_name, email: row.email, role: row.role } : null;
 const attempts = new Map();
 export function limitAuth(ip) {
   const now = Date.now();
