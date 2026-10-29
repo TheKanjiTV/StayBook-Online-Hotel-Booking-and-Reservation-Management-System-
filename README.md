@@ -73,6 +73,8 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 The guest interface follows the existing ivory/green identity with self-hosted Cormorant Garamond and Manrope, a date-search landing page and room previews sourced from the local catalog. See `DESIGN.md` for the shared visual rules. Font licenses are included in `public/fonts/`; hotel photography is illustrative.
 
+Room results group matching rooms by type, capacity and nightly rate. Guests can update dates, filter room types and sort prices/capacity. Both nightly rates and the estimated whole-stay total are shown before room selection; the server recalculates the final amount during booking.
+
 Keep XianFire, `.xian` views and Tailwind. Complete and verify one feature, then commit it before starting a different feature. For example, an explicitly requested login feature and registration feature should have separate commits after each works; these examples do not add those features to the current scope.
 
 Use `npm run build`, `npm test` and `npm run route:list` as applicable. The integration tests create an isolated `online_booking_test_TIMESTAMP` MySQL database and delete only that named test database afterward. They verify that other systems' endpoints are absent, as well as guest validation, pricing, local payments, concurrency, booking ownership, lookup, cancellation and session persistence.
