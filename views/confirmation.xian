@@ -3,4 +3,11 @@
 <main id="main" class="shell checkout-page">
 <div id="content"><p class="muted py-12" role="status">Preparing your stay details…</p></div>
 <p id="message" role="alert" tabindex="-1" class="form-error mt-6"></p>
-</main>{{> footer}}<script type="module" src="/confirmation.js"></script></body></html>
+</main>
+<dialog id="cancelDialog" class="booking-dialog no-print" aria-labelledby="cancelTitle" aria-describedby="cancelDescription">
+<h2 id="cancelTitle">Cancel this booking?</h2>
+<p id="cancelDescription">You can search for another stay after cancelling.</p>
+<p id="cancelError" class="form-error" role="alert" tabindex="-1"></p>
+<form method="dialog" class="dialog-actions"><button class="btn-secondary" value="keep" autofocus>Keep booking</button><button id="confirmCancel" type="button" class="btn btn-danger">Cancel booking</button></form>
+</dialog>
+{{> footer}}<script type="module" src="/confirmation.js"></script></body></html>

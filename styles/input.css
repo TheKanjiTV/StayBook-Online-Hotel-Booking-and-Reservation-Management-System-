@@ -351,6 +351,13 @@
 }
 @media (max-width: 540px) { .booking-steps { display: flex; flex-wrap: wrap; gap: 12px 20px; } }
 .payment-availability { margin-block: 14px 22px; font-size: 16px; color: var(--subtle); }
+.booking-dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); margin: auto; padding: 28px; border: 0; border-radius: 16px; background: #fff; color: var(--ink); overflow-y: auto; }
+.booking-dialog::backdrop { background: rgb(15 30 24 / 45%); }
+.booking-dialog h2 { font-size: 2rem; }
+.booking-dialog > p { margin-top: 16px; font-size: 16px; }
+.dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.btn-danger { background: #8f302a; color: white; }
+.btn-danger:hover { background: #73251f; }
 .site-header { background: #fff; }
 .header-shell { width: min(1240px, calc(100% - 48px)); margin-inline: auto; }
 .header-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px 22px; padding-block: 22px; }
