@@ -156,6 +156,17 @@ await test('Admin booking and account management', async t => {
       await admin.call('/admin/guests/history?email=missing@example.test', 'GET', undefined, 404);
       assert.ok((await admin.call('/admin/guests?q=%25')).includes('No guests found.'));
     });
+    await t.test('Reports use reservation snapshots, property/date filters and safe CSV cells', async () => {
+      const page = await admin.call('/admin/bookings/new'), key = page.match(/name="requestKey"[^>]*value="([^"]+)"/)[1];
+      await admin.call('/api/admin/bookings', 'POST', { requestKey: key, checkIn: day(150), checkOut: day(151), roomId: 2, guests: 2, firstName: '=2+2', lastName: 'Guest', email: 'export-guest@example.test', phone: '09123456789', paymentMethod: 'VISA' });
+      const params = new URLSearchParams({ from: day(100), to: day(151) });
+      await owner.call('/admin/reports', 'GET', undefined, 403); await owner.call(`/admin/reports/export?${params}`, 'GET', undefined, 403);
+      const report = await admin.call(`/admin/reports?${params}`); assert.ok(report.includes('11,000.00'));
+      const city = await admin.call(`/admin/reports?${params}&hotelId=1`); assert.ok(city.includes('5,000.00')); assert.ok(!city.includes('11,000.00'));
+      const csv = await admin.call(`/admin/reports/export?${params}`); assert.ok(csv.includes('"\'=2+2 Guest"')); assert.ok(!csv.includes('access_token')); assert.ok(!csv.includes('password_hash'));
+      assert.equal(await AuditLog.count({ where: { action: 'REPORT_EXPORTED' } }), 1);
+      await admin.call(`/admin/reports?from=${day(151)}&to=${day(100)}`, 'GET', undefined, 400);
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

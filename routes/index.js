@@ -7,6 +7,7 @@ import { adminUserController as adminUsers } from '../controllers/adminUserContr
 import { adminCatalogController as catalog } from '../controllers/adminCatalogController.js';
 import { adminAvailabilityController as availability } from '../controllers/adminAvailabilityController.js';
 import { adminGuestController as guests } from '../controllers/adminGuestController.js';
+import { adminReportController as reports } from '../controllers/adminReportController.js';
 import { savePreferences } from '../services/preferences.js';
 const router = express.Router();
 router.post('/api/preferences', a(savePreferences));
@@ -33,6 +34,8 @@ router.post('/api/admin/closures', requireAdmin, a(availability.close));
 router.post('/api/admin/closures/:id/release', requireAdmin, a(availability.release));
 router.get('/admin/guests', requireAdmin, a(guests.list));
 router.get('/admin/guests/history', requireAdmin, a(guests.history));
+router.get('/admin/reports', requireAdmin, a(reports.page));
+router.get('/admin/reports/export', requireAdmin, a(reports.export));
 router.get('/admin/users', requireAdmin, a(adminUsers.list));
 router.get('/admin/users/new', requireAdmin, a(adminUsers.form));
 router.get('/admin/users/:id/edit', requireAdmin, a(adminUsers.form));

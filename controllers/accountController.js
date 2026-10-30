@@ -22,6 +22,7 @@ export function requireAdmin(req, res, next) {
   Object.assign(res.locals, { navDashboard: req.path === '/admin', navBookings: req.path.startsWith('/admin/bookings'), navAudit: req.path.startsWith('/admin/audit-logs'), navUsers: req.path.startsWith('/admin/users'), navRooms: req.path.startsWith('/admin/rooms') });
   res.locals.navAvailability = req.path.startsWith('/admin/availability');
   res.locals.navGuests = req.path.startsWith('/admin/guests');
+  res.locals.navReports = req.path.startsWith('/admin/reports');
   next();
 }
 const accountHome = account => account.role === 'ADMIN' ? '/admin' : '/account';
