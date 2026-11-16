@@ -12,7 +12,12 @@ export async function saveBooking(body, options = {}) {
   const requestKey = string(body.requestKey, 'Request key');
   const paymentMethod = body.paymentMethod ?? 'SIMULATED';
   if (!['SIMULATED', ...paymentMethods.map(method => method.id)].includes(paymentMethod)) fail(400, 'Choose a supported payment method.');
-  const requestHash = hash({ dates, guest, roomId, paymentMethod, ...(options.source === 'ADMIN' ? { source: 'ADMIN', accountId: body.accountId || null } : {}) });
+  const cardLast4 = body.cardLast4;
+  if (cardLast4 !== undefined && (typeof cardLast4 !== 'string' || !/^\d{4}$/.test(cardLast4) ||
+    !paymentMethods.some(method => method.id === paymentMethod && method.kind === 'Card'))) {
+    fail(400, 'Use only the last four digits of the test card.');
+  }
+  const requestHash = hash({ dates, guest, roomId, paymentMethod, ...(cardLast4 ? { cardLast4 } : {}), ...(options.source === 'ADMIN' ? { source: 'ADMIN', accountId: body.accountId || null } : {}) });
   return sequelize.transaction(async transaction => {
     const room = await BookingRoom.findByPk(roomId, { transaction, lock: transaction.LOCK.UPDATE });
     if (!room) fail(404, 'Room not found.');
@@ -32,7 +37,7 @@ export async function saveBooking(body, options = {}) {
     const booking = await Reservation.create({ ...guest, reference: `SB-${randomBytes(6).toString('hex').toUpperCase()}`, request_key: requestKey, request_hash: requestHash, access_token: randomBytes(32).toString('hex'),
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,
       guests: dates.guests, nights: dates.nights, nightly_rate: room.price, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });
-    await Payment.create({ reservation_id: booking.reservation_id, amount: total, payment_method: paymentMethod, payment_status: 'PAID', paid_at: new Date(), reference: randomUUID(), purpose: 'BOOKING' }, { transaction });
+    await Payment.create({ reservation_id: booking.reservation_id, amount: total, payment_method: paymentMethod, payment_status: 'PAID', paid_at: new Date(), reference: randomUUID(), purpose: 'BOOKING', card_last4: cardLast4 ?? null }, { transaction });
     if (body.accountId) {
       await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });
       await Notification.create({ account_id: body.accountId, reservation_id: booking.reservation_id, reference: booking.reference, kind: 'BOOKING_SAVED' }, { transaction });
@@ -46,7 +51,7 @@ export async function saveBooking(body, options = {}) {
 export async function getBooking(id, token) {
   const booking = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token } });
   if (!booking) fail(404, 'Booking not found.');
-  const payments = await Payment.findAll({ where: { reservation_id: booking.reservation_id }, attributes: ['amount', 'payment_method', 'payment_status', 'paid_at', 'purpose', 'reference'], order: [['payment_id', 'ASC']] });
+  const payments = await Payment.findAll({ where: { reservation_id: booking.reservation_id }, attributes: ['amount', 'payment_method', 'payment_status', 'paid_at', 'purpose', 'reference', 'card_last4'], order: [['payment_id', 'ASC']] });
   const room = await BookingRoom.findByPk(booking.room_id, { attributes: ['image'] });
   const data = booking.toJSON(); delete data.access_token; delete data.request_key; delete data.request_hash;
   delete data.deletion_requested_by;

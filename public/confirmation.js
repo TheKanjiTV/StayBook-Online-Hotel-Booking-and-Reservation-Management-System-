@@ -47,11 +47,11 @@ import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry
     try { const saved = localStorage.getItem('staybook.paymentMethod'); if (paymentMethods.some(method => method.id === saved)) { remember.checked = true; if (['APPLE_PAY', 'GOOGLE_PAY'].includes(saved)) choose(saved); } } catch {}
     const invalid = (field, message) => { field.setCustomValidity(StayBook.t(message)); field.setAttribute('aria-invalid', 'true'); field.reportValidity(); field.focus(); return null; };
     const getMethod = () => {
-      if (selected !== 'CARD') return selected;
+      if (selected !== 'CARD') return { paymentMethod: selected };
       if (!validCardNumber(number.value)) return invalid(number, 'Enter a valid test card number.');
       if (!validExpiry(expiry.value)) return invalid(expiry, 'Enter a valid expiration date (MM/YY).');
       if (!validSecurityCode(security.value, cardBrand(number.value))) return invalid(security, 'Enter the correct security code for this test card.');
-      return cardBrand(number.value);
+      return { paymentMethod: cardBrand(number.value), cardLast4: number.value.replace(/\D/g, '').slice(-4) };
     };
     getMethod.complete = method => { try { if (remember.checked) localStorage.setItem('staybook.paymentMethod', method); else localStorage.removeItem('staybook.paymentMethod'); } catch {} resetCard(); };
     return getMethod;
@@ -67,7 +67,10 @@ import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry
       const { reservation: r } = await request('/api/bookings/current');
       if (r) {
         const cancelled = r.status === 'CANCELLED';
-        content.innerHTML = `${steps(true, '')}<div class="checkout-grid"><section><div class="booking-result-mark">${icon('check')}</div><h1>${cancelled ? 'A change of plans.' : 'Your stay, a step closer.'}</h1><p class="result-intro">${cancelled ? 'Your booking has been cancelled. No payment was collected.' : 'Your booking details are saved. Keep your reference handy for your next visit.'}</p><div class="reference-strip"><div><span>Booking reference</span><strong id="bookingReference">${esc(r.reference)}</strong></div><button type="button" id="copyReference" class="btn-secondary" aria-label="Copy booking reference">Copy</button></div><span class="badge mb-6">${cancelled ? 'Cancelled' : r.status === 'ADMIN_CONFIRMED' ? 'Confirmed in StayBook' : 'Awaiting confirmation'}</span><h2 class="form-heading">Guest details</h2><dl class="review-details">${row('Guest', `${r.first_name} ${r.last_name}`)}${row('Email address', r.email)}${row('Phone number', r.phone)}${row('Payment preference', paymentLabel(r.payments[0]?.payment_method))}</dl><div class="payment-note">${icon('lock')}<p>No payment has been collected. Hotel confirmation is pending.</p></div><div class="result-actions no-print"><a id="print" class="btn-secondary" href="/receipt">Print receipt</a>${!cancelled ? '<button id="cancel" class="cancel-link">Cancel booking</button>' : ''}<a class="text-link" href="/">Plan another stay ${icon('arrow')}</a></div></section>${summary({ image: r.room.image, hotelName: r.hotel?.name, room: r.room_type, roomNumber: r.room_number, checkIn: r.check_in, checkOut: r.check_out, nights: r.nights, guests: r.guests, rate: r.nightly_rate, total: r.total_amount })}</div>`;
+        const payment = r.payments[0];
+        const method = paymentLabel(payment?.payment_method);
+        const paymentDisplay = payment?.card_last4 ? `${method} •••• ${payment.card_last4}` : method;
+        content.innerHTML = `${steps(true, '')}<div class="checkout-grid"><section><div class="booking-result-mark">${icon('check')}</div><h1>${cancelled ? 'A change of plans.' : 'Your stay, a step closer.'}</h1><p class="result-intro">${cancelled ? 'Your booking has been cancelled. No payment was collected.' : 'Your booking details are saved. Keep your reference handy for your next visit.'}</p><div class="reference-strip"><div><span>Booking reference</span><strong id="bookingReference">${esc(r.reference)}</strong></div><button type="button" id="copyReference" class="btn-secondary" aria-label="Copy booking reference">Copy</button></div><span class="badge mb-6">${cancelled ? 'Cancelled' : r.status === 'ADMIN_CONFIRMED' ? 'Confirmed in StayBook' : 'Awaiting confirmation'}</span><h2 class="form-heading">Guest details</h2><dl class="review-details">${row('Guest', `${r.first_name} ${r.last_name}`)}${row('Email address', r.email)}${row('Phone number', r.phone)}${row('Payment method', paymentDisplay)}</dl><div class="payment-note">${icon('lock')}<p>No payment has been collected. Hotel confirmation is pending.</p></div><div class="result-actions no-print"><a id="print" class="btn-secondary" href="/receipt">Print receipt</a>${!cancelled ? '<button id="cancel" class="cancel-link">Cancel booking</button>' : ''}<a class="text-link" href="/">Plan another stay ${icon('arrow')}</a></div></section>${summary({ image: r.room.image, hotelName: r.hotel?.name, room: r.room_type, roomNumber: r.room_number, checkIn: r.check_in, checkOut: r.check_out, nights: r.nights, guests: r.guests, rate: r.nightly_rate, total: r.total_amount })}</div>`;
         StayBook.configureSummaries();
         document.getElementById('copyReference').onclick = async e => { try { await navigator.clipboard.writeText(r.reference); e.target.textContent = 'Copied'; } catch { message.textContent = 'Select your booking reference and copy it manually.'; } };
         document.getElementById('cancel')?.addEventListener('click', () => { cancelError.textContent = ''; cancelDialog.showModal(); });
@@ -80,8 +83,8 @@ import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry
       StayBook.configureSummaries();
       const payForm = document.getElementById('pay'), selectedMethod = configurePayment(payForm);
       payForm.addEventListener('submit', async e => {
-        e.preventDefault(); const paymentMethod = selectedMethod(); if (!paymentMethod) return; message.textContent = ''; const button = e.target.querySelector('button'), original = button.innerHTML; button.disabled = true; button.textContent = 'Saving your booking…';
-        try { await request('/api/bookings/confirm', { method: 'POST', body: { paymentMethod } }); selectedMethod.complete(paymentMethod); await load(); window.scrollTo({ top: 0 }); }
+        e.preventDefault(); const payment = selectedMethod(); if (!payment) return; message.textContent = ''; const button = e.target.querySelector('button'), original = button.innerHTML; button.disabled = true; button.textContent = 'Saving your booking…';
+        try { await request('/api/bookings/confirm', { method: 'POST', body: payment }); selectedMethod.complete(payment.paymentMethod); await load(); window.scrollTo({ top: 0 }); }
         catch (error) { message.textContent = error.message; message.focus(); button.disabled = false; button.innerHTML = original; }
       });
     } catch (error) { content.innerHTML = `<div class="empty-state"><h1>Let’s find your booking.</h1><p>${esc(error.message)}</p><a class="btn" href="/manage-booking">Find my booking</a><a class="btn-secondary ml-3" href="/">Start a new stay</a></div>`; }

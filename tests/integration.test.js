@@ -171,9 +171,16 @@ await test('Online booking scope and guest review', async t => {
         await client.call('/booking/preview', 'POST', { checkIn: ci, checkOut: co, guests: 2, roomId: 6, firstName: 'Method', lastName: 'Test', email: 'method@example.test', phone: '09123456789' });
         await client.call('/api/bookings/confirm', 'POST', { paymentMethod: 'UNSUPPORTED' }, 400);
         await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id, simulateFailure: true }, 402);
-        const { reservation } = await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id, totalAmount: 1 });
+        const card = method.kind === 'Card';
+        const choice = { paymentMethod: method.id, ...(card ? { cardLast4: '0042' } : {}) };
+        await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id, cardLast4: card ? '4111111111111111' : '0042' }, 400);
+        const { reservation } = await client.call('/api/bookings/confirm', 'POST', { ...choice, totalAmount: 1 });
         assert.equal(reservation.payments[0].payment_method, method.id); assert.equal(Number(reservation.total_amount), 5000);
-        const again = await client.call('/api/bookings/confirm', 'POST', { paymentMethod: method.id }); assert.equal(again.reservation.reference, reservation.reference);
+        assert.equal(reservation.payments[0].card_last4, card ? '0042' : null);
+        const receipt = await client.call('/receipt');
+        assert.ok(receipt.includes(card ? `${method.label} •••• 0042` : method.label));
+        assert.ok(receipt.includes('Not collected'));
+        const again = await client.call('/api/bookings/confirm', 'POST', choice); assert.equal(again.reservation.reference, reservation.reference);
         await client.call('/api/bookings/confirm', 'POST', { paymentMethod: paymentMethods[(index + 1) % paymentMethods.length].id }, 409);
       }
     });

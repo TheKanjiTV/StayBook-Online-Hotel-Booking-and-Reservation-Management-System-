@@ -24,6 +24,7 @@ export const Reservation = sequelize.define('Reservation', {
 export const Payment = sequelize.define('Payment', {
   payment_id: id(), reservation_id: { type: D.INTEGER, allowNull: false }, amount: money(),
   payment_method: text(30), payment_status: text(30), paid_at: { type: D.DATE }, reference: { ...text(), unique: true }, purpose: text(30),
+  card_last4: { type: D.STRING(4), allowNull: true },
 }, options);
 Payment.belongsTo(Reservation, { foreignKey: 'reservation_id' });
 export const Session = sequelize.define('Session', {

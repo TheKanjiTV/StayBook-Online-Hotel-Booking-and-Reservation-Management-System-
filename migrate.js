@@ -2,7 +2,7 @@ import { Sequelize, DataTypes, QueryTypes } from 'sequelize';
 import { pathToFileURL } from 'node:url';
 import { config } from './config.js';
 import { sequelize } from './models/db.js';
-import { BookingRoom, Reservation } from './models/bookingModel.js';
+import { BookingRoom, Payment, Reservation } from './models/bookingModel.js';
 import { Account, accountRoles } from './models/accountModel.js';
 import './models/auditModel.js';
 import './models/availabilityModel.js';
@@ -24,17 +24,20 @@ export async function migrateAccountRoles() {
   }
 }
 
-export async function migrateBookingColumns() {
+async function addNullableColumn(table, name, type) {
   const query = sequelize.getQueryInterface();
-  const table = Reservation.getTableName();
   const columns = await query.describeTable(table);
-  if (!columns.deletion_requested_by) {
-    try {
-      await query.addColumn(table, 'deletion_requested_by', { type: DataTypes.INTEGER, allowNull: true });
-    } catch (error) {
-      if (error.original?.code !== 'ER_DUP_FIELDNAME') throw error;
-    }
+  if (columns[name]) return;
+  try {
+    await query.addColumn(table, name, { type, allowNull: true });
+  } catch (error) {
+    if (error.original?.code !== 'ER_DUP_FIELDNAME') throw error;
   }
+}
+
+export async function migrateBookingColumns() {
+  await addNullableColumn(Reservation.getTableName(), 'deletion_requested_by', DataTypes.INTEGER);
+  await addNullableColumn(Payment.getTableName(), 'card_last4', DataTypes.STRING(4));
 }
 
 export async function migrate() {

@@ -51,7 +51,7 @@ export const bookingController = {
   },
   confirmBooking: async (req, res) => {
     if (!req.session.bookingPreview) fail(404, 'Start a room search first.');
-    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, paymentMethod: req.body.paymentMethod, simulateFailure: req.body.simulateFailure === true });
+    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, paymentMethod: req.body.paymentMethod, cardLast4: req.body.cardLast4, simulateFailure: req.body.simulateFailure === true });
     req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
     res.json({ success: true, reservation: await getBooking(req.session.bookingId, req.session.bookingToken) });
   },
@@ -68,6 +68,7 @@ export const bookingController = {
     const estimate = preferences.currency !== 'PHP' ? new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(Number(booking.total_amount) * preferences.rate) : '';
     res.render('receipt', { title: 'Booking receipt | StayBook', booking, receipt: {
       cancelled: booking.status === 'CANCELLED', method: paymentLabel(payment?.payment_method), reference: payment?.reference,
+      cardLast4: payment?.card_last4,
       paidAt: payment?.paid_at ? new Date(payment.paid_at).toLocaleString(preferences.locale, { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }) : '',
       total: php(booking.total_amount), nightlyRate: php(booking.nightly_rate), checkIn: date(booking.check_in), checkOut: date(booking.check_out), estimate,
       nightsLabel: booking.nights === 1 ? 'night' : 'nights', guestsLabel: booking.guests === 1 ? 'guest' : 'guests',
