@@ -61,7 +61,9 @@ export const adminController = {
       activeSelected: status === 'LOCAL_CONFIRMED', confirmedSelected: status === 'ADMIN_CONFIRMED', cancelledSelected: status === 'CANCELLED', previous: page > 1 ? link(page - 1) : null, next: page < pages ? link(page + 1) : null });
   },
   detail: async (req, res) => {
-    const booking = await Reservation.findByPk(positiveId(req.params.id), { attributes: [...fields, 'phone', 'address', 'guests'] });
+    const attributes = [...fields, 'phone', 'guests'];
+    if (res.locals.isAdmin) attributes.push('address');
+    const booking = await Reservation.findByPk(positiveId(req.params.id), { attributes });
     if (!booking) fail(404, 'Booking not found.');
     const payment = await Payment.findOne({ where: { reservation_id: booking.reservation_id }, attributes: ['payment_method'], order: [['payment_id', 'ASC']] });
     res.render('admin-booking', { title: 'Booking details | StayBook', adminTitle: 'Booking details', booking: display(booking, res.locals.preferences.locale), paymentMethod: paymentLabel(payment?.payment_method) });

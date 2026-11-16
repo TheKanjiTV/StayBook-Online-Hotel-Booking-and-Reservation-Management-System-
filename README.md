@@ -90,6 +90,8 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 ### Booking administration
 
+In **Users → Add user**, choose **Booking Staff** for employees who review reservations. Staff sign in to the booking list and can view and confirm bookings. Adding, editing, cancelling or deleting bookings and access to the rest of the admin portal require the Administrator role. Staff confirmations use the same booking status, customer notification and audit record as administrator confirmations.
+
 Accounts default to `GUEST`. Registration cannot assign admin roles. To grant admin access to an existing local account, run `npm run migrate`, then `node scripts/promote-admin.js <username-or-email>` with access to this module's database. The command grants a role only; it does not create credentials or reset passwords.
 
 Admin sign-in opens a separate sidebar workspace. `/admin` is the dashboard, `/admin/bookings` lists reservations, `/admin/users` manages accounts, and `/admin/audit-logs` shows the immutable activity history. All admin pages and mutations check the current database role; writes require CSRF protection. The guest navigation/footer are not used in this workspace.

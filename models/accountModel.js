@@ -2,12 +2,13 @@ import { DataTypes as D } from 'sequelize';
 import { sequelize } from './db.js';
 import { Reservation } from './bookingModel.js';
 const options = { timestamps: true, underscored: true };
+export const accountRoles = Object.freeze(['GUEST', 'ADMIN', 'BOOKING_STAFF']);
 export const Account = sequelize.define('GuestAccount', {
   account_id: { type: D.INTEGER, primaryKey: true, autoIncrement: true },
   first_name: { type: D.STRING(100), allowNull: false }, last_name: { type: D.STRING(100), allowNull: false },
   email: { type: D.STRING(255), allowNull: false, unique: true }, password_hash: { type: D.STRING(200), allowNull: false },
   username: { type: D.STRING(100), allowNull: true, unique: true },
-  role: { type: D.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' },
+  role: { type: D.ENUM(...accountRoles), allowNull: false, defaultValue: 'GUEST' },
   session_version: { type: D.INTEGER, allowNull: false, defaultValue: 0 },
 }, { ...options, paranoid: true, version: true });
 // Ownership is explicit. Matching an unverified email never claims old bookings.

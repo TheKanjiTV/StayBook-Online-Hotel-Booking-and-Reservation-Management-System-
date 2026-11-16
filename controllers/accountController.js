@@ -12,10 +12,20 @@ export async function accountContext(req, res, next) {
   try {
     req.account = await accountFor(req.session.accountId);
     if (req.account && Number(req.session.accountSessionVersion || 0) !== req.account.sessionVersion) { req.account = null; delete req.session.accountId; delete req.session.accountSessionVersion; }
-    res.locals.account = req.account; res.locals.isAdmin = req.account?.role === 'ADMIN'; next();
+    res.locals.account = req.account;
+    res.locals.isAdmin = req.account?.role === 'ADMIN';
+    res.locals.isBookingStaff = req.account?.role === 'BOOKING_STAFF';
+    next();
   } catch (error) { next(error); }
 }
 export function requireAccount(req, res, next) { if (!req.account) return next(Object.assign(new Error('Sign in to continue.'), { status: 401 })); next(); }
+export function requireBookingReviewer(req, res, next) {
+  if (!req.account) return req.path.startsWith('/api/') ? requireAccount(req, res, next) : res.redirect('/sign-in');
+  if (req.account.role === 'ADMIN') return requireAdmin(req, res, next);
+  if (req.account.role !== 'BOOKING_STAFF') return next(Object.assign(new Error('Booking staff access is required.'), { status: 403 }));
+  res.locals.navBookings = true;
+  next();
+}
 export function requireAdmin(req, res, next) {
   if (!req.account) return req.path.startsWith('/api/') ? next(Object.assign(new Error('Sign in to continue.'), { status: 401 })) : res.redirect('/sign-in');
   if (req.account.role !== 'ADMIN') return next(Object.assign(new Error('Administrator access is required.'), { status: 403 }));
@@ -25,13 +35,21 @@ export function requireAdmin(req, res, next) {
   res.locals.navReports = req.path.startsWith('/admin/reports');
   next();
 }
-const accountHome = account => account.role === 'ADMIN' ? '/admin' : '/account';
+export function accountHome(account) {
+  if (account.role === 'ADMIN') return '/admin';
+  if (account.role === 'BOOKING_STAFF') return '/admin/bookings';
+  return '/account';
+}
 export const accountController = {
   signIn: (req, res) => req.account ? res.redirect(accountHome(req.account)) : res.render('auth', { title: 'Sign in | StayBook' }),
   join: (req, res) => req.account ? res.redirect(accountHome(req.account)) : res.render('auth', { title: 'Create account | StayBook', joining: true }),
-  page: (req, res) => !req.account ? res.redirect('/sign-in') : req.account.role === 'ADMIN' ? res.redirect('/admin') : res.render('account', { title: 'My StayBook', account: req.account }),
+  page: (req, res) => {
+    if (!req.account) return res.redirect('/sign-in');
+    if (req.account.role !== 'GUEST') return res.redirect(accountHome(req.account));
+    res.render('account', { title: 'My StayBook', account: req.account });
+  },
   register: async (req, res) => { limitAuth(req.ip); const account = await register(req.body); await startSession(req, account); res.json({ success: true, redirect: req.session.bookingPreview ? '/confirmation' : '/account' }); },
-  signInApi: async (req, res) => { limitAuth(req.ip); const account = await authenticate(req.body); await startSession(req, account); res.json({ success: true, redirect: account.role === 'ADMIN' ? '/admin' : req.session.bookingPreview ? '/confirmation' : '/account' }); },
+  signInApi: async (req, res) => { limitAuth(req.ip); const account = await authenticate(req.body); await startSession(req, account); res.json({ success: true, redirect: account.role === 'GUEST' && req.session.bookingPreview ? '/confirmation' : accountHome(account) }); },
   signOut: async (req, res) => { await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve())); res.clearCookie('staybook.sid'); res.json({ success: true, redirect: '/' }); },
   bookings: async (req, res) => res.json({ success: true, bookings: await accountBookings(req.account.id) }),
   notifications: async (req, res) => {

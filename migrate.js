@@ -1,12 +1,29 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize, DataTypes, QueryTypes } from 'sequelize';
 import { pathToFileURL } from 'node:url';
 import { config } from './config.js';
 import { sequelize } from './models/db.js';
 import { BookingRoom, Reservation } from './models/bookingModel.js';
-import { Account } from './models/accountModel.js';
+import { Account, accountRoles } from './models/accountModel.js';
 import './models/auditModel.js';
 import './models/availabilityModel.js';
 import { sampleRooms } from './services/pmsApi.js';
+
+export async function migrateAccountRoles() {
+  const query = sequelize.getQueryInterface();
+  const table = Account.getTableName();
+  const quoted = query.queryGenerator.quoteTable(table);
+  const [column] = await sequelize.query(`SHOW COLUMNS FROM ${quoted} WHERE Field = 'role'`, { type: QueryTypes.SELECT });
+  const definition = { type: DataTypes.ENUM(...accountRoles), allowNull: false, defaultValue: 'GUEST' };
+  if (!column) {
+    await query.addColumn(table, 'role', definition);
+  } else if (column.Type === "enum('GUEST','ADMIN')") {
+    // Append a role without changing existing enum positions or account rows.
+    await query.changeColumn(table, 'role', definition);
+  } else if (column.Type !== "enum('GUEST','ADMIN','BOOKING_STAFF')") {
+    throw new Error('Unexpected account role column. Review the booking database schema before deploying.');
+  }
+}
+
 export async function migrate() {
   const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });
   try {
@@ -15,7 +32,7 @@ export async function migrate() {
     const query = sequelize.getQueryInterface(), table = Account.getTableName();
     const columns = await query.describeTable(table);
     if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
-    if (!columns.role) await query.addColumn(table, 'role', { type: DataTypes.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' });
+    await migrateAccountRoles();
     if (!columns.deleted_at) await query.addColumn(table, 'deleted_at', { type: DataTypes.DATE, allowNull: true });
     if (!columns.version) await query.addColumn(table, 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
     if (!columns.session_version) await query.addColumn(table, 'session_version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });

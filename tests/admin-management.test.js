@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Sequelize } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import { Client } from './client.js';
 process.env.DB_NAME = `online_booking_management_test_${Date.now()}`;
 const { migrate } = await import('../migrate.js');
@@ -16,13 +16,58 @@ const day = offset => new Date(Date.parse(today()) + offset * 86400000).toISOStr
 await test('Admin booking and account management', async t => {
   let server;
   try {
-    await migrate(); server = await startServer(0);
+    await migrate();
     const password = 'management-example-password';
     const administrator = await register({ firstName: 'Primary', lastName: 'Admin', email: 'management-admin@example.test', password });
     await Account.update({ role: 'ADMIN' }, { where: { account_id: administrator.id } });
     await register({ firstName: 'Booking', lastName: 'Owner', email: 'management-owner@example.test', password });
+    // An existing deployment starts with the original two-role database column.
+    await sequelize.getQueryInterface().changeColumn(Account.getTableName(), 'role', { type: DataTypes.ENUM('GUEST', 'ADMIN'), allowNull: false, defaultValue: 'GUEST' });
+    server = await startServer(0);
     const admin = new Client(`http://127.0.0.1:${server.address().port}`), owner = new Client(admin.base);
     for (const [client, email] of [[admin, administrator.email], [owner, 'management-owner@example.test']]) { await client.call('/sign-in'); await client.call('/api/auth/sign-in', 'POST', { email, password }); await client.call(client === admin ? '/admin' : '/account'); }
+    await t.test('Booking Staff can confirm reservations while restricted routes stay admin-only', async () => {
+      const values = { firstName: 'Booking', lastName: 'Staff', email: 'booking-staff@example.test', role: 'BOOKING_STAFF', password };
+      const userForm = await admin.call('/admin/users/new');
+      assert.match(userForm, /value="BOOKING_STAFF"/);
+      await admin.call('/api/admin/users', 'POST', values);
+      const staffAccount = await Account.findOne({ where: { email: values.email } });
+      assert.equal(staffAccount.role, 'BOOKING_STAFF');
+      const userList = await admin.call('/admin/users?role=BOOKING_STAFF');
+      assert.ok(userList.includes(values.email));
+      assert.ok(!userList.includes(administrator.email));
+      const staff = new Client(admin.base);
+      await staff.call('/sign-in');
+      assert.equal((await staff.call('/api/auth/sign-in', 'POST', { email: values.email, password })).redirect, '/admin/bookings');
+      const list = await staff.call('/admin/bookings');
+      assert.match(list, /Booking Staff portal/);
+      for (const path of ['/admin', '/admin/bookings/new', '/admin/users', '/admin/audit-logs', '/admin/rooms', '/admin/availability', '/admin/guests', '/admin/reports', '/admin/reports/export']) {
+        assert.ok(!list.includes(`href="${path}"`));
+        await staff.call(path, 'GET', undefined, 403);
+      }
+      const customer = new Client(admin.base);
+      await customer.call('/sign-in');
+      const customerEmail = 'review-customer@example.test';
+      await customer.call('/api/auth/register', 'POST', { firstName: 'Review', lastName: 'Customer', email: customerEmail, password, role: 'BOOKING_STAFF' });
+      assert.equal((await Account.findOne({ where: { email: customerEmail } })).role, 'GUEST');
+      await customer.call('/account');
+      await customer.call('/booking/preview', 'POST', { checkIn: day(35), checkOut: day(36), roomId: 1, guests: 2, firstName: 'Review', lastName: 'Customer', email: customerEmail, phone: '09123456789' });
+      const { reservation } = await customer.call('/api/bookings/confirm', 'POST', { paymentMethod: 'VISA' });
+      const id = reservation.reservation_id;
+      const detail = await staff.call(`/admin/bookings/${id}`);
+      assert.match(detail, /Confirm booking/);
+      assert.doesNotMatch(detail, /Edit booking|Cancel booking|Delete booking/);
+      await staff.call(`/admin/bookings/${id}/edit`, 'GET', undefined, 403);
+      for (const path of ['/api/admin/users', '/api/admin/rooms/1', '/api/admin/closures', '/api/admin/bookings', ...['update', 'delete', 'cancel'].map(action => `/api/admin/bookings/${id}/${action}`)]) {
+        await staff.call(path, 'POST', {}, 403);
+      }
+      await staff.call(`/api/admin/bookings/${id}/confirm`, 'POST', {});
+      assert.equal((await Reservation.findByPk(id)).status, 'ADMIN_CONFIRMED');
+      assert.equal(await Notification.count({ where: { reservation_id: id, kind: 'BOOKING_CONFIRMED' } }), 1);
+      assert.equal(await AuditLog.count({ where: { target_id: id, action: 'BOOKING_CONFIRMED', actor_id: staffAccount.account_id } }), 1);
+      await admin.call(`/api/admin/users/${staffAccount.account_id}`, 'POST', { ...values, role: 'GUEST', password: '', version: staffAccount.version });
+      await staff.call('/admin/bookings', 'GET', undefined, 403);
+    });
     await t.test('Confirm, edit and delete preserve availability, pricing, audit history and ownership', async () => {
       const input = { checkIn: day(50), checkOut: day(51), roomId: 1, guests: 2, firstName: 'Booking', lastName: 'Owner', email: 'management-owner@example.test', phone: '09123456789' };
       await owner.call('/booking/preview', 'POST', input);

@@ -1,5 +1,5 @@
 import { sequelize } from '../models/db.js';
-import { Account } from '../models/accountModel.js';
+import { Account, accountRoles } from '../models/accountModel.js';
 import { email, string, positiveId, fail } from './validation.js';
 import { hashPassword } from './accountService.js';
 import { recordAudit } from './auditService.js';
@@ -8,7 +8,7 @@ import { checkVersion } from './adminBookingService.js';
 function accountValues(body) {
   const username = body.username ? string(body.username, 'Username', 100).toLowerCase() : null;
   if (username && !/^[a-z0-9][a-z0-9_.-]{1,99}$/.test(username)) fail(400, 'Use 2–100 letters, numbers, dots, hyphens or underscores for the username.');
-  if (!['GUEST', 'ADMIN'].includes(body.role)) fail(400, 'Choose a valid account role.');
+  if (!accountRoles.includes(body.role)) fail(400, 'Choose a valid account role.');
   return { first_name: string(body.firstName, 'First name'), last_name: string(body.lastName, 'Last name'), email: email(body.email), username, role: body.role };
 }
 // Serialize role/delete changes against all current admins, including the actor.

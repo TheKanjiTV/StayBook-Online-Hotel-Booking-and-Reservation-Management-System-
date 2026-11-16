@@ -18,6 +18,7 @@ import { sequelize } from './models/db.js';
 import router from './routes/index.js';
 import { accountContext } from './controllers/accountController.js';
 import { preferencesContext } from './services/preferences.js';
+import { migrateAccountRoles } from './migrate.js';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.disable('x-powered-by');
@@ -50,6 +51,7 @@ app.use((error, req, res, next) => {
 export default app;
 export async function startServer(port = Number(process.env.PORT || 3000)) {
   await sequelize.authenticate();
+  await migrateAccountRoles();
   const server = createServer(app);
   const host = process.env.HOST || '127.0.0.1';
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, host, resolve); });
