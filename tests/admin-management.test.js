@@ -26,7 +26,7 @@ await test('Admin booking and account management', async t => {
     server = await startServer(0);
     const admin = new Client(`http://127.0.0.1:${server.address().port}`), owner = new Client(admin.base);
     for (const [client, email] of [[admin, administrator.email], [owner, 'management-owner@example.test']]) { await client.call('/sign-in'); await client.call('/api/auth/sign-in', 'POST', { email, password }); await client.call(client === admin ? '/admin' : '/account'); }
-    await t.test('Booking Staff can confirm reservations while restricted routes stay admin-only', async () => {
+    await t.test('Booking Staff can confirm reservations, manage availability and request administrator approval for deletion', async () => {
       const values = { firstName: 'Booking', lastName: 'Staff', email: 'booking-staff@example.test', role: 'BOOKING_STAFF', password };
       const userForm = await admin.call('/admin/users/new');
       assert.match(userForm, /value="BOOKING_STAFF"/);
@@ -38,10 +38,17 @@ await test('Admin booking and account management', async t => {
       assert.ok(!userList.includes(administrator.email));
       const staff = new Client(admin.base);
       await staff.call('/sign-in');
-      assert.equal((await staff.call('/api/auth/sign-in', 'POST', { email: values.email, password })).redirect, '/admin/bookings');
+      assert.equal((await staff.call('/api/auth/sign-in', 'POST', { email: values.email, password })).redirect, '/admin');
       const list = await staff.call('/admin/bookings');
       assert.match(list, /Booking Staff portal/);
-      for (const path of ['/admin', '/admin/bookings/new', '/admin/users', '/admin/audit-logs', '/admin/rooms', '/admin/availability', '/admin/guests', '/admin/reports', '/admin/reports/export']) {
+      const dashboard = await staff.call('/admin');
+      assert.match(dashboard, /Review pending bookings/);
+      assert.doesNotMatch(dashboard, /Recent activity|User accounts/);
+      await staff.call('/admin/rooms');
+      await staff.call('/admin/availability');
+      const closure = await staff.call('/api/admin/closures', 'POST', { roomId: 1, start: day(200), end: day(201), reason: 'Unlisted dates' });
+      await staff.call(`/api/admin/closures/${closure.closureId}/release`, 'POST', {});
+      for (const path of ['/admin/bookings/new', '/admin/users', '/admin/audit-logs', '/admin/guests', '/admin/reports', '/admin/reports/export']) {
         assert.ok(!list.includes(`href="${path}"`));
         await staff.call(path, 'GET', undefined, 403);
       }
@@ -58,13 +65,31 @@ await test('Admin booking and account management', async t => {
       assert.match(detail, /Confirm booking/);
       assert.doesNotMatch(detail, /Edit booking|Cancel booking|Delete booking/);
       await staff.call(`/admin/bookings/${id}/edit`, 'GET', undefined, 403);
-      for (const path of ['/api/admin/users', '/api/admin/rooms/1', '/api/admin/closures', '/api/admin/bookings', ...['update', 'delete', 'cancel'].map(action => `/api/admin/bookings/${id}/${action}`)]) {
+      for (const path of ['/api/admin/users', '/api/admin/bookings', ...['update', 'delete', 'cancel'].map(action => `/api/admin/bookings/${id}/${action}`)]) {
         await staff.call(path, 'POST', {}, 403);
       }
       await staff.call(`/api/admin/bookings/${id}/confirm`, 'POST', {});
       assert.equal((await Reservation.findByPk(id)).status, 'ADMIN_CONFIRMED');
       assert.equal(await Notification.count({ where: { reservation_id: id, kind: 'BOOKING_CONFIRMED' } }), 1);
       assert.equal(await AuditLog.count({ where: { target_id: id, action: 'BOOKING_CONFIRMED', actor_id: staffAccount.account_id } }), 1);
+      const requestPath = `/api/admin/bookings/${id}/request-deletion`;
+      await staff.call(requestPath, 'POST', {});
+      await staff.call(requestPath, 'POST', {});
+      const requested = await Reservation.findByPk(id);
+      assert.equal(requested.deletion_requested_by, staffAccount.account_id);
+      assert.equal(await AuditLog.count({ where: { target_id: id, action: 'BOOKING_DELETION_REQUESTED' } }), 1);
+      assert.ok((await admin.call('/admin/bookings?deletion=1')).includes(reservation.reference));
+      const review = await admin.call(`/admin/bookings/${id}`);
+      assert.match(review, /Administrator password/);
+      const approvePath = `/api/admin/bookings/${id}/approve-deletion`;
+      await staff.call(approvePath, 'POST', { password, version: requested.version }, 403);
+      await admin.call(approvePath, 'POST', { password: 'wrong-approval-password', version: requested.version }, 401);
+      await admin.call(`/api/admin/bookings/${id}/delete`, 'POST', {}, 403);
+      await admin.call(approvePath, 'POST', { password, version: requested.version - 1 }, 409);
+      assert.ok(await Reservation.findByPk(id));
+      await admin.call(approvePath, 'POST', { password, version: requested.version });
+      assert.equal(await Reservation.findByPk(id), null);
+      assert.ok(await Reservation.findByPk(id, { paranoid: false }));
       await admin.call(`/api/admin/users/${staffAccount.account_id}`, 'POST', { ...values, role: 'GUEST', password: '', version: staffAccount.version });
       await staff.call('/admin/bookings', 'GET', undefined, 403);
     });

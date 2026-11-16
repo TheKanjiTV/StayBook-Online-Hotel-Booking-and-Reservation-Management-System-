@@ -23,21 +23,23 @@ export function requireBookingReviewer(req, res, next) {
   if (!req.account) return req.path.startsWith('/api/') ? requireAccount(req, res, next) : res.redirect('/sign-in');
   if (req.account.role === 'ADMIN') return requireAdmin(req, res, next);
   if (req.account.role !== 'BOOKING_STAFF') return next(Object.assign(new Error('Booking staff access is required.'), { status: 403 }));
-  res.locals.navBookings = true;
+  setPortalNavigation(req, res);
   next();
 }
 export function requireAdmin(req, res, next) {
   if (!req.account) return req.path.startsWith('/api/') ? next(Object.assign(new Error('Sign in to continue.'), { status: 401 })) : res.redirect('/sign-in');
   if (req.account.role !== 'ADMIN') return next(Object.assign(new Error('Administrator access is required.'), { status: 403 }));
+  setPortalNavigation(req, res);
+  next();
+}
+function setPortalNavigation(req, res) {
   Object.assign(res.locals, { navDashboard: req.path === '/admin', navBookings: req.path.startsWith('/admin/bookings'), navAudit: req.path.startsWith('/admin/audit-logs'), navUsers: req.path.startsWith('/admin/users'), navRooms: req.path.startsWith('/admin/rooms') });
   res.locals.navAvailability = req.path.startsWith('/admin/availability');
   res.locals.navGuests = req.path.startsWith('/admin/guests');
   res.locals.navReports = req.path.startsWith('/admin/reports');
-  next();
 }
 export function accountHome(account) {
-  if (account.role === 'ADMIN') return '/admin';
-  if (account.role === 'BOOKING_STAFF') return '/admin/bookings';
+  if (account.role === 'ADMIN' || account.role === 'BOOKING_STAFF') return '/admin';
   return '/account';
 }
 export const accountController = {

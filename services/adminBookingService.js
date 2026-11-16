@@ -69,9 +69,32 @@ export async function updateAdminBooking(id, body, actor) {
     await recordAudit(actor, 'BOOKING_UPDATED', 'BOOKING', booking.reservation_id, booking.reference, changes, transaction);
   });
 }
-export const deleteAdminBooking = (id, actor) => lockedBooking(id, null, async (booking, rooms, transaction) => {
+export const requestBookingDeletion = (id, actor) => lockedBooking(id, null, async (booking, rooms, transaction) => {
+  if (booking.deletion_requested_by) return;
+  await booking.update({ deletion_requested_by: actor.id }, { transaction });
+  await recordAudit(actor, 'BOOKING_DELETION_REQUESTED', 'BOOKING', booking.reservation_id, booking.reference, {}, transaction);
+});
+
+export const dismissBookingDeletion = (id, actor, body) => lockedBooking(id, null, async (booking, rooms, transaction) => {
+  checkVersion(booking, body);
+  if (!booking.deletion_requested_by) fail(409, 'There is no deletion request to dismiss.');
+  await booking.update({ deletion_requested_by: null }, { transaction });
+  await recordAudit(actor, 'BOOKING_DELETION_DISMISSED', 'BOOKING', booking.reservation_id, booking.reference, {}, transaction);
+});
+
+export const deleteAdminBooking = (id, actor, approval) => lockedBooking(id, null, async (booking, rooms, transaction) => {
+  const requestedBy = booking.deletion_requested_by;
+  if (requestedBy && !approval) fail(403, 'An administrator must approve this request with their password.');
+  if (approval) {
+    checkVersion(booking, approval);
+    if (!requestedBy) fail(409, 'There is no deletion request to approve.');
+    const administrator = await Account.findByPk(actor.id, { transaction, lock: transaction.LOCK.UPDATE });
+    if (administrator?.role !== 'ADMIN' || administrator.session_version !== actor.sessionVersion) {
+      fail(403, 'Sign in again as an administrator.');
+    }
+  }
   const previousStatus = booking.status;
   if (activeBookingStatuses.includes(booking.status)) { await cancelBooking(booking.reservation_id, booking.access_token, { transaction }); await booking.reload({ transaction }); }
-  await recordAudit(actor, 'BOOKING_DELETED', 'BOOKING', booking.reservation_id, booking.reference, { deleted: true, previousStatus }, transaction);
+  await recordAudit(actor, 'BOOKING_DELETED', 'BOOKING', booking.reservation_id, booking.reference, { deleted: true, previousStatus, ...(requestedBy ? { requested_by: requestedBy } : {}) }, transaction);
   await booking.destroy({ transaction });
 });

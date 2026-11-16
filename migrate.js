@@ -24,6 +24,19 @@ export async function migrateAccountRoles() {
   }
 }
 
+export async function migrateBookingColumns() {
+  const query = sequelize.getQueryInterface();
+  const table = Reservation.getTableName();
+  const columns = await query.describeTable(table);
+  if (!columns.deletion_requested_by) {
+    try {
+      await query.addColumn(table, 'deletion_requested_by', { type: DataTypes.INTEGER, allowNull: true });
+    } catch (error) {
+      if (error.original?.code !== 'ER_DUP_FIELDNAME') throw error;
+    }
+  }
+}
+
 export async function migrate() {
   const root = new Sequelize('mysql', config.dbUser, config.dbPassword, { host: config.dbHost, port: config.dbPort, dialect: 'mysql', logging: false });
   try {
@@ -33,6 +46,7 @@ export async function migrate() {
     const columns = await query.describeTable(table);
     if (!columns.username) await query.addColumn(table, 'username', { type: DataTypes.STRING(100), allowNull: true, unique: true });
     await migrateAccountRoles();
+    await migrateBookingColumns();
     if (!columns.deleted_at) await query.addColumn(table, 'deleted_at', { type: DataTypes.DATE, allowNull: true });
     if (!columns.version) await query.addColumn(table, 'version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });
     if (!columns.session_version) await query.addColumn(table, 'session_version', { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 });

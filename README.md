@@ -90,7 +90,7 @@ Mutation requests use the session cookie and CSRF token from the page. Prices ar
 
 ### Booking administration
 
-In **Users → Add user**, choose **Booking Staff** for employees who review reservations. Staff sign in to the booking list and can view and confirm bookings. Adding, editing, cancelling or deleting bookings and access to the rest of the admin portal require the Administrator role. Staff confirmations use the same booking status, customer notification and audit record as administrator confirmations.
+In **Users → Add user**, choose **Booking Staff** for employees who review and confirm reservations, manage room rates and publication, or close and reopen dates for online booking. Staff sign in to their booking dashboard. To remove a booking, staff submit a deletion request. An administrator reviews the request under **Dashboard → Deletion requests** and enters their own password in their own session to approve it. Staff actions are audited. User access, guest directories, reports, audit history and adding, editing or cancelling reservations remain within Administrator access.
 
 Accounts default to `GUEST`. Registration cannot assign admin roles. To grant admin access to an existing local account, run `npm run migrate`, then `node scripts/promote-admin.js <username-or-email>` with access to this module's database. The command grants a role only; it does not create credentials or reset passwords.
 

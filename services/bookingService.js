@@ -49,6 +49,7 @@ export async function getBooking(id, token) {
   const payments = await Payment.findAll({ where: { reservation_id: booking.reservation_id }, attributes: ['amount', 'payment_method', 'payment_status', 'paid_at', 'purpose', 'reference'], order: [['payment_id', 'ASC']] });
   const room = await BookingRoom.findByPk(booking.room_id, { attributes: ['image'] });
   const data = booking.toJSON(); delete data.access_token; delete data.request_key; delete data.request_hash;
+  delete data.deletion_requested_by;
   return { ...data, hotel: hotelForRoom(data.room_id), guest: { first_name: data.first_name, last_name: data.last_name, email: data.email },
     room: { room_number: data.room_number, roomType: { name: data.room_type }, image: room?.image || null }, payments, integration_status: 'NOT_CONNECTED' };
 }

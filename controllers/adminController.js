@@ -10,9 +10,10 @@ import { paymentMethods } from '../public/payment-methods.js';
 import { Account } from '../models/accountModel.js';
 import { AuditLog } from '../models/auditModel.js';
 import { recordAudit, auditDisplay } from '../services/auditService.js';
-import { confirmAdminBooking, updateAdminBooking, deleteAdminBooking, createAdminBooking } from '../services/adminBookingService.js';
+import { confirmAdminBooking, updateAdminBooking, deleteAdminBooking, createAdminBooking, requestBookingDeletion, dismissBookingDeletion } from '../services/adminBookingService.js';
+import { authenticate, limitAuth } from '../services/accountService.js';
 
-const fields = ['reservation_id', 'reference', 'room_id', 'room_type', 'room_number', 'first_name', 'last_name', 'email', 'check_in', 'check_out', 'total_amount', 'status'];
+const fields = ['reservation_id', 'reference', 'room_id', 'room_type', 'room_number', 'first_name', 'last_name', 'email', 'check_in', 'check_out', 'total_amount', 'status', 'deletion_requested_by'];
 const php = amount => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', currencyDisplay: 'code' }).format(Number(amount));
 function display(row, locale) {
   const booking = row.toJSON();
@@ -37,11 +38,14 @@ export const adminController = {
     res.json({ success: true, redirect: `/admin/bookings/${booking.reservation_id}`, reference: booking.reference });
   },
   dashboard: async (req, res) => {
-    const [pending, cancelled, users, bookings, audits, confirmed] = await Promise.all([
-      Reservation.count({ where: { status: 'LOCAL_CONFIRMED' } }), Reservation.count({ where: { status: 'CANCELLED' } }), Account.count(),
-      Reservation.findAll({ attributes: fields, order: [['createdAt', 'DESC']], limit: 5 }), AuditLog.findAll({ order: [['audit_id', 'DESC']], limit: 5 }), Reservation.count({ where: { status: 'ADMIN_CONFIRMED' } }),
+    const [pending, cancelled, bookings, audits, confirmed, deletionRequests] = await Promise.all([
+      Reservation.count({ where: { status: 'LOCAL_CONFIRMED' } }), Reservation.count({ where: { status: 'CANCELLED' } }),
+      Reservation.findAll({ attributes: fields, order: [['createdAt', 'DESC']], limit: 5 }),
+      res.locals.isAdmin ? AuditLog.findAll({ order: [['audit_id', 'DESC']], limit: 5 }) : [],
+      Reservation.count({ where: { status: 'ADMIN_CONFIRMED' } }),
+      Reservation.count({ where: { deletion_requested_by: { [Op.ne]: null } } }),
     ]);
-    res.render('admin-dashboard', { title: 'Dashboard | StayBook', adminTitle: 'Dashboard', pending, confirmed, cancelled, users, bookings: bookings.map(row => display(row, res.locals.preferences.locale)), audits: audits.map(row => auditDisplay(row, res.locals.preferences.locale)) });
+    res.render('admin-dashboard', { title: 'Dashboard | StayBook', adminTitle: 'Dashboard', pending, confirmed, cancelled, deletionRequests, bookings: bookings.map(row => display(row, res.locals.preferences.locale)), audits: audits.map(row => auditDisplay(row, res.locals.preferences.locale)) });
   },
   list: async (req, res) => {
     const q = req.query.q ? string(req.query.q, 'Search', 100) : '';
@@ -50,18 +54,20 @@ export const adminController = {
     const page = req.query.page === undefined ? 1 : positiveId(req.query.page, 'page');
     if (page > 10000) fail(400, 'Choose a valid page.');
     const where = status ? { status } : {};
+    const deletionOnly = req.query.deletion === '1';
+    if (deletionOnly) where.deletion_requested_by = { [Op.ne]: null };
     if (q) {
       const pattern = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
       where[Op.or] = ['reference', 'email', 'first_name', 'last_name'].map(field => ({ [field]: { [Op.like]: pattern } }));
     }
     const { count, rows } = await Reservation.findAndCountAll({ where, attributes: fields, order: [['createdAt', 'DESC'], ['reservation_id', 'DESC']], limit: 25, offset: (page - 1) * 25 });
     const pages = Math.max(1, Math.ceil(count / 25));
-    const link = target => `/admin/bookings?${new URLSearchParams({ q, status, page: target })}`;
-    res.render('admin', { title: 'Bookings | StayBook', adminTitle: 'Bookings', bookings: rows.map(row => display(row, res.locals.preferences.locale)), q, count, page, pages,
+    const link = target => `/admin/bookings?${new URLSearchParams({ q, status, page: target, ...(deletionOnly ? { deletion: '1' } : {}) })}`;
+    res.render('admin', { title: 'Bookings | StayBook', adminTitle: 'Bookings', bookings: rows.map(row => display(row, res.locals.preferences.locale)), q, count, page, pages, deletionOnly,
       activeSelected: status === 'LOCAL_CONFIRMED', confirmedSelected: status === 'ADMIN_CONFIRMED', cancelledSelected: status === 'CANCELLED', previous: page > 1 ? link(page - 1) : null, next: page < pages ? link(page + 1) : null });
   },
   detail: async (req, res) => {
-    const attributes = [...fields, 'phone', 'guests'];
+    const attributes = [...fields, 'phone', 'guests', 'version'];
     if (res.locals.isAdmin) attributes.push('address');
     const booking = await Reservation.findByPk(positiveId(req.params.id), { attributes });
     if (!booking) fail(404, 'Booking not found.');
@@ -86,6 +92,27 @@ export const adminController = {
   update: async (req, res) => { const id = positiveId(req.params.id); await updateAdminBooking(id, req.body, req.account); res.json({ success: true, redirect: `/admin/bookings/${id}` }); },
   confirm: async (req, res) => { const id = positiveId(req.params.id); await confirmAdminBooking(id, req.account); res.json({ success: true, redirect: `/admin/bookings/${id}` }); },
   delete: async (req, res) => { await deleteAdminBooking(positiveId(req.params.id), req.account); res.json({ success: true, redirect: '/admin/bookings' }); },
+  requestDeletion: async (req, res) => {
+    if (req.account.role !== 'BOOKING_STAFF') fail(403, 'Only booking staff submit deletion requests.');
+    const id = positiveId(req.params.id);
+    await requestBookingDeletion(id, req.account);
+    res.json({ success: true, redirect: `/admin/bookings/${id}` });
+  },
+  approveDeletion: async (req, res) => {
+    const id = positiveId(req.params.id);
+    limitAuth(`deletion-approval:${req.account.id}`);
+    const administrator = await authenticate({ email: req.account.email, password: req.body.password });
+    if (administrator.id !== req.account.id || administrator.role !== 'ADMIN' || administrator.sessionVersion !== req.account.sessionVersion) {
+      fail(403, 'Sign in again as an administrator.');
+    }
+    await deleteAdminBooking(id, administrator, { version: req.body.version });
+    res.json({ success: true, redirect: '/admin/bookings?deletion=1' });
+  },
+  dismissDeletion: async (req, res) => {
+    const id = positiveId(req.params.id);
+    await dismissBookingDeletion(id, req.account, req.body);
+    res.json({ success: true, redirect: `/admin/bookings/${id}` });
+  },
   audit: async (req, res) => {
     const q = req.query.q ? string(req.query.q, 'Search', 100) : '';
     const page = req.query.page === undefined ? 1 : positiveId(req.query.page, 'page');
