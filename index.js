@@ -59,9 +59,10 @@ export async function startServer(port = Number(process.env.PORT || 3000)) {
   return server;
 }
 const direct = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-if (direct) {
-  startServer().then(server => {
+export function runServer() {
+  return startServer().then(server => {
     const shutdown = () => server.close(async () => { await sequelize.close(); process.exit(0); });
     process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
   }).catch(async error => { console.error(error.message); await sequelize.close(); process.exitCode = 1; });
 }
+if (direct) runServer();
