@@ -1,0 +1,31 @@
+<div data-booking-panel>
+  <div class="admin-heading"><h1>Booking details</h1><p data-no-translate>{{booking.reference}}</p><p class="badge">{{statusLabel}}</p></div>
+  <div class="admin-detail-grid">
+    <section aria-labelledby="panelGuestTitle">
+      <h2 id="panelGuestTitle">Guest details</h2>
+      <dl class="review-details">
+        <div class="review-row"><dt>Guest</dt><dd data-no-translate>{{booking.first_name}} {{booking.last_name}}</dd></div>
+        <div class="review-row"><dt>Email address</dt><dd data-no-translate>{{booking.email}}</dd></div>
+        <div class="review-row"><dt>Phone number</dt><dd data-no-translate>{{booking.phone}}</dd></div>
+      </dl>
+    </section>
+    <section aria-labelledby="panelStayTitle">
+      <h2 id="panelStayTitle">Your stay</h2>
+      <dl class="review-details">
+        <div class="review-row"><dt>Room</dt><dd>{{booking.room_type}} · <span data-no-translate>{{booking.room_number}}</span></dd></div>
+        <div class="review-row"><dt>Hotel or resort</dt><dd data-no-translate>{{booking.hotel.name}}</dd></div>
+        <div class="review-row"><dt>Check-in</dt><dd data-no-translate>{{checkIn}}</dd></div>
+        <div class="review-row"><dt>Check-out</dt><dd data-no-translate>{{checkOut}}</dd></div>
+        <div class="review-row"><dt>Guests</dt><dd>{{booking.guests}}</dd></div>
+        <div class="review-row"><dt>Total for your stay</dt><dd data-money="{{booking.total_amount}}">{{total}}</dd></div>
+        <div class="review-row"><dt>Payment method</dt><dd data-no-translate>{{method}}{{#if cardLast4}} •••• {{cardLast4}}{{/if}}</dd></div>
+      </dl>
+    </section>
+  </div>
+  <p class="field-help mt-5">No payment has been collected.</p>
+  {{#unless cancelled}}<p class="field-help mt-1">{{refundPolicy}}</p>{{/unless}}
+  <div class="booking-detail-actions">
+    <div><a class="btn" href="/receipt">Print receipt</a></div>
+    {{#if booking.can_cancel}}<div><button type="button" class="btn-secondary" data-guest-booking-action data-url="/api/bookings/cancel" data-title="Cancel this booking?" data-description="You can search for another stay after cancelling." data-label="Cancel booking" data-danger="true" data-reference="{{booking.reference}}">Cancel booking</button></div>{{/if}}
+  </div>
+</div>

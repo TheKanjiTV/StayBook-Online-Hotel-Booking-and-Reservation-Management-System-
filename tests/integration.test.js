@@ -86,6 +86,7 @@ await test('Online booking scope and guest review', async t => {
       const booking = (await guest.call('/api/bookings/current')).reservation;
       const lookup = new Client(guest.base); await lookup.call('/manage-booking');
       await lookup.call('/api/bookings/cancel', 'POST', {}, 404);
+      await lookup.call('/booking/details', 'GET', undefined, 404);
       await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'wrong@example.test' }, 404);
       await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'guest@example.test' });
       assert.equal((await lookup.call('/api/bookings/current')).reservation.reference, booking.reference);

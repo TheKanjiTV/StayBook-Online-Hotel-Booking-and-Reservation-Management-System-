@@ -17,7 +17,10 @@
     const button = event.target.closest('[data-notification]'); if (!button) return; button.disabled = true;
     try {
       await request('/api/account/notifications/read', { method: 'POST', body: { notificationId: button.dataset.notification } });
-      const result = await request('/api/account/bookings/open', { method: 'POST', body: { reservationId: button.dataset.reservation } }); location.href = result.redirect;
+      await request('/api/account/bookings/open', { method: 'POST', body: { reservationId: button.dataset.reservation } });
+      document.querySelector('.notification-menu').open = false;
+      button.disabled = false;
+      StayBook.bookingPanel.open('/booking/details', document.querySelector('.notification-menu > summary'));
     } catch (problem) { error.textContent = problem.message; button.disabled = false; }
   };
   document.querySelector('.notification-menu').addEventListener('toggle', event => { if (event.target.open) refresh(); });

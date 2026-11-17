@@ -67,6 +67,20 @@ export const bookingController = {
     const reservation = req.session.bookingId ? await getBooking(req.session.bookingId, req.session.bookingToken) : null;
     res.json({ success: true, reservation });
   },
+  bookingPanel: async (req, res) => {
+    if (!req.session.bookingId) fail(404, 'Booking not found.');
+    const booking = await getBooking(req.session.bookingId, req.session.bookingToken);
+    const payment = booking.payments[0], preferences = res.locals.preferences;
+    const date = value => new Date(value + 'T12:00:00Z').toLocaleDateString(preferences.locale, { dateStyle: 'medium' });
+    const total = new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(Number(booking.total_amount) * preferences.rate);
+    const cancelled = booking.status === 'CANCELLED';
+    const statusLabel = cancelled ? 'Cancelled' : booking.status === 'ADMIN_CONFIRMED' ? 'Confirmed in StayBook' : 'Awaiting confirmation';
+    res.set('Cache-Control', 'private, no-store');
+    res.render('guest-booking-panel', {
+      booking, total, cancelled, statusLabel, refundPolicy, checkIn: date(booking.check_in), checkOut: date(booking.check_out),
+      method: paymentLabel(payment?.payment_method), cardLast4: payment?.card_last4,
+    });
+  },
   receipt: async (req, res) => {
     if (!req.session.bookingId) return res.redirect('/manage-booking');
     const booking = await getBooking(req.session.bookingId, req.session.bookingToken);

@@ -1,0 +1,5 @@
+<dialog class="booking-dialog booking-panel-dialog no-print" data-booking-dialog aria-label="Booking details">
+  <button type="button" class="booking-icon-button booking-panel-close" data-close-booking aria-label="Close dialog" title="Close dialog" autofocus><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  <div data-booking-dialog-content></div>
+</dialog>
+<script src="/booking-panel.js"></script>

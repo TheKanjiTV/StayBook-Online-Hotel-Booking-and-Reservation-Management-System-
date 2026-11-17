@@ -12,6 +12,16 @@ export const languages = [
 export const currencies = 'CNY USD GBP SGD HKD AED AUD BND BRL CAD CHF DKK EUR FJD IDR INR JPY KRW LKR MMK MNT MYR NOK TWD NZD OMR PHP PKR QAR RUB SAR SCR SEK THB TRY ZAR'.split(' ');
 // English is the source copy; each row follows the language order above after English.
 const rows = {
+  'Not available': 'Hindi available|不可预订|予約不可|예약 불가|No disponible|Indisponible|Nicht verfügbar|غير متاح',
+  'Not available today': 'Hindi available ngayong araw|今天不可预订|本日は予約不可|오늘 예약 불가|No disponible hoy|Indisponible aujourd’hui|Heute nicht verfügbar|غير متاح اليوم',
+  'Check other dates': 'Tingnan ang ibang petsa|查看其他日期|別の日程を確認|다른 날짜 확인|Consultar otras fechas|Voir d’autres dates|Andere Daten prüfen|تحقق من تواريخ أخرى',
+  'Base nightly rate (PHP)': 'Base rate kada gabi (PHP)|每晚基础房价（PHP）|基本宿泊料金（1泊・PHP）|기본 1박 요금(PHP)|Tarifa base por noche (PHP)|Tarif de base par nuit (PHP)|Grundpreis pro Nacht (PHP)|السعر الأساسي لكل ليلة (PHP)',
+  'Includes extra guests': 'Kasama ang bayad sa dagdag na guest|含额外住客费用|追加人数料金込み|추가 인원 요금 포함|Incluye huéspedes adicionales|Supplément voyageurs inclus|Zusatzgäste inbegriffen|يشمل رسوم الضيوف الإضافيين',
+  'Extra guest fee per night (included)': 'Bayad sa dagdag na guest kada gabi (kasama na)|每晚额外住客费用（已包含）|追加人数料金（1泊・料金に含む）|1박 추가 인원 요금(포함)|Suplemento por huésped por noche (incluido)|Supplément par voyageur et par nuit (inclus)|Zuschlag für Zusatzgäste pro Nacht (enthalten)|رسوم الضيوف الإضافيين لكل ليلة (مشمولة)',
+  'Refunds are unavailable from the check-in date onward.': 'Walang refund simula sa araw ng check-in.|自入住日期起不可退款。|チェックイン日以降は返金できません。|체크인 날짜부터 환불이 불가능합니다.|No se realizan reembolsos desde la fecha de llegada.|Aucun remboursement à partir de la date d’arrivée.|Ab dem Anreisedatum ist keine Erstattung möglich.|لا تتوفر المبالغ المستردة اعتبارًا من تاريخ تسجيل الوصول.',
+  'Close dialog': 'Isara ang dialog|关闭对话框|ダイアログを閉じる|대화 상자 닫기|Cerrar ventana|Fermer la fenêtre|Dialog schließen|إغلاق النافذة',
+  'Opening booking…': 'Binubuksan ang booking…|正在打开预订…|予約を開いています…|예약을 여는 중…|Abriendo reserva…|Ouverture de la réservation…|Buchung wird geöffnet…|جارٍ فتح الحجز…',
+  'This booking could not be opened.': 'Hindi mabuksan ang booking na ito.|无法打开此预订。|この予約を開けませんでした。|이 예약을 열 수 없습니다.|No se pudo abrir esta reserva.|Impossible d’ouvrir cette réservation.|Diese Buchung konnte nicht geöffnet werden.|تعذر فتح هذا الحجز.',
   'Reports': 'Mga report|报表|レポート|보고서|Informes|Rapports|Berichte|التقارير',
   'Export CSV': 'I-export ang CSV|导出 CSV|CSVを出力|CSV 내보내기|Exportar CSV|Exporter CSV|CSV exportieren|تصدير CSV',
   'View report': 'Tingnan ang report|查看报表|レポートを見る|보고서 보기|Ver informe|Voir le rapport|Bericht ansehen|عرض التقرير',

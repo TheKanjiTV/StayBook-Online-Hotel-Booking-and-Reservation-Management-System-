@@ -265,6 +265,10 @@ await test('Admin booking and account management', async t => {
       await lookup.call('/manage-booking');
       await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: booking.email });
       const endpoint = '/api/admin/bookings/' + booking.reservation_id;
+      assert.match(await admin.call('/admin/bookings'), /data-booking-panel-link/);
+      assert.match(await admin.call('/admin/bookings/' + booking.reservation_id), /data-booking-panel/);
+      assert.match(await admin.call('/admin/bookings/new'), /data-booking-panel/);
+      assert.match(await lookup.call('/booking/details'), new RegExp(booking.reference));
       await booking.update({ check_in: day(0), check_out: day(1) });
       assert.equal((await lookup.call('/api/bookings/current')).reservation.can_cancel, false);
       assert.match(await lookup.call('/receipt'), /Refunds are unavailable from the check-in date onward/);

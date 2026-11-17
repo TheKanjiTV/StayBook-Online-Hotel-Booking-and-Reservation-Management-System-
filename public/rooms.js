@@ -22,7 +22,7 @@
     const available = shown.filter(group => group.available);
     const count = available.reduce((sum, g) => sum + g.rooms.length, 0), n = nights(), d = dates();
     const typeCount = new Set(available.map(group => group.room.type)).size;
-    document.getElementById('resultCount').textContent = `${typeCount} room ${typeCount === 1 ? 'type' : 'types'} available`;
+    document.getElementById('resultCount').textContent = typeCount ? `${typeCount} room ${typeCount === 1 ? 'type' : 'types'} available` : 'No rooms available for these dates.';
     document.getElementById('searchSummary').textContent = `${shortDate(d.checkIn)} – ${shortDate(d.checkOut)} · ${n} ${n === 1 ? 'night' : 'nights'} · ${d.guests} ${Number(d.guests) === 1 ? 'guest' : 'guests'}${count ? ` · ${count} ${count === 1 ? 'room' : 'rooms'} to choose from` : ''}`;
     if (!shown.length) {
       container.innerHTML = `<div class="empty-state">${icon('search')}<h2>No rooms for these plans.</h2><p>Try different dates or a smaller guest count. Your next stay might be just a change away.</p><button id="changeDates" class="btn-secondary">Change your dates</button></div>`;

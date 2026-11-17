@@ -9,3 +9,5 @@
 {{#if account}}<button class="nav-link session-action header-logout" type="button" data-sign-out>Log out</button>{{/if}}
 <p id="headerError" class="form-error" role="alert" tabindex="-1"></p>
 </div></header>
+{{> booking-panel-dialog}}
+{{> booking-action-dialog}}

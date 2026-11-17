@@ -1,6 +1,25 @@
-document.querySelectorAll('[data-admin-form]').forEach(form => form.addEventListener('submit', async event => {
-  event.preventDefault(); const button = form.querySelector('button[type=submit]'), error = form.querySelector('[role=alert]'), original = button.textContent;
-  button.disabled = true; button.textContent = StayBook.t('Please wait…'); error.textContent = '';
-  try { const data = await StayBook.request(form.dataset.endpoint, { method: 'POST', body: Object.fromEntries(new FormData(form)) }); location.href = data.redirect; }
-  catch (problem) { error.textContent = problem.message; error.focus(); button.disabled = false; button.textContent = original; }
-}));
+document.addEventListener('submit', async event => {
+  const form = event.target;
+  if (!form.matches('[data-admin-form]')) return;
+  event.preventDefault();
+  const button = event.submitter || form.querySelector('button[type=submit]');
+  if (form.getAttribute('aria-busy') === 'true') return;
+  const error = form.querySelector('[role=alert]');
+  const body = Object.fromEntries(new FormData(form));
+  button.disabled = true;
+  form.setAttribute('aria-busy', 'true');
+  StayBook.bookingPanel.setBusy(form, true);
+  error.textContent = '';
+  try {
+    const { redirect } = await StayBook.request(form.dataset.endpoint, { method: 'POST', body });
+    StayBook.bookingPanel.setBusy(form, false);
+    if (!StayBook.bookingPanel.saved(form, redirect)) location.assign(redirect);
+  } catch (problem) {
+    error.textContent = problem.message;
+    error.focus();
+  } finally {
+    StayBook.bookingPanel.setBusy(form, false);
+    form.removeAttribute('aria-busy');
+    button.disabled = false;
+  }
+});
