@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { Reservation, Payment, BookingRoom } from '../models/bookingModel.js';
-import { cancelBooking } from '../services/bookingService.js';
+import { canCancelBooking, canRemoveBooking, cancelBooking, refundPolicy } from '../services/bookingService.js';
 import { hotelForRoom } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
 import { positiveId, string, fail, today, validDate, email } from '../services/validation.js';
@@ -72,7 +72,7 @@ export const adminController = {
     const booking = await Reservation.findByPk(positiveId(req.params.id), { attributes });
     if (!booking) fail(404, 'Booking not found.');
     const payment = await Payment.findOne({ where: { reservation_id: booking.reservation_id }, attributes: ['payment_method'], order: [['payment_id', 'ASC']] });
-    res.render('admin-booking', { title: 'Booking details | StayBook', adminTitle: 'Booking details', booking: display(booking, res.locals.preferences.locale), paymentMethod: paymentLabel(payment?.payment_method) });
+    res.render('admin-booking', { title: 'Booking details | StayBook', adminTitle: 'Booking details', booking: { ...display(booking, res.locals.preferences.locale), canCancel: canCancelBooking(booking), canRemove: canRemoveBooking(booking) }, refundPolicy, paymentMethod: paymentLabel(payment?.payment_method) });
   },
   cancel: async (req, res) => {
     const id = positiveId(req.params.id);

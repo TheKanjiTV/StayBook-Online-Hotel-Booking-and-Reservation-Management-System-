@@ -6,8 +6,12 @@ import { AccountBooking, Notification } from '../models/accountModel.js';
 import { BookingClosure } from '../models/availabilityModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
-import { searchInput, guestInput, positiveId, fail, string, email, hash } from './validation.js';
+import { searchInput, guestInput, positiveId, fail, string, email, hash, today } from './validation.js';
 import { quoteStay } from './bookingPrice.js';
+
+export const refundPolicy = 'Refunds are unavailable from the check-in date onward.';
+export const canCancelBooking = (booking, date = today()) => activeBookingStatuses.includes(booking.status) && booking.check_in > date;
+export const canRemoveBooking = (booking, date = today()) => booking.status === 'CANCELLED' || booking.check_in > date || booking.check_out <= date;
 
 export async function saveBooking(body, options = {}) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
@@ -57,7 +61,7 @@ export async function getBooking(id, token) {
   const room = await BookingRoom.findByPk(booking.room_id, { attributes: ['image'] });
   const data = booking.toJSON(); delete data.access_token; delete data.request_key; delete data.request_hash;
   delete data.deletion_requested_by;
-  return { ...data, hotel: hotelForRoom(data.room_id), guest: { first_name: data.first_name, last_name: data.last_name, email: data.email },
+  return { ...data, can_cancel: canCancelBooking(booking), hotel: hotelForRoom(data.room_id), guest: { first_name: data.first_name, last_name: data.last_name, email: data.email },
     room: { room_number: data.room_number, roomType: { name: data.room_type }, image: room?.image || null }, payments, integration_status: 'NOT_CONNECTED' };
 }
 export async function findBooking(reference, guestEmail) {
@@ -75,6 +79,7 @@ export async function cancelBooking(id, token, options = {}) {
     if (booking.room_id !== reference.room_id) fail(409, 'This booking changed. Reload the page and try again.');
     if (booking.status === 'CANCELLED') return false;
     if (!activeBookingStatuses.includes(booking.status)) fail(409, 'This booking cannot be cancelled.');
+    if (!canCancelBooking(booking)) fail(409, refundPolicy);
     const previousStatus = booking.status;
     await booking.update({ status: 'CANCELLED' }, { transaction });
     await Payment.update({ payment_status: 'REFUNDED' }, { where: { reservation_id: booking.reservation_id, payment_status: 'PAID' }, transaction });

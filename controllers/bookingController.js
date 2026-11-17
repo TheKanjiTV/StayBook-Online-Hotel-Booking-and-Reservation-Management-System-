@@ -5,7 +5,7 @@ import { hotels } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
 import { quoteStay } from '../services/bookingPrice.js';
 import { BookingRoom } from '../models/bookingModel.js';
-import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
+import { saveBooking, getBooking, findBooking, cancelBooking, refundPolicy } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
 export const bookingController = {
@@ -36,7 +36,7 @@ export const bookingController = {
   },
   confirmationPage: (req, res) => {
     if (!req.session.bookingPreview && !req.session.bookingId) return res.redirect('/');
-    res.render('confirmation', { title: 'Your online booking | StayBook' });
+    res.render('confirmation', { title: 'Your online booking | StayBook', refundPolicy });
   },
   searchRooms: async (req, res) => {
     const { checkIn, checkOut, guests } = searchInput(req.query);
@@ -74,7 +74,7 @@ export const bookingController = {
     const php = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', currencyDisplay: 'code' }).format(Number(value));
     const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(preferences.locale, { day: 'numeric', month: 'short', year: 'numeric' });
     const estimate = preferences.currency !== 'PHP' ? new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(Number(booking.total_amount) * preferences.rate) : '';
-    res.render('receipt', { title: 'Booking receipt | StayBook', booking, receipt: {
+    res.render('receipt', { title: 'Booking receipt | StayBook', booking, refundPolicy, receipt: {
       cancelled: booking.status === 'CANCELLED', method: paymentLabel(payment?.payment_method), reference: payment?.reference,
       cardLast4: payment?.card_last4,
       paidAt: payment?.paid_at ? new Date(payment.paid_at).toLocaleString(preferences.locale, { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }) : '',

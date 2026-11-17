@@ -13,7 +13,8 @@ const { startServer } = await import('../index.js');
 const { today } = await import('../services/validation.js');
 await test('Online booking scope and guest review', async t => {
   let server;
-  const dates = { checkIn: today(), checkOut: new Date(Date.parse(today()) + 86400000).toISOString().slice(0, 10), guests: 2 };
+  const day = offset => new Date(Date.parse(today()) + offset * 86400000).toISOString().slice(0, 10);
+  const dates = { checkIn: day(1), checkOut: day(2), guests: 2 };
   try {
     await migrate(); server = await startServer(0);
     const guest = new Client(`http://127.0.0.1:${server.address().port}`);

@@ -259,6 +259,23 @@ await test('Admin booking and account management', async t => {
       assert.equal(await AuditLog.count({ where: { action: 'REPORT_EXPORTED' } }), 1);
       await admin.call(`/admin/reports?from=${day(151)}&to=${day(100)}`, 'GET', undefined, 400);
     });
+    await t.test('Refunds stop on the Manila check-in date and completed bookings archive without a refund', async () => {
+      const booking = await Reservation.findOne({ where: { status: 'LOCAL_CONFIRMED' } });
+      const lookup = new Client(admin.base);
+      await lookup.call('/manage-booking');
+      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: booking.email });
+      const endpoint = '/api/admin/bookings/' + booking.reservation_id;
+      await booking.update({ check_in: day(0), check_out: day(1) });
+      assert.equal((await lookup.call('/api/bookings/current')).reservation.can_cancel, false);
+      assert.match(await lookup.call('/receipt'), /Refunds are unavailable from the check-in date onward/);
+      await lookup.call('/api/bookings/cancel', 'POST', {}, 409);
+      await admin.call(endpoint + '/cancel', 'POST', {}, 409);
+      await admin.call(endpoint + '/delete', 'POST', {}, 409);
+      await booking.update({ check_in: day(-1), check_out: day(0) });
+      await admin.call(endpoint + '/delete', 'POST', {});
+      assert.equal(await Reservation.findByPk(booking.reservation_id), null);
+      assert.equal((await Payment.findOne({ where: { reservation_id: booking.reservation_id } })).payment_status, 'PAID');
+    });
     await t.test('The current admin is signed out after changing their own password', async () => {
       const current = await Account.findByPk(administrator.id), replacement = 'changed-own-admin-password';
       const data = await admin.call(`/api/admin/users/${current.account_id}`, 'POST', { firstName: current.first_name, lastName: current.last_name, email: current.email, username: current.username || '', role: 'ADMIN', password: replacement, version: current.version });

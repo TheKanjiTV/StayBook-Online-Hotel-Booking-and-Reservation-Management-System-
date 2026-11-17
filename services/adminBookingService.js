@@ -3,8 +3,8 @@ import { sequelize } from '../models/db.js';
 import { BookingRoom, Reservation, Payment, activeBookingStatuses } from '../models/bookingModel.js';
 import { Account, AccountBooking, Notification } from '../models/accountModel.js';
 import { BookingClosure } from '../models/availabilityModel.js';
-import { guestInput, positiveId, searchInput, cents, amount, fail } from './validation.js';
-import { cancelBooking, saveBooking } from './bookingService.js';
+import { guestInput, positiveId, searchInput, cents, amount, fail, today } from './validation.js';
+import { canCancelBooking, canRemoveBooking, cancelBooking, saveBooking } from './bookingService.js';
 import { quoteStay } from './bookingPrice.js';
 import { recordAudit } from './auditService.js';
 export async function createAdminBooking(body, actor) {
@@ -61,6 +61,7 @@ export async function updateAdminBooking(id, body, actor) {
     if (conflict) fail(409, 'This room is already booked for those dates.');
     if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
     const guestsChanged = guests !== booking.guests;
+    if ((stayChanged || guestsChanged) && booking.check_in <= today()) fail(409, 'Room, dates and guest count cannot change once the stay starts.');
     const baseRate = stayChanged ? room.price : amount(cents(booking.nightly_rate) - cents(booking.extra_guest_nightly ?? 0, 'Extra guest fee', true));
     const quote = stayChanged || guestsChanged ? quoteStay(baseRate, { guests, nights: dates.nights }) : null;
     const values = { ...guest, room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, guests, check_in: dates.checkIn, check_out: dates.checkOut, nights: dates.nights, nightly_rate: quote?.nightlyRate ?? booking.nightly_rate, extra_guest_nightly: quote?.extraGuestNightly ?? booking.extra_guest_nightly, total_amount: quote?.total ?? booking.total_amount, status: stayChanged || guestsChanged ? 'LOCAL_CONFIRMED' : booking.status };
@@ -74,6 +75,7 @@ export async function updateAdminBooking(id, body, actor) {
 }
 export const requestBookingDeletion = (id, actor) => lockedBooking(id, null, async (booking, rooms, transaction) => {
   if (booking.deletion_requested_by) return;
+  if (!canRemoveBooking(booking)) fail(409, 'This booking can be removed after checkout.');
   await booking.update({ deletion_requested_by: actor.id }, { transaction });
   await recordAudit(actor, 'BOOKING_DELETION_REQUESTED', 'BOOKING', booking.reservation_id, booking.reference, {}, transaction);
 });
@@ -96,8 +98,10 @@ export const deleteAdminBooking = (id, actor, approval) => lockedBooking(id, nul
       fail(403, 'Sign in again as an administrator.');
     }
   }
+  const date = today();
+  if (!canRemoveBooking(booking, date)) fail(409, 'This booking can be removed after checkout.');
   const previousStatus = booking.status;
-  if (activeBookingStatuses.includes(booking.status)) { await cancelBooking(booking.reservation_id, booking.access_token, { transaction }); await booking.reload({ transaction }); }
+  if (canCancelBooking(booking, date)) { await cancelBooking(booking.reservation_id, booking.access_token, { transaction }); await booking.reload({ transaction }); }
   await recordAudit(actor, 'BOOKING_DELETED', 'BOOKING', booking.reservation_id, booking.reference, { deleted: true, previousStatus, ...(requestedBy ? { requested_by: requestedBy } : {}) }, transaction);
   await booking.destroy({ transaction });
 });
