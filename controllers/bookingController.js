@@ -3,6 +3,7 @@ import { searchInput, guestInput, positiveId, fail, today } from '../services/va
 import { randomUUID } from 'node:crypto';
 import { hotels } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
+import { quoteStay } from '../services/bookingPrice.js';
 import { BookingRoom } from '../models/bookingModel.js';
 import { saveBooking, getBooking, findBooking, cancelBooking } from '../services/bookingService.js';
 const lookupAttempts = new Map();
@@ -25,12 +26,13 @@ export const bookingController = {
     const stay = searchInput(req.query), room = await getRoomById(positiveId(req.query.roomId, 'room'));
     if (!room) fail(404, 'Room not found.');
     if (stay.guests > room.capacity) fail(400, 'Room capacity exceeded.');
+    const quote = quoteStay(room.price, stay);
     const preferences = res.locals.preferences;
     const money = value => new Intl.NumberFormat(preferences.locale, { style: 'currency', currency: preferences.currency }).format(value * preferences.rate);
     const date = value => new Date(`${value}T12:00:00Z`).toLocaleDateString(preferences.locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     const searchQuery = new URLSearchParams({ checkIn: stay.checkIn, checkOut: stay.checkOut, guests: stay.guests, hotelId: room.hotel?.id || '' }).toString();
     res.render('guest-details', { title: 'Guest details | StayBook', room, guest: req.session.bookingPreview || req.account,
-      searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(room.price), total: money(room.price * stay.nights), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });
+      searchQuery, stay: { ...stay, checkInLabel: date(stay.checkIn), checkOutLabel: date(stay.checkOut), nightlyRate: money(quote.nightlyRate), extraGuestNightly: Number(quote.extraGuestNightly) ? money(quote.extraGuestNightly) : null, total: money(quote.total), nightsLabel: stay.nights === 1 ? 'night' : 'nights', guestsLabel: stay.guests === 1 ? 'guest' : 'guests' } });
   },
   confirmationPage: (req, res) => {
     if (!req.session.bookingPreview && !req.session.bookingId) return res.redirect('/');
@@ -45,8 +47,9 @@ export const bookingController = {
     const room = await getRoomById(positiveId(req.body.roomId, 'room'));
     if (!room) fail(404, 'Room not found.');
     if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
+    const quote = quoteStay(room.price, dates);
     req.session.bookingPreview = { ...dates, roomId: room.id, roomName: room.name, firstName: guest.first_name, lastName: guest.last_name,
-      email: guest.email, phone: guest.phone, address: guest.address, hotelName: room.hotel?.name, hotelId: room.hotel?.id, roomImage: room.image, roomType: room.type, roomNumber: room.roomNumber, pricePerNight: room.price, totalAmount: room.price * dates.nights, status: 'REVIEW', requestKey: randomUUID() };
+      email: guest.email, phone: guest.phone, address: guest.address, hotelName: room.hotel?.name, hotelId: room.hotel?.id, roomImage: room.image, roomType: room.type, roomNumber: room.roomNumber, pricePerNight: Number(quote.nightlyRate), extraGuestNightly: Number(quote.extraGuestNightly), totalAmount: Number(quote.total), status: 'REVIEW', requestKey: randomUUID() };
     delete req.session.bookingId; delete req.session.bookingToken;
     res.json({ success: true, redirect: '/confirmation' });
   },
@@ -75,7 +78,7 @@ export const bookingController = {
       cancelled: booking.status === 'CANCELLED', method: paymentLabel(payment?.payment_method), reference: payment?.reference,
       cardLast4: payment?.card_last4,
       paidAt: payment?.paid_at ? new Date(payment.paid_at).toLocaleString(preferences.locale, { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }) : '',
-      total: php(booking.total_amount), nightlyRate: php(booking.nightly_rate), checkIn: date(booking.check_in), checkOut: date(booking.check_out), estimate,
+      total: php(booking.total_amount), nightlyRate: php(booking.nightly_rate), extraGuestNightly: Number(booking.extra_guest_nightly) ? php(booking.extra_guest_nightly) : null, checkIn: date(booking.check_in), checkOut: date(booking.check_out), estimate,
       nightsLabel: booking.nights === 1 ? 'night' : 'nights', guestsLabel: booking.guests === 1 ? 'guest' : 'guests',
     } });
   },

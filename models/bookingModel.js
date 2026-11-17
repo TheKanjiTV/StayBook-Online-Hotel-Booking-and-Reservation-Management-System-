@@ -19,6 +19,7 @@ export const Reservation = sequelize.define('Reservation', {
   check_in: { type: D.DATEONLY, allowNull: false }, check_out: { type: D.DATEONLY, allowNull: false },
   guests: { type: D.INTEGER, allowNull: false }, nights: { type: D.INTEGER, allowNull: false },
   nightly_rate: money(), total_amount: money(), status: text(30),
+  extra_guest_nightly: { type: D.DECIMAL(12, 2), allowNull: true },
   deletion_requested_by: { type: D.INTEGER, allowNull: true },
 }, { ...options, paranoid: true, version: true, indexes: [{ fields: ['room_id', 'status', 'check_in', 'check_out'] }] });
 export const Payment = sequelize.define('Payment', {

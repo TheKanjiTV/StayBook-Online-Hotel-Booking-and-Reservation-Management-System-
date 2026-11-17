@@ -6,7 +6,9 @@ import { AccountBooking, Notification } from '../models/accountModel.js';
 import { BookingClosure } from '../models/availabilityModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
-import { searchInput, guestInput, positiveId, fail, string, email, hash, cents, amount } from './validation.js';
+import { searchInput, guestInput, positiveId, fail, string, email, hash } from './validation.js';
+import { quoteStay } from './bookingPrice.js';
+
 export async function saveBooking(body, options = {}) {
   const dates = searchInput(body), guest = guestInput(body), roomId = positiveId(body.roomId, 'room');
   const requestKey = string(body.requestKey, 'Request key');
@@ -33,10 +35,10 @@ export async function saveBooking(body, options = {}) {
     if (conflict) fail(409, 'This sample room is already booked for those dates. Choose another room.');
     if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
     if (body.simulateFailure === true) fail(402, 'Payment could not be processed. No booking was saved. Please retry.');
-    const total = amount(cents(room.price) * dates.nights);
+    const { nightlyRate, extraGuestNightly, total } = quoteStay(room.price, dates);
     const booking = await Reservation.create({ ...guest, reference: `SB-${randomBytes(6).toString('hex').toUpperCase()}`, request_key: requestKey, request_hash: requestHash, access_token: randomBytes(32).toString('hex'),
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,
-      guests: dates.guests, nights: dates.nights, nightly_rate: room.price, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });
+      guests: dates.guests, nights: dates.nights, nightly_rate: nightlyRate, extra_guest_nightly: extraGuestNightly, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });
     await Payment.create({ reservation_id: booking.reservation_id, amount: total, payment_method: paymentMethod, payment_status: 'PAID', paid_at: new Date(), reference: randomUUID(), purpose: 'BOOKING', card_last4: cardLast4 ?? null }, { transaction });
     if (body.accountId) {
       await AccountBooking.create({ account_id: body.accountId, reservation_id: booking.reservation_id }, { transaction });

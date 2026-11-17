@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import { BookingRoom, Reservation, activeBookingStatuses } from '../models/bookingModel.js';
 import { hotelForRoom, hotels } from './hotelCatalog.js';
 import { BookingClosure } from '../models/availabilityModel.js';
+import { quoteStay } from './bookingPrice.js';
 const types = [
   { type: 'Deluxe Room', price: 2500, capacity: 2, description: 'Queen bed, air conditioning, Wi-Fi and a private bathroom.', image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=900' },
   { type: 'Superior Room', price: 3500, capacity: 3, description: 'A spacious room with a queen bed, an extra single bed and breakfast.', image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=900' },
@@ -23,8 +24,11 @@ export async function searchCatalogRooms(checkIn, checkOut, guests, hotelId) {
     order: [['room_id', 'ASC']],
   });
   const rooms = [], unavailableRooms = [];
+  const nights = (Date.parse(checkOut) - Date.parse(checkIn)) / 86400000;
   for (const room of catalog) {
-    (room.is_published && !blocked.has(room.room_id) ? rooms : unavailableRooms).push(dto(room));
+    const quote = quoteStay(room.price, { guests, nights });
+    const listing = { ...dto(room), price: Number(quote.nightlyRate), extraGuestNightly: Number(quote.extraGuestNightly), stayTotal: Number(quote.total) };
+    (room.is_published && !blocked.has(room.room_id) ? rooms : unavailableRooms).push(listing);
   }
   return { rooms, unavailableRooms };
 }

@@ -3,9 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let rooms = [], controller;
   const php = value => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
   function quote() {
-    const selected = rooms.find(item => String(item.id) === room.value), nights = (Date.parse(form.checkOut.value) - Date.parse(form.checkIn.value)) / 86400000;
+    const selected = rooms.find(item => String(item.id) === room.value);
     document.getElementById('quotedRate').textContent = selected ? php(selected.price) : '—';
-    document.getElementById('quotedTotal').textContent = selected ? php(selected.price * nights) : '—'; button.disabled = !selected;
+    const fee = document.getElementById('quotedExtraGuest');
+    fee.hidden = !selected?.extraGuestNightly;
+    fee.querySelector('dd').textContent = selected ? php(selected.extraGuestNightly) : '';
+    document.getElementById('quotedTotal').textContent = selected ? php(selected.stayTotal) : '—'; button.disabled = !selected;
   }
   async function available() {
     controller?.abort(); const active = controller = new AbortController(), previous = room.value; button.disabled = true; room.disabled = true; status.textContent = StayBook.t('Checking availability…');

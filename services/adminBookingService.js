@@ -5,6 +5,7 @@ import { Account, AccountBooking, Notification } from '../models/accountModel.js
 import { BookingClosure } from '../models/availabilityModel.js';
 import { guestInput, positiveId, searchInput, cents, amount, fail } from './validation.js';
 import { cancelBooking, saveBooking } from './bookingService.js';
+import { quoteStay } from './bookingPrice.js';
 import { recordAudit } from './auditService.js';
 export async function createAdminBooking(body, actor) {
   let owner;
@@ -59,8 +60,10 @@ export async function updateAdminBooking(id, body, actor) {
     const conflict = await Reservation.findOne({ where: { reservation_id: { [Op.ne]: booking.reservation_id }, room_id: roomId, status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: dates.checkOut }, check_out: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE });
     if (conflict) fail(409, 'This room is already booked for those dates.');
     if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
-    const rate = stayChanged ? room.price : booking.nightly_rate;
-    const values = { ...guest, room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, guests, check_in: dates.checkIn, check_out: dates.checkOut, nights: dates.nights, nightly_rate: rate, total_amount: amount(cents(rate) * dates.nights), status: stayChanged ? 'LOCAL_CONFIRMED' : booking.status };
+    const guestsChanged = guests !== booking.guests;
+    const baseRate = stayChanged ? room.price : amount(cents(booking.nightly_rate) - cents(booking.extra_guest_nightly ?? 0, 'Extra guest fee', true));
+    const quote = stayChanged || guestsChanged ? quoteStay(baseRate, { guests, nights: dates.nights }) : null;
+    const values = { ...guest, room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, guests, check_in: dates.checkIn, check_out: dates.checkOut, nights: dates.nights, nightly_rate: quote?.nightlyRate ?? booking.nightly_rate, extra_guest_nightly: quote?.extraGuestNightly ?? booking.extra_guest_nightly, total_amount: quote?.total ?? booking.total_amount, status: stayChanged || guestsChanged ? 'LOCAL_CONFIRMED' : booking.status };
     const changes = Object.fromEntries(Object.entries(values).filter(([key, value]) => String(booking[key] ?? '') !== String(value ?? '')).map(([key, value]) => [key, { before: booking[key], after: value }]));
     if (!Object.keys(changes).length) return;
     await booking.update(values, { transaction });

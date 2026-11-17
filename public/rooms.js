@@ -34,7 +34,7 @@
       return `<article class="room-listing"><img class="listing-photo" src="${esc(r.image)}" alt="${esc(r.type)} interior, illustrative photograph" width="600" height="420" loading="lazy">
         <div class="listing-info"><div class="listing-top"><h2>${esc(r.type)}</h2><span class="availability-label${available ? '' : ' is-unavailable'}">${available ? `${rooms.length} ${rooms.length === 1 ? 'room' : 'rooms'} available` : 'Not available'}</span></div>
         <p class="muted mt-3">${esc(r.hotel?.name || '')}</p><p class="listing-description">${esc(r.description)}</p><div class="listing-features"><span>${icon('guests')} Up to ${esc(r.capacity)} guests</span><span>${icon('bed')} Room ${esc(rooms.map(room => room.roomNumber).join(' / '))}</span></div>
-        <div class="listing-bottom"><div class="listing-price"><strong>${money(r.price)}</strong><span> / night</span><p>${money(r.price * n)} for ${n} ${n === 1 ? 'night' : 'nights'}</p></div>${available ? `<a class="btn" href="/guest-details?${esc(query.toString())}">Select room ${icon('arrow')}</a>` : ''}</div></div></article>`;
+        <div class="listing-bottom"><div class="listing-price"><strong>${money(r.price)}</strong><span> / night</span>${r.extraGuestNightly ? `<p><span>Includes extra guests</span> · ${money(r.extraGuestNightly)} / night</p>` : ''}<p>${money(r.stayTotal)} for ${n} ${n === 1 ? 'night' : 'nights'}</p></div>${available ? `<a class="btn" href="/guest-details?${esc(query.toString())}">Select room ${icon('arrow')}</a>` : ''}</div></div></article>`;
     }).join('');
   }
   async function loadRooms() {

@@ -38,6 +38,7 @@ async function addNullableColumn(table, name, type) {
 export async function migrateBookingColumns() {
   await addNullableColumn(Reservation.getTableName(), 'deletion_requested_by', DataTypes.INTEGER);
   await addNullableColumn(Payment.getTableName(), 'card_last4', DataTypes.STRING(4));
+  await addNullableColumn(Reservation.getTableName(), 'extra_guest_nightly', DataTypes.DECIMAL(12, 2));
 }
 
 export async function migrate() {
