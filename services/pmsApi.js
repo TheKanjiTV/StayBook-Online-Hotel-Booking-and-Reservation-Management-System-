@@ -13,11 +13,19 @@ const types = [
 ];
 export const sampleRooms = types.flatMap((room, index) => [1, 2].map(n => ({ ...room, id: index * 2 + n, roomNumber: `${index + 1}0${n}`, name: `${room.type} · ${index + 1}0${n}` })));
 const dto = room => ({ id: room.room_id, roomNumber: room.room_number, name: room.name, type: room.type, description: room.description, capacity: room.capacity, price: Number(room.price), image: room.image, hotel: hotelForRoom(room.room_id) });
-export async function getAvailableRooms(checkIn, checkOut, guests, hotelId) {
+export async function searchCatalogRooms(checkIn, checkOut, guests, hotelId) {
   const [booked, closures] = await Promise.all([Reservation.findAll({ where: { status: { [Op.in]: activeBookingStatuses }, check_in: { [Op.lt]: checkOut }, check_out: { [Op.gt]: checkIn } }, attributes: ['room_id'] }), BookingClosure.findAll({ where: { starts_on: { [Op.lt]: checkOut }, ends_on: { [Op.gt]: checkIn } }, attributes: ['room_id'] })]);
-  const unavailable = [...new Set([...booked, ...closures].map(row => row.room_id))];
-  const rooms = await BookingRoom.findAll({ where: { is_published: true, capacity: { [Op.gte]: guests }, ...(unavailable.length ? { room_id: { [Op.notIn]: unavailable } } : {}) }, order: [['room_id', 'ASC']] });
-  if (hotelId && !hotels.some(hotel => hotel.id === Number(hotelId))) return [];
-  return rooms.map(dto).filter(room => !hotelId || room.hotel?.id === Number(hotelId));
+  const blocked = new Set([...booked, ...closures].map(row => row.room_id));
+  const hotel = hotelId && hotels.find(item => item.id === Number(hotelId));
+  if (hotelId && !hotel) return { rooms: [], unavailableRooms: [] };
+  const catalog = await BookingRoom.findAll({
+    where: { capacity: { [Op.gte]: guests }, ...(hotel ? { room_id: hotel.rooms } : {}) },
+    order: [['room_id', 'ASC']],
+  });
+  const rooms = [], unavailableRooms = [];
+  for (const room of catalog) {
+    (room.is_published && !blocked.has(room.room_id) ? rooms : unavailableRooms).push(dto(room));
+  }
+  return { rooms, unavailableRooms };
 }
 export async function getRoomById(id) { const room = await BookingRoom.findOne({ where: { room_id: Number(id), is_published: true } }); return room ? dto(room) : null; }

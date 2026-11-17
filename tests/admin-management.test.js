@@ -192,7 +192,10 @@ await test('Admin booking and account management', async t => {
       assert.equal((await owner.call(`/rooms/search?${query}`)).rooms.find(item => item.id === 1).price, 3000);
       assert.ok((await Reservation.findAll({ where: { room_id: 1 } })).every(row => Number(row.total_amount) === 2500));
       await room.reload(); await admin.call('/api/admin/rooms/1', 'POST', { ...values, version: room.version, published: '0' });
-      assert.ok(!(await owner.call(`/rooms/search?${query}`)).rooms.some(item => item.id === 1));
+      const disabledSearch = await owner.call(`/rooms/search?${query}`);
+      assert.ok(!disabledSearch.rooms.some(room => room.id === 1));
+      assert.ok(disabledSearch.unavailableRooms.some(room => room.id === 1));
+      assert.match(await owner.call('/'), /Not available today/);
       assert.equal(await AuditLog.count({ where: { action: 'ROOM_UPDATED', target_id: 1 } }), 2);
     });
     await t.test('Date closures connect search, booking creation and editing with exclusive end dates', async () => {
@@ -202,7 +205,9 @@ await test('Admin booking and account management', async t => {
       const { BookingClosure } = await import('../models/availabilityModel.js'); assert.ok(await BookingClosure.findByPk(created.closureId));
       await admin.call('/api/admin/closures', 'POST', values, 409);
       const query = new URLSearchParams({ checkIn: day(130), checkOut: day(131), guests: 2 });
-      assert.ok(!(await owner.call(`/rooms/search?${query}`)).rooms.some(room => room.id === 4));
+      const closedSearch = await owner.call(`/rooms/search?${query}`);
+      assert.ok(!closedSearch.rooms.some(room => room.id === 4));
+      assert.ok(closedSearch.unavailableRooms.some(room => room.id === 4));
       assert.ok((await owner.call(`/rooms/search?${new URLSearchParams({ checkIn: day(132), checkOut: day(133), guests: 2 })}`)).rooms.some(room => room.id === 4));
       await owner.call('/booking/preview', 'POST', { checkIn: day(130), checkOut: day(131), roomId: 4, guests: 2, firstName: 'Closure', lastName: 'Guest', email: 'management-owner@example.test', phone: '09123456789' });
       await owner.call('/api/bookings/confirm', 'POST', { paymentMethod: 'VISA' }, 409);

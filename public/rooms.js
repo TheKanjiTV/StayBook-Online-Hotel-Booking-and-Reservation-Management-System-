@@ -18,8 +18,10 @@
     if (sort.value === 'price-low') shown.sort((a,b) => a.room.price - b.room.price);
     if (sort.value === 'price-high') shown.sort((a,b) => b.room.price - a.room.price);
     if (sort.value === 'capacity') shown.sort((a,b) => b.room.capacity - a.room.capacity);
-    const count = shown.reduce((sum, g) => sum + g.rooms.length, 0), n = nights(), d = dates();
-    const typeCount = new Set(shown.map(group => group.room.type)).size;
+    shown.sort((a, b) => Number(b.available) - Number(a.available));
+    const available = shown.filter(group => group.available);
+    const count = available.reduce((sum, g) => sum + g.rooms.length, 0), n = nights(), d = dates();
+    const typeCount = new Set(available.map(group => group.room.type)).size;
     document.getElementById('resultCount').textContent = `${typeCount} room ${typeCount === 1 ? 'type' : 'types'} available`;
     document.getElementById('searchSummary').textContent = `${shortDate(d.checkIn)} – ${shortDate(d.checkOut)} · ${n} ${n === 1 ? 'night' : 'nights'} · ${d.guests} ${Number(d.guests) === 1 ? 'guest' : 'guests'}${count ? ` · ${count} ${count === 1 ? 'room' : 'rooms'} to choose from` : ''}`;
     if (!shown.length) {
@@ -27,20 +29,26 @@
       document.getElementById('changeDates').onclick = () => { form.scrollIntoView({ block: 'center' }); form.elements.checkIn.focus(); };
       return;
     }
-    container.innerHTML = shown.map(({ room: r, rooms }) => {
+    container.innerHTML = shown.map(({ room: r, rooms, available }) => {
       const query = new URLSearchParams({ ...d, roomId: r.id });
       return `<article class="room-listing"><img class="listing-photo" src="${esc(r.image)}" alt="${esc(r.type)} interior, illustrative photograph" width="600" height="420" loading="lazy">
-        <div class="listing-info"><div class="listing-top"><h2>${esc(r.type)}</h2><span class="availability-label">${rooms.length} ${rooms.length === 1 ? 'room' : 'rooms'} available</span></div>
+        <div class="listing-info"><div class="listing-top"><h2>${esc(r.type)}</h2><span class="availability-label${available ? '' : ' is-unavailable'}">${available ? `${rooms.length} ${rooms.length === 1 ? 'room' : 'rooms'} available` : 'Not available'}</span></div>
         <p class="muted mt-3">${esc(r.hotel?.name || '')}</p><p class="listing-description">${esc(r.description)}</p><div class="listing-features"><span>${icon('guests')} Up to ${esc(r.capacity)} guests</span><span>${icon('bed')} Room ${esc(rooms.map(room => room.roomNumber).join(' / '))}</span></div>
-        <div class="listing-bottom"><div class="listing-price"><strong>${money(r.price)}</strong><span> / night</span><p>${money(r.price * n)} for ${n} ${n === 1 ? 'night' : 'nights'}</p></div><a class="btn" href="/guest-details?${esc(query.toString())}">Select room ${icon('arrow')}</a></div></div></article>`;
+        <div class="listing-bottom"><div class="listing-price"><strong>${money(r.price)}</strong><span> / night</span><p>${money(r.price * n)} for ${n} ${n === 1 ? 'night' : 'nights'}</p></div>${available ? `<a class="btn" href="/guest-details?${esc(query.toString())}">Select room ${icon('arrow')}</a>` : ''}</div></div></article>`;
     }).join('');
   }
   async function loadRooms() {
     container.setAttribute('aria-busy', 'true');
     try {
-      const { rooms } = await request(`/rooms/search?${new URLSearchParams(dates())}`);
+      const { rooms, unavailableRooms } = await request(`/rooms/search?${new URLSearchParams(dates())}`);
       const map = new Map();
-      rooms.forEach(room => { const key = `${room.hotel?.id}:${room.type}:${room.price}:${room.capacity}`; if (!map.has(key)) map.set(key, { room, rooms: [] }); map.get(key).rooms.push(room); });
+      for (const [entries, available] of [[rooms, true], [unavailableRooms, false]]) {
+        for (const room of entries) {
+          const key = [room.hotel?.id, room.type, room.price, room.capacity, available].join(':');
+          if (!map.has(key)) map.set(key, { room, rooms: [], available });
+          map.get(key).rooms.push(room);
+        }
+      }
       groups = [...map.values()]; renderFilters(); render();
     } catch (error) {
       document.getElementById('resultCount').textContent = 'Rooms could not be loaded'; filterBox.innerHTML = '';
