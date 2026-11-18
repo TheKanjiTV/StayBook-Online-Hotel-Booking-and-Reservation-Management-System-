@@ -214,6 +214,17 @@ await test('Admin booking and account management', async t => {
       assert.ok(disabledSearch.unavailableRooms.some(room => room.id === 1));
       assert.match(await owner.call('/'), /Not available today/);
       assert.equal(await AuditLog.count({ where: { action: 'ROOM_UPDATED', target_id: 1 } }), 3);
+      assert.match(await admin.call('/admin/rooms'), /data-booking-panel-link/);
+      assert.match(await admin.call('/admin/rooms/1/edit'), /data-booking-panel/);
+      const audit = await AuditLog.findOne({ where: { action: 'ROOM_UPDATED', target_id: 1 }, order: [['audit_id', 'DESC']] });
+      assert.equal(audit.actor_role, 'ADMIN');
+      const logs = await admin.call('/admin/audit-logs?q=Room+updated');
+      assert.match(logs, /View audit event/);
+      const detail = await admin.call('/admin/audit-logs/' + audit.audit_id);
+      assert.match(detail, /What changed/);
+      assert.match(detail, /Before/);
+      assert.match(detail, /Booking Staff|Administrator/);
+      await owner.call('/admin/audit-logs/' + audit.audit_id, 'GET', undefined, 403);
     });
     await t.test('Date closures connect search, booking creation and editing with exclusive end dates', async () => {
       const values = { roomId: 4, start: day(130), end: day(132), reason: 'Sales pause' };

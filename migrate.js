@@ -4,7 +4,7 @@ import { config } from './config.js';
 import { sequelize } from './models/db.js';
 import { BookingRoom, Payment, Reservation } from './models/bookingModel.js';
 import { Account, accountRoles } from './models/accountModel.js';
-import './models/auditModel.js';
+import { AuditLog } from './models/auditModel.js';
 import './models/availabilityModel.js';
 import { sampleRooms } from './services/pmsApi.js';
 
@@ -36,6 +36,7 @@ async function addNullableColumn(table, name, type) {
 }
 
 export async function migrateBookingColumns() {
+  await addNullableColumn(AuditLog.getTableName(), 'actor_role', DataTypes.STRING(30));
   await addNullableColumn(Reservation.getTableName(), 'deletion_requested_by', DataTypes.INTEGER);
   await addNullableColumn(Payment.getTableName(), 'card_last4', DataTypes.STRING(4));
   await addNullableColumn(Reservation.getTableName(), 'extra_guest_nightly', DataTypes.DECIMAL(12, 2));

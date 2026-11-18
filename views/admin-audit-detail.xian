@@ -1,0 +1,27 @@
+{{> admin-start}}
+<div data-booking-panel>
+  <a class="back-link booking-page-back" href="/admin/audit-logs">Back to audit logs</a>
+  {{#with audit}}
+  <div class="admin-heading"><h1>{{actionLabel}}</h1><p>{{> audit-event}}</p></div>
+  <dl class="review-details">
+    <div class="review-row"><dt>Created date</dt><dd data-no-translate>{{timestamp}}</dd></div>
+    <div class="review-row"><dt>Performed by</dt><dd data-no-translate>{{actor_name}}</dd></div>
+    <div class="review-row"><dt>Role</dt><dd>{{role}}</dd></div>
+    <div class="review-row"><dt>Source</dt><dd>{{source}}</dd></div>
+    <div class="review-row"><dt>Record</dt><dd data-no-translate>{{reference}}</dd></div>
+  </dl>
+  {{/with}}
+
+  <section class="mt-6" aria-labelledby="auditFields">
+    <h2 class="form-heading" id="auditFields">What changed</h2>
+    {{#if fields.length}}
+    <div class="admin-table-scroll mt-3" role="region" tabindex="0" aria-labelledby="auditFields">
+      <table class="admin-table audit-fields">
+        <thead><tr><th scope="col">Field</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+        <tbody>{{#each fields}}<tr><th scope="row">{{field}}</th><td data-no-translate>{{before}}</td><td data-no-translate>{{after}}</td></tr>{{/each}}</tbody>
+      </table>
+    </div>
+    {{else}}<p class="field-help mt-2">No field changes were recorded.</p>{{/if}}
+  </section>
+</div>
+{{> admin-end}}

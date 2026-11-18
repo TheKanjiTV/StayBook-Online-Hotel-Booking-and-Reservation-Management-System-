@@ -9,7 +9,7 @@ import { hotels } from '../services/hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
 import { Account } from '../models/accountModel.js';
 import { AuditLog } from '../models/auditModel.js';
-import { recordAudit, auditDisplay } from '../services/auditService.js';
+import { recordAudit, auditDisplay, auditFields } from '../services/auditService.js';
 import { confirmAdminBooking, updateAdminBooking, deleteAdminBooking, createAdminBooking, requestBookingDeletion, dismissBookingDeletion } from '../services/adminBookingService.js';
 import { authenticate, limitAuth } from '../services/accountService.js';
 
@@ -123,5 +123,13 @@ export const adminController = {
     const { count, rows } = await AuditLog.findAndCountAll({ where, order: [['audit_id', 'DESC']], limit: 25, offset: (page - 1) * 25 });
     const pages = Math.max(1, Math.ceil(count / 25)), link = target => `/admin/audit-logs?${new URLSearchParams({ q, page: target })}`;
     res.render('admin-audit', { title: 'Audit logs | StayBook', adminTitle: 'Audit logs', q, count, page, pages, audits: rows.map(row => auditDisplay(row, res.locals.preferences.locale)), previous: page > 1 ? link(page - 1) : null, next: page < pages ? link(page + 1) : null });
+  },
+  auditDetail: async (req, res) => {
+    const record = await AuditLog.findByPk(positiveId(req.params.id));
+    if (!record) fail(404, 'Audit event not found.');
+    res.render('admin-audit-detail', {
+      title: 'Audit event | StayBook', audit: auditDisplay(record, res.locals.preferences.locale),
+      fields: auditFields(record.changes),
+    });
   },
 };

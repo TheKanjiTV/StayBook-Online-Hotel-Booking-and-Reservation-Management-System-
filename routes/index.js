@@ -26,6 +26,7 @@ router.get('/admin/bookings', requireBookingReviewer, a(admin.list));
 router.get('/admin/bookings/new', requireAdmin, a(admin.newBooking));
 router.post('/api/admin/bookings', requireAdmin, a(admin.create));
 router.get('/admin/audit-logs', requireAdmin, a(admin.audit));
+router.get('/admin/audit-logs/:id', requireAdmin, a(admin.auditDetail));
 router.get('/admin/rooms', requireBookingReviewer, a(catalog.rooms));
 router.get('/admin/rooms/:id/edit', requireBookingReviewer, a(catalog.editRoom));
 router.post('/api/admin/rooms/:id', requireBookingReviewer, a(catalog.updateRoom));
