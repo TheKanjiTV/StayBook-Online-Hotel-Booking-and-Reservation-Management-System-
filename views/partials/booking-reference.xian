@@ -1,0 +1,5 @@
+<div class="flex flex-wrap items-center gap-3 mt-2">
+  <span data-no-translate>{{booking.reference}}</span>
+  <button type="button" class="back-link" data-copy-booking="{{booking.reference}}">Copy</button>
+  <span class="field-help" role="status" data-copy-booking-status></span>
+</div>

@@ -51,6 +51,18 @@
     }
   }
 
+  content.addEventListener('click', async event => {
+    const button = event.target.closest('[data-copy-booking]');
+    if (!button) return;
+    const status = button.parentElement.querySelector('[data-copy-booking-status]');
+    try {
+      await navigator.clipboard.writeText(button.dataset.copyBooking);
+      status.textContent = StayBook.t('Copied');
+    } catch {
+      status.textContent = StayBook.t('Select your booking reference and copy it manually.');
+    }
+  });
+
   document.addEventListener('click', event => {
     const link = event.target.closest('a[data-booking-panel-link]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

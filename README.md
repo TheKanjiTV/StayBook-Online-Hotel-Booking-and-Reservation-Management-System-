@@ -2,7 +2,7 @@
 
 This project contains only the Online Booking module, built with XianFire `.xian` templates and compiled Tailwind CSS. PMS, housekeeping, POS and HR belong to other team members and are not implemented here.
 
-Current workflow: search the sample room catalog, select dates and occupancy, enter guest details, review the server-calculated total and save a booking with a simulated payment. Guests can print the booking, find it again using a booking reference and email, or cancel it with a simulated refund. Booking records and sessions use this module's own `online_booking` MySQL database.
+Current workflow: search the sample room catalog, select dates and occupancy, enter guest details, review the server-calculated total and save a booking with a simulated payment. Guests can print the booking, check its status using a booking reference, or cancel it with a simulated refund. Booking records and sessions use this module's own `online_booking` MySQL database.
 
 ```powershell
 cd 'C:\Users\kenji\OneDrive\Desktop\Event Driven System\online-booking'
@@ -81,7 +81,7 @@ Integration steps for the next phase:
 | POST | `/api/bookings/confirm` | Save the local booking and simulated payment atomically |
 | GET | `/api/bookings/current` | Current session's saved booking |
 | GET | `/manage-booking` | Booking-reference lookup page |
-| POST | `/api/bookings/lookup` | Find a booking using its reference and matching email |
+| POST | `/api/bookings/lookup` | Find a read-only booking summary using its reference |
 | POST | `/api/bookings/cancel` | Cancel the session-owned local booking and record a simulated refund |
 
 Mutation requests use the session cookie and CSRF token from the page. Prices are read from the local catalog, not trusted from browser input. Confirmation retries reuse the server-generated request key. Room rows are locked while checking for overlapping local reservations.

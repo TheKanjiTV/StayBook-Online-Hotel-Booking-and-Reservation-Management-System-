@@ -1,5 +1,5 @@
 <div data-booking-panel>
-  <div class="admin-heading"><h1>Booking details</h1><p data-no-translate>{{booking.reference}}</p><p class="badge">{{statusLabel}}</p></div>
+  <div class="admin-heading"><h1>Booking details</h1>{{> booking-reference}}<p class="badge">{{statusLabel}}</p></div>
   <div class="admin-detail-grid">
     <section aria-labelledby="panelGuestTitle">
       <h2 id="panelGuestTitle">Guest details</h2>

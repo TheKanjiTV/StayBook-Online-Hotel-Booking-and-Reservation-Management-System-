@@ -123,16 +123,32 @@ await test('Online booking scope and guest review', async t => {
       const port = server.address().port; await new Promise(resolve => server.close(resolve)); server = await startServer(port);
       const after = (await guest.call('/api/bookings/current')).reservation; assert.equal(after.reference, before.reference);
     });
-    await t.test('Booking lookup restores access and cancellation refunds only local simulated payments', async () => {
+    await t.test('Reference lookup is read-only and the booking session can still cancel', async () => {
       const booking = (await guest.call('/api/bookings/current')).reservation;
       const lookup = new Client(guest.base); await lookup.call('/manage-booking');
       await lookup.call('/api/bookings/cancel', 'POST', {}, 404);
       await lookup.call('/booking/details', 'GET', undefined, 404);
-      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'wrong@example.test' }, 404);
-      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference, email: 'guest@example.test' });
-      assert.equal((await lookup.call('/api/bookings/current')).reservation.reference, booking.reference);
-      await lookup.call('/api/bookings/cancel', 'POST', {}); await lookup.call('/api/bookings/cancel', 'POST', {});
-      const cancelled = (await lookup.call('/api/bookings/current')).reservation;
+      await lookup.call('/booking/lookup', 'GET', undefined, 404);
+      await lookup.call('/api/bookings/lookup', 'POST', { reference: 'SB-000000000000' }, 404);
+      await lookup.call('/api/bookings/lookup', 'POST', { reference: booking.reference.toLowerCase() });
+      const summary = await lookup.call('/booking/lookup');
+      assert.ok(summary.includes(booking.reference));
+      assert.ok(summary.includes('Awaiting confirmation'));
+      assert.doesNotMatch(summary, /guest@example\.test|09123456789|Print receipt|Cancel booking|Payment method/);
+      assert.equal((await lookup.call('/api/bookings/current')).reservation, null);
+      await lookup.call('/booking/details', 'GET', undefined, 404);
+      await lookup.call('/receipt', 'GET', undefined, 302);
+      await lookup.call('/api/bookings/cancel', 'POST', {}, 404);
+
+      const record = await Reservation.findByPk(booking.reservation_id);
+      const previousCheckIn = record.check_in;
+      await record.update({ check_in: today() });
+      await guest.call('/api/bookings/cancel', 'POST', {}, 409);
+      assert.equal((await guest.call('/api/bookings/current')).reservation.can_cancel, false);
+      await record.update({ check_in: previousCheckIn });
+      await guest.call('/api/bookings/cancel', 'POST', {});
+      await guest.call('/api/bookings/cancel', 'POST', {});
+      const cancelled = (await guest.call('/api/bookings/current')).reservation;
       assert.equal(cancelled.status, 'CANCELLED'); assert.equal(cancelled.payments[0].payment_status, 'REFUNDED');
       const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(available.rooms.some(r => r.id === 1));
     });

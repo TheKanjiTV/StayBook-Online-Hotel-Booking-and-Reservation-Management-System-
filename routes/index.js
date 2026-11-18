@@ -59,6 +59,7 @@ router.get('/guest-details', a(b.guestDetailsPage));
 router.post('/booking/preview', a(b.createBookingPreview));
 router.get('/confirmation', b.confirmationPage);
 router.get('/booking/details', a(b.bookingPanel));
+router.get('/booking/lookup', a(b.lookupPanel));
 router.get('/receipt', a(b.receipt));
 router.get('/api/booking-preview', a(b.getBookingPreview));
 router.patch('/api/booking-preview', a(b.updateBookingPreview));

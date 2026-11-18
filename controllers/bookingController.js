@@ -5,7 +5,7 @@ import { hotels } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
 import { quoteStay } from '../services/bookingPrice.js';
 import { BookingRoom } from '../models/bookingModel.js';
-import { saveBooking, getBooking, findBooking, cancelBooking, refundPolicy } from '../services/bookingService.js';
+import { saveBooking, getBooking, findBookingSummary, cancelBooking, refundPolicy } from '../services/bookingService.js';
 const lookupAttempts = new Map();
 const guestOptions = Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1} ${i ? 'guests' : 'guest'}`, selected: i === 1 }));
 export const bookingController = {
@@ -134,14 +134,24 @@ export const bookingController = {
       nightsLabel: booking.nights === 1 ? 'night' : 'nights', guestsLabel: booking.guests === 1 ? 'guest' : 'guests',
     } });
   },
+  lookupPanel: async (req, res) => {
+    if (!req.session.lookupReference) fail(404, 'Booking not found.');
+    const booking = await findBookingSummary(req.session.lookupReference);
+    const { locale, currency, rate } = res.locals.preferences;
+    const date = value => new Date(value + 'T12:00:00Z').toLocaleDateString(locale, { dateStyle: 'medium' });
+    const total = new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(booking.total_amount) * rate);
+    const statusLabel = booking.status === 'CANCELLED' ? 'Cancelled' : booking.status === 'ADMIN_CONFIRMED' ? 'Confirmed in StayBook' : 'Awaiting confirmation';
+    res.render('booking-lookup-panel', { booking, statusLabel, total, checkIn: date(booking.check_in), checkOut: date(booking.check_out) });
+  },
   lookupBooking: async (req, res) => {
     const previous = lookupAttempts.get(req.ip), now = Date.now();
     const attempts = previous && previous.until > now ? previous : { count: 0, until: now + 900000 };
     lookupAttempts.set(req.ip, attempts);
     if (++attempts.count > 20) fail(429, 'Too many lookup attempts. Try again in 15 minutes.');
-    const booking = await findBooking(req.body.reference, req.body.email);
-    req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
-    res.json({ success: true, redirect: '/confirmation' });
+    delete req.session.lookupReference;
+    const booking = await findBookingSummary(req.body.reference);
+    req.session.lookupReference = booking.reference;
+    res.json({ success: true, redirect: '/booking/lookup' });
   },
   cancelBooking: async (req, res) => {
     if (!req.session.bookingId) fail(404, 'Booking not found.');

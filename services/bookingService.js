@@ -6,7 +6,7 @@ import { AccountBooking, Notification } from '../models/accountModel.js';
 import { BookingClosure } from '../models/availabilityModel.js';
 import { hotelForRoom } from './hotelCatalog.js';
 import { paymentMethods } from '../public/payment-methods.js';
-import { searchInput, guestInput, positiveId, fail, string, email, hash, today } from './validation.js';
+import { searchInput, guestInput, positiveId, fail, string, hash, today } from './validation.js';
 import { quoteStay } from './bookingPrice.js';
 
 export const refundPolicy = 'Refunds are unavailable from the check-in date onward.';
@@ -67,10 +67,13 @@ export async function getBooking(id, token) {
   return { ...data, can_cancel: canCancelBooking(booking), hotel: hotelForRoom(data.room_id), guest: { first_name: data.first_name, last_name: data.last_name, email: data.email },
     room: { room_number: data.room_number, roomType: { name: data.room_type }, image: room?.image || null }, payments, integration_status: 'NOT_CONNECTED' };
 }
-export async function findBooking(reference, guestEmail) {
-  const booking = await Reservation.findOne({ where: { reference: string(reference, 'Booking reference', 30).toUpperCase(), email: email(guestEmail) } });
-  if (!booking) fail(404, 'No booking matches that reference and email.');
-  return booking;
+export async function findBookingSummary(reference) {
+  const booking = await Reservation.findOne({
+    where: { reference: string(reference, 'Booking reference', 30).toUpperCase() },
+    attributes: ['reference', 'room_id', 'room_type', 'check_in', 'check_out', 'guests', 'status', 'total_amount'],
+  });
+  if (!booking) fail(404, 'No booking matches that reference.');
+  return booking.toJSON();
 }
 export async function cancelBooking(id, token, options = {}) {
   const reference = await Reservation.findOne({ where: { reservation_id: positiveId(id), access_token: token }, transaction: options.transaction });

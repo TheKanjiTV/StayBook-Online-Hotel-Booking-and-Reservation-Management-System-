@@ -1,0 +1,21 @@
+<div data-booking-panel>
+  <div class="admin-heading">
+    <h1>Booking details</h1>
+    {{> booking-reference}}
+    <p class="badge">{{statusLabel}}</p>
+  </div>
+  <dl class="review-details">
+    <div class="review-row"><dt>Room type</dt><dd>{{booking.room_type}}</dd></div>
+    <div class="review-row"><dt>Check-in</dt><dd data-no-translate>{{checkIn}}</dd></div>
+    <div class="review-row"><dt>Check-out</dt><dd data-no-translate>{{checkOut}}</dd></div>
+    <div class="review-row"><dt>Guests</dt><dd>{{booking.guests}}</dd></div>
+    <div class="review-row"><dt>Total for your stay</dt><dd data-money="{{booking.total_amount}}">{{total}}</dd></div>
+  </dl>
+  {{#if account}}
+    <p class="field-help mt-5">Open My StayBook to manage bookings linked to your account.</p>
+    <a class="text-link" href="/account">My StayBook {{> arrow}}</a>
+  {{else}}
+    <p class="field-help mt-5">Sign in to manage bookings linked to your account.</p>
+    <a class="text-link" href="/sign-in">Sign in {{> arrow}}</a>
+  {{/if}}
+</div>
