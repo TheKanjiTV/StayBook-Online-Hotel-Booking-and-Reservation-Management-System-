@@ -40,6 +40,9 @@ export async function saveBooking(body, options = {}) {
     if (await BookingClosure.findOne({ where: { room_id: roomId, starts_on: { [Op.lt]: dates.checkOut }, ends_on: { [Op.gt]: dates.checkIn } }, transaction, lock: transaction.LOCK.UPDATE })) fail(409, 'This room is closed for online booking on those dates.');
     if (body.simulateFailure === true) fail(402, 'Payment could not be processed. No booking was saved. Please retry.');
     const { nightlyRate, extraGuestNightly, total } = quoteStay(room.price, dates);
+    if (options.expectedTotal !== undefined && Number(total) !== options.expectedTotal) {
+      fail(409, 'The rate has changed. Update your stay to review the new total.');
+    }
     const booking = await Reservation.create({ ...guest, reference: `SB-${randomBytes(6).toString('hex').toUpperCase()}`, request_key: requestKey, request_hash: requestHash, access_token: randomBytes(32).toString('hex'),
       room_id: roomId, room_name: room.name, room_number: room.room_number, room_type: room.type, check_in: dates.checkIn, check_out: dates.checkOut,
       guests: dates.guests, nights: dates.nights, nightly_rate: nightlyRate, extra_guest_nightly: extraGuestNightly, total_amount: total, status: 'LOCAL_CONFIRMED' }, { transaction });

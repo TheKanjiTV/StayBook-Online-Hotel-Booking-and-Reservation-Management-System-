@@ -2,7 +2,7 @@
 <body>{{> nav}}
 <main id="main" class="shell checkout-page">
 <template id="refundPolicy"><p class="field-help">{{refundPolicy}}</p></template>
-<div id="content"><p class="muted py-12" role="status">Preparing your stay details…</p></div>
+<div id="content" data-max-nights="{{maxStayNights}}"><p class="muted py-12" role="status">Preparing your stay details…</p></div>
 <p id="message" role="alert" tabindex="-1" class="form-error mt-6"></p>
 </main>
 <dialog id="cancelDialog" class="booking-dialog no-print" aria-labelledby="cancelTitle" aria-describedby="cancelDescription">

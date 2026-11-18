@@ -1,5 +1,5 @@
 import { searchCatalogRooms, getRoomById } from '../services/pmsApi.js';
-import { searchInput, guestInput, positiveId, fail, today } from '../services/validation.js';
+import { searchInput, guestInput, positiveId, fail, today, maxStayNights } from '../services/validation.js';
 import { randomUUID } from 'node:crypto';
 import { hotels } from '../services/hotelCatalog.js';
 import { paymentLabel } from '../public/payment-methods.js';
@@ -36,7 +36,7 @@ export const bookingController = {
   },
   confirmationPage: (req, res) => {
     if (!req.session.bookingPreview && !req.session.bookingId) return res.redirect('/');
-    res.render('confirmation', { title: 'Your online booking | StayBook', refundPolicy });
+    res.render('confirmation', { title: 'Your online booking | StayBook', refundPolicy, maxStayNights });
   },
   searchRooms: async (req, res) => {
     const { checkIn, checkOut, guests } = searchInput(req.query);
@@ -53,13 +53,51 @@ export const bookingController = {
     delete req.session.bookingId; delete req.session.bookingToken;
     res.json({ success: true, redirect: '/confirmation' });
   },
-  getBookingPreview: (req, res) => {
-    if (!req.session.bookingPreview) fail(404, 'No reservation review found.');
-    res.json({ success: true, booking: req.session.bookingPreview });
+  getBookingPreview: async (req, res) => {
+    const preview = req.session.bookingPreview;
+    if (!preview) fail(404, 'No reservation review found.');
+    const room = await getRoomById(preview.roomId);
+    if (!room) fail(409, 'This room is not available for new bookings.');
+    res.json({ success: true, booking: { ...preview, roomCapacity: room.capacity } });
+  },
+  updateBookingPreview: async (req, res) => {
+    const preview = req.session.bookingPreview;
+    if (!preview) fail(404, 'No reservation review found.');
+    if (req.session.bookingId || req.body.requestKey !== preview.requestKey) {
+      fail(409, 'This booking review has changed. Reload the page and try again.');
+    }
+
+    const nights = Number(req.body.nights);
+    if (!Number.isInteger(nights) || nights < 1 || nights > maxStayNights) {
+      fail(400, 'Choose a stay from 1 to 365 nights.');
+    }
+    const checkOut = new Date(Date.parse(preview.checkIn) + nights * 86400000).toISOString().slice(0, 10);
+    const dates = searchInput({ checkIn: preview.checkIn, checkOut, guests: req.body.guests });
+    const room = await getRoomById(preview.roomId);
+    if (!room) fail(409, 'This room is not available for new bookings.');
+    if (dates.guests > room.capacity) fail(400, 'Room capacity exceeded.');
+
+    const { rooms } = await searchCatalogRooms(dates.checkIn, dates.checkOut, dates.guests, room.hotel?.id);
+    const quote = rooms.find(entry => entry.id === room.id);
+    if (!quote) fail(409, 'This room is unavailable for the selected dates. Try fewer nights or choose another room.');
+    const booking = {
+      ...preview, ...dates, roomCapacity: quote.capacity, pricePerNight: quote.price,
+      extraGuestNightly: quote.extraGuestNightly, totalAmount: quote.stayTotal, requestKey: randomUUID(),
+    };
+    req.session.bookingPreview = booking;
+    res.json({ success: true, booking });
   },
   confirmBooking: async (req, res) => {
-    if (!req.session.bookingPreview) fail(404, 'Start a room search first.');
-    const booking = await saveBooking({ ...req.session.bookingPreview, accountId: req.account?.id, paymentMethod: req.body.paymentMethod, cardLast4: req.body.cardLast4, simulateFailure: req.body.simulateFailure === true });
+    const preview = req.session.bookingPreview;
+    if (!preview) fail(404, 'Start a room search first.');
+    const reviewed = req.body.requestKey !== undefined;
+    if (reviewed && req.body.requestKey !== preview.requestKey) {
+      fail(409, 'This booking review has changed. Reload the page and try again.');
+    }
+    const booking = await saveBooking({
+      ...preview, accountId: req.account?.id, paymentMethod: req.body.paymentMethod,
+      cardLast4: req.body.cardLast4, simulateFailure: req.body.simulateFailure === true,
+    }, { expectedTotal: reviewed ? preview.totalAmount : undefined });
     req.session.bookingId = booking.reservation_id; req.session.bookingToken = booking.access_token;
     res.json({ success: true, reservation: await getBooking(req.session.bookingId, req.session.bookingToken) });
   },

@@ -5,12 +5,13 @@ export const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'A
 export function validDate(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 }
+export const maxStayNights = 365;
 export function searchInput(body) {
   const checkIn = body.checkIn, checkOut = body.checkOut, guests = Number(body.guests);
   if (!validDate(checkIn) || !validDate(checkOut) || checkIn < today() || checkOut <= checkIn) fail(400, 'Choose valid dates: check-in must be today or later, and check-out after check-in.');
   if (!Number.isInteger(guests) || guests < 1 || guests > 10) fail(400, 'Guests must be a whole number from 1 to 10.');
   const nights = (Date.parse(checkOut) - Date.parse(checkIn)) / 86400000;
-  if (nights > 365) fail(400, 'A reservation may not exceed 365 nights.');
+  if (nights > maxStayNights) fail(400, 'A reservation may not exceed 365 nights.');
   return { checkIn, checkOut, guests, nights };
 }
 export function string(value, label, max = 100) {

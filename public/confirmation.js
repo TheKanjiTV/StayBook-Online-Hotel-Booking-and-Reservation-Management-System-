@@ -61,7 +61,30 @@ import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry
     return `<aside class="stay-summary" aria-label="Your stay"><details class="summary-disclosure" open><summary class="summary-toggle"><span>Your stay</span><strong>${money(total)}</strong><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="summary-body">${image ? `<img src="${esc(image)}" alt="${esc(room)} interior, illustrative photograph" width="500" height="310">` : ''}<div class="summary-content"><h2>${esc(room)}</h2><p class="muted mt-2" data-no-translate>${esc(hotelName || '')}</p><p class="muted mt-2">Room ${esc(roomNumber)}</p><dl class="summary-dates"><div><dt>Check-in</dt><dd>${esc(dateLabel(checkIn))}</dd></div><div><dt>Check-out</dt><dd>${esc(dateLabel(checkOut))}</dd></div></dl><p class="muted summary-occupancy">${nights} ${nights === 1 ? 'night' : 'nights'} · ${guests} ${guests === 1 ? 'guest' : 'guests'}</p>${Number(extra) ? `<p class="field-help mt-3"><span>Includes extra guests</span> · ${money(extra)} / night</p>` : ''}<div class="summary-rate"><span>${money(rate)} × ${nights} ${nights === 1 ? 'night' : 'nights'}</span><span>${money(total)}</span></div><div class="summary-total"><span>Total for your stay</span><strong>${money(total)}</strong></div></div></div></details></aside>`;
   }
   function steps(saved, backQuery) {
-    return `<ol class="booking-steps" aria-label="Booking progress"><li>${saved ? '<span>1</span> Choose your room' : `<a href="/rooms?${esc(backQuery)}"><span>1</span> Choose your room</a>`}</li><li><span>2</span> Guest details</li><li aria-current="step"><span>3</span> ${saved ? 'Booking details' : 'Review booking'}</li></ol>`;
+    return `<ol class="booking-steps" aria-label="Booking progress"><li>${saved ? '<span>1</span> Choose your room' : `<a data-review-rooms href="/rooms?${esc(backQuery)}"><span>1</span> Choose your room</a>`}</li><li><span>2</span> Guest details</li><li aria-current="step"><span>3</span> ${saved ? 'Booking details' : 'Review booking'}</li></ol>`;
+  }
+  function reviewStay(booking) {
+    const guests = Array.from({ length: booking.roomCapacity }, (_, index) => {
+      const value = index + 1;
+      return `<option value="${value}" ${value === booking.guests ? 'selected' : ''}>${value}</option>`;
+    }).join('');
+    return `<form id="reviewStay" class="review-stay" aria-labelledby="reviewStayTitle">
+      <h2 id="reviewStayTitle" class="form-heading">Your stay</h2>
+      <div class="review-stay-fields">
+        <div class="search-field">
+          <label for="reviewGuests">Guests</label>
+          <select id="reviewGuests" name="guests" aria-describedby="reviewCapacity">${guests}</select>
+        </div>
+        <div class="search-field">
+          <label for="reviewNights">Nights</label>
+          <input id="reviewNights" name="nights" type="number" inputmode="numeric" min="1" max="${esc(content.dataset.maxNights)}" value="${booking.nights}" required>
+        </div>
+        <button type="submit" class="btn-secondary">Update stay</button>
+      </div>
+      <p id="reviewCapacity" class="field-help mt-2">Up to ${booking.roomCapacity} guests</p>
+      <p id="reviewStayStatus" class="field-help mt-2" role="status"></p>
+      <p id="reviewStayError" class="form-error mt-2" role="alert" tabindex="-1"></p>
+    </form>`;
   }
   async function load() {
     try {
@@ -77,21 +100,127 @@ import { cardBrand, formatCardNumber, validCardNumber, formatExpiry, validExpiry
         document.getElementById('cancel')?.addEventListener('click', () => { cancelError.textContent = ''; cancelDialog.showModal(); });
         return;
       }
-      const { booking: p } = await request('/api/booking-preview');
-      const backQuery = new URLSearchParams({ checkIn: p.checkIn, checkOut: p.checkOut, guests: p.guests, hotelId: p.hotelId || '' }).toString();
-      const detailsQuery = new URLSearchParams({ checkIn: p.checkIn, checkOut: p.checkOut, guests: p.guests, roomId: p.roomId }).toString();
-      content.innerHTML = `${steps(false, backQuery)}<div class="checkout-grid"><section><div class="page-intro"><h1>One last look.</h1><p>Your room, your dates, your details. Check everything below before saving your booking.</p></div><div class="review-heading"><h2 class="form-heading">Guest details</h2><a href="/guest-details?${esc(detailsQuery)}" class="back-link">Edit details</a></div><dl class="review-details">${row('Guest', `${p.firstName} ${p.lastName}`)}${row('Email address', p.email)}${row('Phone number', p.phone)}${p.address ? row('Address', p.address) : ''}</dl><form id="pay" class="payment-section"><h2 class="form-heading">Payment</h2><p class="payment-availability">Payments are not connected yet. No money will be charged.</p>${methodChoices()}<div class="mt-4">${refundPolicy}</div><div class="form-actions mt-7"><a class="back-link" href="/guest-details?${esc(detailsQuery)}">Back to your details</a><button type="submit" class="btn">Save booking · ${money(p.totalAmount)} ${icon('arrow')}</button></div></form></section>${summary({ image: p.roomImage, hotelName: p.hotelName, room: p.roomType, roomNumber: p.roomNumber, checkIn: p.checkIn, checkOut: p.checkOut, nights: p.nights, guests: p.guests, rate: p.pricePerNight, extra: p.extraGuestNightly, total: p.totalAmount })}</div>`;
+      let { booking } = await request('/api/booking-preview');
+      const roomQuery = () => new URLSearchParams({
+        checkIn: booking.checkIn, checkOut: booking.checkOut, guests: booking.guests, hotelId: booking.hotelId || '',
+      }).toString();
+      const guestQuery = () => new URLSearchParams({
+        checkIn: booking.checkIn, checkOut: booking.checkOut, guests: booking.guests, roomId: booking.roomId,
+      }).toString();
+      const staySummary = () => summary({
+        image: booking.roomImage, hotelName: booking.hotelName, room: booking.roomType, roomNumber: booking.roomNumber,
+        checkIn: booking.checkIn, checkOut: booking.checkOut, nights: booking.nights, guests: booking.guests,
+        rate: booking.pricePerNight, extra: booking.extraGuestNightly, total: booking.totalAmount,
+      });
+      const saveLabel = () => `<span>Save booking · ${money(booking.totalAmount)}</span> ${icon('arrow')}`;
+
+      content.innerHTML = `${steps(false, roomQuery())}
+        <div class="checkout-grid">
+          <section>
+            <div class="page-intro"><h1>One last look.</h1><p>Check your stay and guest details before saving your booking.</p></div>
+            ${reviewStay(booking)}
+            <div class="review-heading">
+              <h2 class="form-heading">Guest details</h2>
+              <a data-review-details href="/guest-details?${esc(guestQuery())}" class="back-link">Edit details</a>
+            </div>
+            <dl class="review-details">
+              ${row('Guest', `${booking.firstName} ${booking.lastName}`)}
+              ${row('Email address', booking.email)}
+              ${row('Phone number', booking.phone)}
+              ${booking.address ? row('Address', booking.address) : ''}
+            </dl>
+            <form id="pay" class="payment-section">
+              <h2 class="form-heading">Payment</h2>
+              <p class="payment-availability">Payments are not connected yet. No money will be charged.</p>
+              ${methodChoices()}
+              <div class="mt-4">${refundPolicy}</div>
+              <div class="form-actions mt-7">
+                <a data-review-details class="back-link" href="/guest-details?${esc(guestQuery())}">Back to your details</a>
+                <button type="submit" class="btn">${saveLabel()}</button>
+              </div>
+            </form>
+          </section>
+          ${staySummary()}
+        </div>`;
       StayBook.configureSummaries();
+
+      const stayForm = document.getElementById('reviewStay');
+      const { guests, nights } = stayForm.elements;
+      const updateButton = stayForm.querySelector('button');
+      const stayError = document.getElementById('reviewStayError');
+      const stayStatus = document.getElementById('reviewStayStatus');
       const payForm = document.getElementById('pay'), selectedMethod = configurePayment(payForm);
-      payForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const button = payForm.querySelector('button[type=submit]');
-        if (button.disabled) return;
-        const payment = selectedMethod(); if (!payment) return;
-        message.textContent = ''; button.disabled = true; payForm.setAttribute('aria-busy', 'true');
-        try { await request('/api/bookings/confirm', { method: 'POST', body: payment }); selectedMethod.complete(payment.paymentMethod); await load(); window.scrollTo({ top: 0 }); }
-        catch (error) { message.textContent = error.message; message.focus(); }
-        finally { button.disabled = false; payForm.removeAttribute('aria-busy'); }
+      const saveButton = payForm.querySelector('button[type=submit]');
+      let updating = false, saving = false;
+      const hasChanges = () => Number(guests.value) !== booking.guests || Number(nights.value) !== booking.nights;
+      const syncButtons = () => {
+        guests.disabled = nights.disabled = updateButton.disabled = updating || saving;
+        saveButton.disabled = updating || saving || hasChanges();
+      };
+      const showTotal = () => {
+        stayStatus.textContent = `${StayBook.t('Check-out')} ${dateLabel(booking.checkOut)} · ${StayBook.t('Total for your stay')} ${money(booking.totalAmount)}`;
+      };
+
+      showTotal();
+      syncButtons();
+      stayForm.addEventListener('input', () => {
+        stayError.textContent = '';
+        if (hasChanges()) stayStatus.textContent = StayBook.t('Update your stay to see the new total.');
+        else showTotal();
+        syncButtons();
+      });
+      stayForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (updating || saving) return;
+        const changes = { guests: Number(guests.value), nights: Number(nights.value), requestKey: booking.requestKey };
+        updating = true;
+        stayError.textContent = '';
+        message.textContent = '';
+        stayForm.setAttribute('aria-busy', 'true');
+        syncButtons();
+        try {
+          const result = await request('/api/booking-preview', { method: 'PATCH', body: changes });
+          booking = result.booking;
+          const currentSummary = content.querySelector('.stay-summary');
+          const wasOpen = currentSummary.querySelector('details').open;
+          currentSummary.outerHTML = staySummary();
+          content.querySelector('.summary-disclosure').open = wasOpen;
+          content.querySelector('[data-review-rooms]').href = '/rooms?' + roomQuery();
+          content.querySelectorAll('[data-review-details]').forEach(link => { link.href = '/guest-details?' + guestQuery(); });
+          saveButton.innerHTML = saveLabel();
+          showTotal();
+        } catch (error) {
+          stayError.textContent = error.message;
+          stayError.focus();
+        } finally {
+          updating = false;
+          stayForm.removeAttribute('aria-busy');
+          syncButtons();
+        }
+      });
+
+      payForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (saveButton.disabled) return;
+        const payment = selectedMethod();
+        if (!payment) return;
+        message.textContent = '';
+        saving = true;
+        payForm.setAttribute('aria-busy', 'true');
+        syncButtons();
+        try {
+          await request('/api/bookings/confirm', { method: 'POST', body: { ...payment, requestKey: booking.requestKey } });
+          selectedMethod.complete(payment.paymentMethod);
+          await load();
+          window.scrollTo({ top: 0 });
+        } catch (error) {
+          message.textContent = error.message;
+          message.focus();
+        } finally {
+          saving = false;
+          payForm.removeAttribute('aria-busy');
+          syncButtons();
+        }
       });
     } catch (error) { content.innerHTML = `<div class="empty-state"><h1>Let’s find your booking.</h1><p>${esc(error.message)}</p><a class="btn" href="/manage-booking">Find my booking</a><a class="btn-secondary ml-3" href="/">Start a new stay</a></div>`; }
   }

@@ -118,6 +118,14 @@
   .footer-inner { @apply flex flex-wrap justify-between items-center gap-5; }
   .footer-links { @apply flex gap-6 text-base; color: var(--subtle); }
   .form-error { color: #a13f2b; font-size: 1rem; }
+  .review-stay { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 24px; }
+  .review-stay-fields { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 12px; margin-top: 12px; }
+  .review-stay-fields .btn-secondary { min-height: 47px; }
+  .review-stay [role=alert]:empty { display: none; }
+  @media (max-width: 460px) {
+    .review-stay-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .review-stay-fields button { grid-column: 1 / -1; justify-self: start; }
+  }
   .checkout-page { padding-top: 34px; padding-bottom: 80px; }
   .checkout-grid { display: grid; grid-template-columns: 1.3fr .85fr; gap: 8%; align-items: start; }
   .checkout-grid .page-intro h1 { font-size: clamp(2.8rem, 4.6vw, 3.9rem); }

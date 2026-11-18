@@ -7,7 +7,7 @@ process.env.HOST = '127.0.0.1';
 process.env.DB_NAME = `online_booking_test_${Date.now()}`;
 const { migrate } = await import('../migrate.js');
 const { sequelize } = await import('../models/db.js');
-const { Reservation, Payment } = await import('../models/bookingModel.js');
+const { BookingRoom, Reservation, Payment } = await import('../models/bookingModel.js');
 const { config } = await import('../config.js');
 const { startServer } = await import('../index.js');
 const { today } = await import('../services/validation.js');
@@ -76,6 +76,47 @@ await test('Online booking scope and guest review', async t => {
       }));
       assert.deepEqual(statuses.sort(), [200, 409]);
       const available = await guest.call(`/rooms/search?${new URLSearchParams(dates)}`); assert.ok(!available.rooms.some(r => r.id === 1 || r.id === 2));
+    });
+    await t.test('Stay edits on review check capacity, date conflicts and the final quote', async () => {
+      const reviewer = new Client(guest.base);
+      await reviewer.call('/');
+      const original = {
+        checkIn: day(5), checkOut: day(6), guests: 2, roomId: 1,
+        firstName: 'Review', lastName: 'Guest', email: 'review-adjust@example.test', phone: '09123456789',
+      };
+      await reviewer.call('/booking/preview', 'POST', original);
+      const { booking: preview } = await reviewer.call('/api/booking-preview');
+      assert.equal(preview.roomCapacity, 3);
+      assert.equal(preview.totalAmount, 2500);
+      const patch = { requestKey: preview.requestKey, guests: 3, nights: 2 };
+      await reviewer.call('/api/booking-preview', 'PATCH', { ...patch, guests: 4 }, 400);
+      await reviewer.call('/api/booking-preview', 'PATCH', { ...patch, nights: 366 }, 400);
+      const { BookingClosure } = await import('../models/availabilityModel.js');
+      const closure = await BookingClosure.create({ room_id: 1, starts_on: day(6), ends_on: day(7), reason: 'Test closure' });
+      try { await reviewer.call('/api/booking-preview', 'PATCH', patch, 409); }
+      finally { await closure.destroy(); }
+
+      const { booking: amended } = await reviewer.call('/api/booking-preview', 'PATCH', { ...patch, totalAmount: 1, roomId: 2 });
+      assert.deepEqual(
+        [amended.roomId, amended.guests, amended.nights, amended.checkOut, amended.pricePerNight, amended.extraGuestNightly, amended.totalAmount],
+        [1, 3, 2, day(7), 3500, 1000, 7000],
+      );
+      assert.equal(amended.email, original.email);
+      await reviewer.call('/api/bookings/confirm', 'POST', { requestKey: preview.requestKey }, 409);
+
+      const room = await BookingRoom.findByPk(1);
+      await room.update({ price: 2600 });
+      try {
+        await reviewer.call('/api/bookings/confirm', 'POST', { requestKey: amended.requestKey }, 409);
+        const reprice = await reviewer.call('/api/booking-preview', 'PATCH', { ...patch, requestKey: amended.requestKey });
+        assert.equal(reprice.booking.totalAmount, 7200);
+        const { reservation } = await reviewer.call('/api/bookings/confirm', 'POST', { requestKey: reprice.booking.requestKey, paymentMethod: 'GOOGLE_PAY' });
+        assert.equal(Number(reservation.total_amount), 7200);
+        assert.equal(reservation.check_out, day(7));
+        assert.match(await reviewer.call('/receipt'), /Includes extra guests/);
+        await reviewer.call('/api/booking-preview', 'PATCH', { ...patch, requestKey: reprice.booking.requestKey }, 409);
+        await reviewer.call('/api/bookings/cancel', 'POST', {});
+      } finally { await room.update({ price: 2500 }); }
     });
     await t.test('Saved bookings and sessions survive a server restart', async () => {
       const before = (await guest.call('/api/bookings/current')).reservation;
